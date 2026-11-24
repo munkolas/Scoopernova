@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#FFF7EE">
+<meta name="theme-color" content="#3B2418">
 <title>Scoopernova</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Scoopernova">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="icon" href="icon-180.png">
@@ -367,10 +367,19 @@ details.acc li::before{content:"";position:absolute;left:2px;top:.62em;width:7px
 .lnk{text-decoration:none}
 .seg.vt button{display:grid;place-items:center}
 .tip .lnk{color:var(--berryd);font-weight:700}
+/* iPhone-App: Schoko-Glasur unter der Statusleiste */
+.drip{display:none}
+@media (display-mode: standalone){
+ .drip{display:block;position:fixed;top:0;left:0;right:0;height:calc(env(safe-area-inset-top) + 10px);z-index:45;pointer-events:none;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='10' viewBox='0 0 64 10'%3E%3Cpath d='M0 0h64v2c-4 0-5 7-9 7s-4-5-8-5-5 3-9 3-4-6-9-6-5 8-10 8S14 3 9 3 3 6 0 6z' fill='%233B2418'/%3E%3C/svg%3E") left bottom/64px 10px repeat-x,linear-gradient(#3B2418,#3B2418) top/100% calc(100% - 9px) no-repeat}
+ .hdr{padding-top:calc(env(safe-area-inset-top) + 16px)}
+ .tools{top:calc(env(safe-area-inset-top) + 64px)}
+}
 
 </style>
 </head>
 <body>
+<div class="drip" aria-hidden="true"></div>
 <div class="app" id="app">
   <header class="hdr" id="hdr"><div class="hdr-in">
     <div class="brand"><button class="lg" id="logo" aria-label="Scoopernova"></button><div><h1 id="ttl">Scoopernova</h1><small id="subttl">created by munkolas · v1.2</small></div></div>
