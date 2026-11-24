@@ -1,0 +1,1686 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#FFF7EE">
+<title>Scoopernova</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Scoopernova">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon-180.png">
+<link rel="manifest" href="manifest.webmanifest">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&display=swap">
+<style>
+/*
+VOICE: verspielte Eisdiele im Apple-Gewand – klar, freundlich, ein Augenzwinkern
+IDEA: die Eistheke – jede Sorte ein Becher mit Gesicht, Vitrinen-Karten, Kühltruhe mit 6 Pints
+PICTURE: generierte Kugel-Illustrationen je Rezept, Truhe, Lust-Matrix
+COLOUR: Vanille-Tag / Schoko-Nacht, Himbeere als Akzent, Mango & Pistazie als Support
+TYPE: SF Rounded (ui-rounded) / Nunito für Titel, System-Font für Text
+*/
+:root{color-scheme:light dark;
+--bg:light-dark(#FFF7EE,#17100D);--bg2:light-dark(#FFFFFF,#211714);--card:light-dark(#FFFFFF,#261B17);
+--ink:light-dark(#2B1A14,#FFF1E4);--mute:light-dark(#86736A,#B9A497);--line:light-dark(rgba(70,35,20,.10),rgba(255,235,220,.10));
+--fill:light-dark(rgba(110,60,40,.065),rgba(255,235,220,.08));--fill2:light-dark(rgba(110,60,40,.12),rgba(255,235,220,.14));
+--berry:#FF4D7E;--berryd:light-dark(#E0305E,#FF7096);--berrybg:light-dark(#FFE4EC,#3B1C26);
+--mango:#F59E0B;--pist:#7FB44A;--choc:#5B3527;--gold:#B7832F;
+--shadow:light-dark(0 1px 2px rgba(70,30,10,.06),0 8px 24px rgba(70,30,10,.07));
+--sh:0 1px 2px rgba(70,30,10,.06),0 10px 28px rgba(70,30,10,.08);
+--r:22px;--title:ui-rounded,"SF Pro Rounded","Nunito",system-ui,sans-serif;
+--tabh:64px;
+}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0;-webkit-tap-highlight-color:transparent}
+html{scroll-padding-top:72px}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 -apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,"Segoe UI",Roboto,sans-serif;overflow-x:clip;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer;border:0;background:none;padding:0}
+input,select,textarea{font-size:16px}
+:focus-visible{outline:3px solid var(--berry);outline-offset:2px;border-radius:10px}
+.hide{display:none!important}
+.app{min-height:100dvh;padding-bottom:calc(var(--tabh) + env(safe-area-inset-bottom) + 16px)}
+.view{max-width:1180px;margin:0 auto;padding:0 max(4vw,16px)}
+
+/* Header */
+.hdr{position:sticky;top:0;z-index:30;padding:calc(env(safe-area-inset-top) + 10px) max(4vw,16px) 8px;background:color-mix(in srgb,var(--bg) 82%,transparent);backdrop-filter:blur(18px) saturate(180%);-webkit-backdrop-filter:blur(18px) saturate(180%);border-bottom:1px solid transparent;transition:border-color .2s}
+.hdr.scrolled{border-bottom-color:var(--line)}
+.hdr-in{max-width:1180px;margin:0 auto;display:flex;align-items:center;gap:12px}
+.brand{display:flex;align-items:center;gap:10px;flex:1}
+.brand .lg{width:42px;height:42px;flex:none}
+.brand h1{font:800 clamp(26px,6vw,34px)/1.05 var(--title);margin:0;letter-spacing:-.01em}
+.brand small{display:block;font-size:13px;color:var(--mute);font-weight:500}
+.lg .orbit{transform-origin:32px 30px;animation:orb 9s linear infinite}
+@keyframes orb{to{transform:rotate(360deg)}}
+.iconbtn{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:var(--fill);font-size:20px;flex:none}
+.iconbtn:active{transform:scale(.92)}
+
+/* Tabbar */
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:40;display:flex;justify-content:center;padding:6px 8px calc(env(safe-area-inset-bottom) + 6px);background:color-mix(in srgb,var(--bg2) 80%,transparent);backdrop-filter:blur(22px) saturate(180%);-webkit-backdrop-filter:blur(22px) saturate(180%);border-top:1px solid var(--line)}
+.tabs-in{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));width:100%;max-width:560px;align-items:end}
+.tab{display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px 0;min-height:50px;color:var(--mute);font-size:11px;font-weight:600;letter-spacing:.01em}
+.tab svg{width:26px;height:26px}
+.tab[aria-current=page]{color:var(--berryd)}
+.tab.chat .bub{width:54px;height:54px;margin-top:-22px;border-radius:50%;background:linear-gradient(145deg,#FF7DA0,#FF4D7E);display:grid;place-items:center;box-shadow:0 8px 20px rgba(255,77,126,.38);color:#fff;transition:transform .25s cubic-bezier(.3,1.6,.5,1)}
+.tab.chat .bub svg{width:28px;height:28px}
+.tab.chat:active .bub{transform:scale(.9) rotate(-8deg)}
+@media(min-width:900px){
+ .tabs{top:0;bottom:0;right:auto;width:96px;flex-direction:column;justify-content:center;border-top:0;border-right:1px solid var(--line);padding:20px 6px}
+ .tabs-in{grid-template-columns:1fr;gap:14px}
+ .app{padding-left:96px;padding-bottom:40px}
+ .hdr{padding-left:calc(96px + 4vw)} .hdr{margin-left:-96px}
+ .tab.chat .bub{margin-top:0}
+}
+
+/* Sections */
+.sec{margin:22px 0}
+.sec-h{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:0 0 10px}
+.sec-h h2{font:800 22px/1.15 var(--title);margin:0}
+.sec-h .lnk{color:var(--berryd);font-weight:600;font-size:15px;min-height:44px;display:inline-flex;align-items:center}
+.muted{color:var(--mute)}
+.card{background:var(--card);border-radius:var(--r);box-shadow:var(--sh)}
+
+/* Hall of Fame */
+.hof{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding:4px max(4vw,16px) 14px;margin:0 calc(-1*max(4vw,16px));scrollbar-width:none}
+.hof::-webkit-scrollbar{display:none}
+.hcard{flex:none;width:min(62vw,230px);scroll-snap-align:start;position:relative;text-align:left;overflow:hidden}
+.hcard .im{aspect-ratio:4/3.3;border-radius:var(--r) var(--r) 0 0;overflow:hidden}
+.hcard .im svg{width:100%;height:100%;display:block}
+.hcard .tx{padding:10px 14px 14px}
+.hcard b{display:block;font:800 17px/1.2 var(--title)}
+.rank{position:absolute;top:10px;left:10px;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font:900 18px/1 var(--title);color:#fff;background:var(--berry);box-shadow:0 4px 12px rgba(0,0,0,.18);border:3px solid #fff}
+.rank.r1{background:linear-gradient(135deg,#FFD25A,#E0A400)}.rank.r2{background:linear-gradient(135deg,#E3E7EE,#A6AFBD)}.rank.r3{background:linear-gradient(135deg,#F0B27A,#B86B2F)}
+.rank.champ{width:auto;padding:0 10px;border-radius:19px;font-size:13px;background:linear-gradient(135deg,#8DC26F,#4E8A2D)}
+
+/* Truhe */
+.truhe{padding:16px;display:grid;gap:12px}
+.truhe-top{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.truhe-top b{font:800 18px/1.2 var(--title)}
+.slots{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px}
+.slot{display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 2px;border-radius:16px;background:var(--fill);min-height:112px;color:var(--ink);position:relative}
+.slot svg{width:100%;max-width:46px;height:auto}
+.slot .em{font-size:18px;height:22px;line-height:22px}
+.slot small{font-size:11px;color:var(--mute);text-align:center;line-height:1.2;font-weight:600}
+.slot.ready small{color:#16A34A}
+.slot.empty{border:2px dashed var(--fill2);background:transparent}
+.slot.empty .plus{font-size:24px;color:var(--mute);margin-top:22px}
+.frost{position:absolute;inset:0;border-radius:16px;pointer-events:none;background:repeating-linear-gradient(135deg,rgba(150,200,255,.0) 0 8px,rgba(150,200,255,.08) 8px 10px)}
+
+/* Maker */
+.maker{padding:16px;display:grid;gap:12px;background:linear-gradient(135deg,light-dark(#FFE4EC,#3A1C26),light-dark(#FFF1D6,#3A2A16));box-shadow:none}
+.maker h3{margin:0;font:800 20px/1.2 var(--title)}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.field{width:100%;min-height:48px;border-radius:14px;border:1px solid var(--line);background:var(--bg2);padding:10px 14px}
+textarea.field{min-height:84px;resize:vertical;line-height:1.45}
+.btn{min-height:46px;padding:0 18px;border-radius:14px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--fill);transition:transform .15s}
+.btn:active{transform:scale(.96)}
+.btn.pri{background:var(--berry);color:#fff;box-shadow:0 6px 16px rgba(255,77,126,.3)}
+.btn.sm{min-height:38px;padding:0 12px;border-radius:12px;font-size:14px}
+.btn.full{width:100%}
+.btn.ghost{background:transparent;color:var(--berryd)}
+.btn.danger{color:#E11D48}
+
+/* Segmented */
+.seg{display:flex;background:var(--fill);border-radius:13px;padding:3px;gap:2px;overflow-x:auto;scrollbar-width:none}
+.seg::-webkit-scrollbar{display:none}
+.seg button{flex:1 0 auto;min-height:38px;padding:0 12px;border-radius:10px;font-size:14px;font-weight:600;color:var(--mute);white-space:nowrap}
+.seg button[aria-pressed=true]{background:var(--bg2);color:var(--ink);box-shadow:0 1px 4px rgba(0,0,0,.12)}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:2px 0 4px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;min-height:36px;padding:0 13px;border-radius:18px;background:var(--fill);font-size:14px;font-weight:600;white-space:nowrap}
+.chip[aria-pressed=true]{background:var(--ink);color:var(--bg)}
+
+/* Toolbar */
+.tools{display:grid;gap:10px;position:sticky;top:calc(env(safe-area-inset-top) + 62px);z-index:20;padding:8px 0;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.search{display:flex;gap:8px}
+.search .field{min-height:42px;border-radius:12px;background:var(--fill);border:0;padding-left:38px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' fill='none' stroke='%2386736A' stroke-width='2.2' stroke-linecap='round'%3E%3Ccircle cx='8' cy='8' r='6'/%3E%3Cpath d='M12.5 12.5 17 17'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:12px center}
+
+/* Grid */
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+@media(min-width:640px){.grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}}
+@media(min-width:1040px){.grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.rc{text-align:left;overflow:hidden;position:relative;display:flex;flex-direction:column;transition:transform .2s cubic-bezier(.3,1.4,.5,1)}
+.rc:active{transform:scale(.97)}
+.rc .im{aspect-ratio:4/3.2;overflow:hidden;position:relative}
+.rc .im svg,.rc .im img,.hcard .im img{width:100%;height:100%;display:block;object-fit:cover}
+.rc .tx{padding:10px 12px 12px;display:grid;gap:4px}
+.rc b{font:800 16px/1.2 var(--title)}
+.rc .sub{font-size:13px;color:var(--mute);line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.mac{display:flex;gap:6px;flex-wrap:wrap;margin-top:2px}
+.pill{font-size:13px;font-weight:700;padding:3px 8px;border-radius:9px;background:var(--fill);white-space:nowrap}
+.pill.p{background:var(--berrybg);color:var(--berryd)}
+.emo{position:absolute;bottom:8px;right:8px;font-size:15px;background:color-mix(in srgb,var(--bg2) 85%,transparent);padding:3px 8px;border-radius:12px;backdrop-filter:blur(6px)}
+.st{position:absolute;top:8px;left:8px;font-size:12px;font-weight:700;padding:3px 8px 3px 6px;border-radius:10px;background:color-mix(in srgb,var(--bg2) 88%,transparent);display:flex;align-items:center;gap:5px;backdrop-filter:blur(6px)}
+.st i{width:8px;height:8px;border-radius:50%;display:inline-block}
+.heart{position:absolute;top:6px;right:6px;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-size:18px;background:color-mix(in srgb,var(--bg2) 80%,transparent);backdrop-filter:blur(6px)}
+.heart.on{animation:pop .4s}
+@keyframes pop{40%{transform:scale(1.35)}}
+.rc .top-scoop,.hcard .top-scoop{transform-origin:200px 200px;transition:transform .35s cubic-bezier(.3,1.6,.5,1)}
+.rc:hover .top-scoop,.hcard:hover .top-scoop{transform:rotate(-4deg) translateY(-4px)}
+.fl{animation:float 6s ease-in-out infinite}
+@keyframes float{50%{transform:translateY(-5px)}}
+.sorthandle{display:flex;gap:6px;padding:0 12px 12px}
+.sorthandle .btn{flex:1}
+
+/* Empty */
+.empty{text-align:center;padding:40px 16px;color:var(--mute)}
+.empty .melt{font-size:56px;display:inline-block;animation:melt 2.4s ease-in-out infinite;transform-origin:bottom}
+@keyframes melt{50%{transform:scaleY(.86) scaleX(1.08)}}
+
+/* Sheet */
+.scrim{position:fixed;inset:0;background:rgba(20,10,5,.42);z-index:60;opacity:0;transition:opacity .25s}
+.scrim.on{opacity:1}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:61;max-height:94dvh;background:var(--bg);border-radius:24px 24px 0 0;overflow:auto;transform:translateY(100%);transition:transform .38s cubic-bezier(.2,.9,.25,1);padding-bottom:env(safe-area-inset-bottom);overscroll-behavior:contain}
+.sheet.on{transform:none}
+.sheet.small{max-height:80dvh}
+@media(min-width:760px){.sheet{left:50%;right:auto;width:min(760px,94vw);bottom:3dvh;border-radius:26px;transform:translate(-50%,110%);max-height:94dvh}.sheet.on{transform:translate(-50%,0)}}
+.grab{position:sticky;top:0;z-index:5;display:flex;justify-content:space-between;align-items:center;padding:10px 12px 6px;background:color-mix(in srgb,var(--bg) 85%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.grab::before{content:"";position:absolute;left:50%;top:6px;width:40px;height:5px;border-radius:3px;background:var(--fill2);transform:translateX(-50%)}
+.sheet-body{padding:4px 18px 28px}
+
+/* Detail */
+.hero{border-radius:24px;overflow:hidden;aspect-ratio:4/2.7;position:relative;box-shadow:var(--sh)}
+.hero svg,.hero img{width:100%;height:100%;display:block;object-fit:cover}
+.d-title{margin:16px 0 4px;font:800 clamp(28px,7vw,40px)/1.05 var(--title);text-wrap:balance}
+.d-meta{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:8px 0}
+.tag{font-size:13px;font-weight:700;padding:5px 10px;border-radius:10px;background:var(--fill);display:inline-flex;gap:6px;align-items:center}
+.macros{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:14px 0}
+.mbox{background:var(--card);border-radius:16px;padding:10px 8px;text-align:center;box-shadow:var(--sh)}
+.mbox b{display:block;font:800 clamp(20px,5.5vw,26px)/1.1 var(--title)}
+.mbox span{font-size:12px;color:var(--mute);font-weight:600}
+.mbox.k b{color:var(--mango)}.mbox.p b{color:var(--berryd)}
+.flow{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin:4px 0}
+.fstep{font-size:14px;font-weight:800;padding:8px 12px;border-radius:12px;background:var(--ink);color:var(--bg)}
+.fstep.soft{background:var(--fill);color:var(--ink);font-weight:700}
+.farr{color:var(--mute);font-weight:800}
+.d-sec{margin:22px 0 0}
+.d-sec h3{font:800 19px/1.2 var(--title);margin:0 0 8px}
+.ing{list-style:none;margin:0;padding:0;background:var(--card);border-radius:18px;box-shadow:var(--sh);overflow:hidden}
+.ing li{display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:10px;align-items:center;padding:11px 14px;border-top:1px solid var(--line)}
+.ing li:first-child{border-top:0}
+.ing .ck{width:24px;height:24px;border-radius:50%;border:2px solid var(--fill2);display:grid;place-items:center;font-size:14px;color:transparent}
+.ing li.done .ck{background:var(--pist);border-color:var(--pist);color:#fff}
+.ing li.done .nm{text-decoration:line-through;opacity:.55}
+.ing .amt{font-weight:800;white-space:nowrap;text-align:right}
+.ing .nt{display:block;font-size:13px;color:var(--mute);line-height:1.3}
+.ing .opt{font-size:11px;font-weight:700;color:var(--mute);background:var(--fill);padding:1px 6px;border-radius:6px;margin-left:4px}
+.ing .miss{font-size:11px;font-weight:700;color:#C2410C;background:light-dark(#FFEDD5,#43260F);padding:1px 6px;border-radius:6px;margin-left:4px}
+ol.steps{margin:0;padding:0;list-style:none;counter-reset:s;display:grid;gap:8px}
+ol.steps li{counter-increment:s;display:grid;grid-template-columns:32px minmax(0,1fr);gap:10px;background:var(--card);padding:12px 14px;border-radius:16px;box-shadow:var(--sh)}
+ol.steps li::before{content:counter(s);width:28px;height:28px;border-radius:50%;background:var(--berrybg);color:var(--berryd);display:grid;place-items:center;font-weight:800;font-size:14px}
+ul.bul{margin:0;padding:0;list-style:none;display:grid;gap:6px}
+ul.bul li{padding:10px 14px;background:var(--fill);border-radius:14px;line-height:1.45}
+.timeline{display:grid;gap:0;border-left:3px solid var(--fill2);margin-left:6px;padding-left:16px}
+.timeline div{position:relative;padding:6px 0;line-height:1.45}
+.timeline div::before{content:"";position:absolute;left:-23px;top:13px;width:11px;height:11px;border-radius:50%;background:var(--berry);border:2px solid var(--bg)}
+.yz{background:var(--card);border-radius:18px;padding:12px 14px;box-shadow:var(--sh);display:grid;gap:8px}
+.yz table{width:100%;border-collapse:collapse;font-size:15px}
+.yz td{padding:4px 0;border-bottom:1px solid var(--line)}
+.yz td:last-child{text-align:right;font-weight:700;white-space:nowrap}
+.actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:16px}
+@media(min-width:560px){.actions{grid-template-columns:repeat(4,minmax(0,1fr))}}
+
+/* Editor */
+.ed{display:grid;gap:14px}
+.ed label{display:grid;gap:6px;font-size:14px;font-weight:700;color:var(--mute)}
+.ed .two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
+.ired{display:grid;gap:8px}
+.irow{display:grid;grid-template-columns:minmax(0,1fr) 72px 92px 40px;gap:6px;align-items:center;background:var(--fill);padding:8px;border-radius:14px}
+.irow .field{min-height:42px;padding:6px 10px;border-radius:10px}
+.irow .ex{grid-column:1/-1;display:grid;grid-template-columns:72px minmax(0,1fr) auto;gap:6px;align-items:center}
+.irow .ex label{display:flex;align-items:center;gap:6px;font-size:13px}
+.irow .del{width:40px;height:40px;border-radius:10px;background:var(--bg2);font-size:18px;color:#E11D48}
+.livemac{position:sticky;bottom:0;background:var(--bg);padding:10px 0;border-top:1px solid var(--line);display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+input[type=range]{width:100%;accent-color:var(--berry);height:32px}
+.tpick{display:flex;flex-wrap:wrap;gap:6px}
+
+/* Matrix */
+.mx-wrap{position:relative;padding:8px 0}
+.mx{position:relative;width:100%;max-width:760px;aspect-ratio:1/1;margin:0 auto;border-radius:26px;overflow:hidden;box-shadow:var(--sh);
+background:linear-gradient(to right,light-dark(rgba(255,77,126,.20),rgba(255,77,126,.22)),rgba(0,0,0,0) 50%,light-dark(rgba(255,220,150,.30),rgba(255,210,140,.16))),linear-gradient(to bottom,light-dark(#E8F4FF,#16212b),light-dark(#FFF8EE,#1d1612) 50%,light-dark(#EBD9CC,#2a1a12))}
+.mx::before,.mx::after{content:"";position:absolute;background:var(--fill2)}
+.mx::before{left:50%;top:0;bottom:0;width:2px;transform:translateX(-1px)}
+.mx::after{top:50%;left:0;right:0;height:2px;transform:translateY(-1px)}
+.ax{position:absolute;font-weight:800;font-size:13px;padding:4px 9px;border-radius:10px;background:color-mix(in srgb,var(--bg2) 80%,transparent);z-index:2;pointer-events:none}
+.ax.l{left:8px;top:50%;transform:translateY(-50%)}.ax.r{right:8px;top:50%;transform:translateY(-50%)}.ax.t{top:8px;left:50%;transform:translateX(-50%)}.ax.b{bottom:8px;left:50%;transform:translateX(-50%)}
+.dot{position:absolute;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:2px;z-index:3;transition:transform .2s}
+.dot .b{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;font-size:19px;background:var(--bg2);box-shadow:0 3px 10px rgba(0,0,0,.14);border:3px solid var(--c)}
+.dot .n{font-size:12px;font-weight:800;padding:1px 6px;border-radius:7px;background:color-mix(in srgb,var(--bg2) 88%,transparent);white-space:nowrap;max-width:110px;overflow:hidden;text-overflow:ellipsis}
+.dot:hover,.dot.sel{transform:translate(-50%,-50%) scale(1.15);z-index:5}
+.dot.dim{opacity:.18}
+.mx-tip{max-width:760px;margin:12px auto 0}
+.legend{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;font-size:13px;color:var(--mute);margin-top:10px}
+.legend span{display:inline-flex;align-items:center;gap:5px}
+.legend i{width:12px;height:12px;border-radius:50%;border:3px solid;display:inline-block}
+
+/* Chat */
+.chatv{display:flex;flex-direction:column;min-height:calc(100dvh - 140px)}
+.msgs{flex:1;display:flex;flex-direction:column;gap:10px;padding:8px 0 16px}
+.m{max-width:min(86%,620px);padding:10px 14px;border-radius:20px;line-height:1.5;white-space:normal;overflow-wrap:anywhere;font-size:16px}
+.m.u{align-self:flex-end;background:var(--berry);color:#fff;border-bottom-right-radius:6px}
+.m.a{align-self:flex-start;background:var(--card);box-shadow:var(--sh);border-bottom-left-radius:6px}
+.m img{max-width:220px;border-radius:14px;display:block;margin-bottom:6px}
+.m p{margin:0 0 6px}.m p:last-child{margin:0}
+.m ul{margin:4px 0 6px;padding-left:20px}
+.m h4{margin:8px 0 4px;font:800 16px var(--title)}
+.typing{display:inline-flex;gap:4px;padding:4px 0}
+.typing i{width:8px;height:8px;border-radius:50%;background:var(--mute);animation:bl 1s infinite}
+.typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}
+@keyframes bl{50%{opacity:.25;transform:translateY(-3px)}}
+.prop{align-self:flex-start;width:min(92%,420px);overflow:hidden}
+.prop .im{aspect-ratio:4/2.4}
+.prop .im svg{width:100%;height:100%;display:block}
+.prop .tx{padding:12px 14px;display:grid;gap:8px}
+.prop b{font:800 18px/1.2 var(--title)}
+.upd{align-self:flex-start;font-size:14px;font-weight:700;background:light-dark(#DCFCE7,#14321F);color:light-dark(#166534,#86EFAC);padding:8px 12px;border-radius:14px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.composer{position:sticky;bottom:calc(var(--tabh) + env(safe-area-inset-bottom) + 6px);display:grid;gap:8px;background:color-mix(in srgb,var(--bg) 90%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);padding:8px 0}
+@media(min-width:900px){.composer{bottom:8px}}
+.cbar{display:flex;gap:8px;align-items:flex-end;background:var(--card);border-radius:24px;padding:6px;box-shadow:var(--sh)}
+.cbar textarea{flex:1;border:0;background:transparent;resize:none;min-height:44px;max-height:140px;padding:10px 8px;outline:none;line-height:1.4}
+.cbar .iconbtn{width:42px;height:42px;font-size:18px}
+.send{background:var(--berry)!important;color:#fff}
+.thumb{display:flex;gap:8px;align-items:center}
+.thumb img{width:56px;height:56px;object-fit:cover;border-radius:12px}
+.sugg{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none}
+.sugg::-webkit-scrollbar{display:none}
+.sugg button{flex:none;min-height:38px;padding:0 13px;border-radius:19px;background:var(--fill);font-size:14px;font-weight:600}
+.mic.on{background:var(--berry);color:#fff;animation:pulse 1.2s infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 8px rgba(255,77,126,.18)}}
+
+/* Wissen */
+.rules{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,250px),1fr));gap:10px}
+.rule{padding:14px;display:grid;grid-template-columns:40px minmax(0,1fr);gap:10px;align-items:start}
+.rule .ri{font-size:26px;line-height:1}
+.rule b{display:block;font-weight:800;margin-bottom:2px}
+.rule p{margin:0;font-size:14px;color:var(--mute);line-height:1.45}
+.modes{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,230px),1fr));gap:10px}
+.mode{padding:14px}
+.mode b{font:800 15px var(--title);display:inline-block;background:var(--ink);color:var(--bg);padding:4px 10px;border-radius:9px;margin-bottom:6px}
+.mode em{display:block;font-style:normal;font-weight:700;margin-bottom:2px}
+.mode p{margin:0;font-size:14px;color:var(--mute)}
+details.acc{background:var(--card);border-radius:18px;box-shadow:var(--sh);margin-bottom:10px;overflow:hidden}
+details.acc summary{list-style:none;padding:14px 16px;display:flex;gap:12px;align-items:center;font:800 17px/1.25 var(--title);cursor:pointer;min-height:52px}
+details.acc summary::-webkit-details-marker{display:none}
+details.acc summary::after{content:"›";margin-left:auto;font-size:24px;color:var(--mute);transition:transform .2s}
+details.acc[open] summary::after{transform:rotate(90deg)}
+details.acc ul{margin:0;padding:0 16px 14px 16px;list-style:none;display:grid;gap:8px}
+details.acc li{padding-left:18px;position:relative;line-height:1.5}
+details.acc li::before{content:"";position:absolute;left:2px;top:.62em;width:7px;height:7px;border-radius:50%;background:var(--berry)}
+.finder{padding:16px;display:grid;gap:10px}
+.finder .res{padding:14px;border-radius:16px;background:var(--ink);color:var(--bg)}
+.finder .res b{font:900 22px var(--title);display:block}
+.ideas{display:flex;flex-wrap:wrap;gap:8px}
+.ideas button{min-height:40px;padding:0 13px;border-radius:20px;background:var(--card);box-shadow:var(--sh);font-size:14px;font-weight:600;text-align:left}
+.ideas small{color:var(--mute);font-weight:700;margin-left:4px}
+
+/* Vorrat */
+.pgrp{margin:18px 0 8px;font:800 18px var(--title)}
+.plist{background:var(--card);border-radius:18px;box-shadow:var(--sh);overflow:hidden}
+.prow{display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:8px;align-items:center;padding:8px 12px;border-top:1px solid var(--line)}
+.prow:first-child{border-top:0}
+.prow .hv{width:30px;height:30px;border-radius:50%;border:2px solid var(--fill2);display:grid;place-items:center;color:transparent;font-weight:900;margin-left:4px}
+.prow .hv.on{background:var(--pist);border-color:var(--pist);color:#fff}
+.prow .nm{text-align:left;min-height:44px;display:flex;flex-direction:column;justify-content:center}
+.prow .nm small{color:var(--mute);font-size:13px}
+.prow .kc{font-size:13px;color:var(--mute);font-weight:700;white-space:nowrap}
+
+/* Toast & confetti */
+.toast{position:fixed;left:50%;bottom:calc(var(--tabh) + env(safe-area-inset-bottom) + 18px);transform:translate(-50%,30px);opacity:0;z-index:90;background:var(--ink);color:var(--bg);padding:12px 16px;border-radius:16px;font-weight:700;font-size:15px;display:flex;gap:12px;align-items:center;transition:.3s;max-width:92vw;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+.toast button{color:var(--berry);font-weight:800;min-height:32px}
+.conf{position:fixed;inset:0;pointer-events:none;z-index:95;overflow:hidden}
+.conf i{position:absolute;top:-20px;width:8px;height:14px;border-radius:4px;animation:fall 1.8s cubic-bezier(.3,.6,.5,1) forwards}
+@keyframes fall{to{transform:translate(var(--dx),110vh) rotate(var(--rot))}}
+.snow i{border-radius:50%;width:8px;height:8px;background:#fff!important;box-shadow:0 0 4px rgba(120,170,255,.8);animation-duration:4s}
+.tip{padding:14px 16px;display:flex;gap:12px;align-items:center}
+.tip .ti{font-size:28px}
+.tip p{margin:0;font-size:15px;line-height:1.45}
+.list-pick{display:grid;gap:6px}
+.list-pick button{display:flex;gap:12px;align-items:center;padding:8px;border-radius:14px;background:var(--fill);text-align:left;min-height:56px}
+.list-pick .mini{width:56px;height:44px;border-radius:10px;overflow:hidden;flex:none}
+.list-pick .mini svg{width:100%;height:100%;display:block}
+.cnt{font-size:13px;color:var(--mute);font-weight:600;margin:4px 0 0}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+.tip .ti{flex:none}
+@media(max-width:700px){.mx-wrap{overflow-x:auto;margin:0 calc(-1*max(4vw,16px));padding:8px max(4vw,16px)}.mx{min-width:640px}}
+.irow{grid-template-columns:minmax(0,1fr) minmax(0,1fr) 40px}
+.irow [data-k=n]{grid-column:1/-1}
+/* v1.1 */
+.ptitle{margin:14px 0 6px}
+.ptitle h2{font:800 clamp(30px,8vw,40px)/1.05 var(--title);margin:0;letter-spacing:-.01em;text-wrap:balance}
+.ptitle p{margin:4px 0 0;color:var(--mute);font-size:16px}
+.brand h1{font-size:22px}
+.brand small{font-size:12px;letter-spacing:.01em}
+.brand .lg{width:36px;height:36px}
+.hdr{padding-top:calc(env(safe-area-inset-top) + 6px);padding-bottom:6px}
+.seg.mini{flex:none}.seg.mini button{min-width:44px;font-size:17px;padding:0 8px}
+.search{align-items:center}
+.seg.vt{flex:none;padding:3px}.seg.vt button{min-width:40px;font-size:17px;padding:0 6px}
+.tools{top:calc(env(safe-area-inset-top) + 54px)}
+.maker{gap:10px}
+.maker h3{font-size:19px}
+.maker .cbar{background:var(--bg2);padding:4px 4px 4px 6px}
+.lnk{text-decoration:none}
+.seg.vt button{display:grid;place-items:center}
+
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <header class="hdr" id="hdr"><div class="hdr-in">
+    <div class="brand"><button class="lg" id="logo" aria-label="Scoopernova"></button><div><h1 id="ttl">Scoopernova</h1><small id="subttl">created by munkolas · v1.1</small></div></div>
+    <div id="hdrbtns" class="row"></div>
+  </div></header>
+  <main id="main"></main>
+</div>
+<nav class="tabs" aria-label="Navigation"><div class="tabs-in" id="tabs"></div></nav>
+<div class="scrim hide" id="scrim"></div>
+<div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-hidden="true"></div>
+<div class="toast" id="toast" role="status"></div>
+<input type="file" id="fileImg" accept="image/*" class="hide">
+<input type="file" id="filePhoto" accept="image/*" class="hide">
+<script>window.SN_PWA=true</script>
+<script>
+/* Scoopernova – Daten: Vorrat (Nährwerte pro 100 g/ml), Rezepte (finale Versionen), Wissen, Ideen */
+window.SN = window.SN || {};
+
+/* ---------- VORRAT / NÄHRWERT-DB ----------
+   k=kcal, p=Protein, c=KH (Erythrit 0), f=Fett – jeweils pro 100 g bzw. 100 ml
+   tl = Gramm pro TL, pc = Gramm pro Stück, have = hab ich da */
+SN.PANTRY = [
+  // Flüssig
+  {id:'mandel', n:'Mandelmilch ungesüßt', u:'ml', k:13, p:0.4, c:0.1, f:1.1, g:'Flüssig', have:true},
+  {id:'hafer', n:'Barista-Hafermilch', u:'ml', k:60, p:0.8, c:6.8, f:3.0, g:'Flüssig', have:true},
+  {id:'vollmilch', n:'Vollmilch 3,5 %', u:'ml', k:64, p:3.3, c:4.8, f:3.5, g:'Flüssig', have:false},
+  {id:'sahne', n:'Sahne 30 %', u:'ml', k:292, p:2.4, c:3.2, f:30, g:'Flüssig', have:false},
+  {id:'kokos_light', n:'Kokosmilch light (Lidl)', u:'ml', k:135, p:0.6, c:1.2, f:14, g:'Flüssig', have:true},
+  {id:'kokosmilch', n:'Kokosmilch (voll)', u:'ml', k:180, p:1.6, c:2.6, f:18, g:'Flüssig', have:false},
+  {id:'cremefine7', n:'Cremefine 7 %', u:'ml', k:99, p:3, c:5.5, f:7, g:'Flüssig', have:true},
+  {id:'cremefine15', n:'Cremefine 15 %', u:'ml', k:160, p:3, c:4, f:15, g:'Flüssig', have:true},
+  {id:'hafersahne', n:'Hafersahne', u:'ml', k:150, p:1, c:6, f:13, g:'Flüssig', have:true},
+  {id:'espresso', n:'Espresso (De’Longhi Dedica)', u:'ml', k:7, p:0.1, c:1.2, f:0.2, g:'Flüssig', have:true},
+  {id:'maracuja', n:'Maracujasaft/-nektar', u:'ml', k:55, p:0.3, c:13, f:0.1, g:'Flüssig', have:true},
+  {id:'wasser', n:'Wasser', u:'ml', k:0, p:0, c:0, f:0, g:'Flüssig', have:true},
+  {id:'amaretto', n:'Amaretto Cassella', u:'ml', k:300, p:0, c:30, f:0, g:'Flüssig', tl:5, have:true},
+  // Protein & Milchprodukte
+  {id:'whey', n:'Better Protein Whey neutral', u:'g', k:390, p:78, c:7.6, f:5.3, g:'Protein', tl:3, have:true},
+  {id:'whey_esn', n:'ESN Whey Vanilla Ice Cream', u:'g', k:380, p:76.7, c:7.7, f:5.0, g:'Protein', tl:3, have:false},
+  {id:'fk', n:'Körniger Frischkäse (Lidl)', u:'g', k:95, p:12.3, c:2.6, f:4.0, g:'Protein', have:true},
+  {id:'skyr', n:'Skyr natur', u:'g', k:63, p:11, c:4, f:0.2, g:'Protein', have:true},
+  {id:'quark', n:'Magerquark', u:'g', k:67, p:12, c:4, f:0.3, g:'Protein', have:true},
+  {id:'joghurt', n:'Joghurt 2 % (griech. Art)', u:'g', k:52, p:6, c:2.5, f:2.0, g:'Protein', have:true},
+  {id:'eigelb', n:'Eigelb', u:'g', k:322, p:15.9, c:3.6, f:26.5, g:'Protein', pc:18, have:true},
+  // Süße & Textur
+  {id:'erythrit', n:'Erythrit', u:'g', k:0, p:0, c:0, f:0, g:'Süße & Textur', tl:4, have:true},
+  {id:'jbkm', n:'Johannisbrotkernmehl', u:'g', k:200, p:4.6, c:3, f:0.6, g:'Süße & Textur', tl:2.4, have:true},
+  {id:'pud_v', n:'Vanillepuddingpulver', u:'g', k:345, p:0.3, c:85, f:0.1, g:'Süße & Textur', tl:3, have:true},
+  {id:'pud_s', n:'Schokopuddingpulver', u:'g', k:355, p:5.5, c:75, f:3, g:'Süße & Textur', tl:3, have:true},
+  {id:'zucker', n:'Zucker', u:'g', k:400, p:0, c:100, f:0, g:'Süße & Textur', tl:4, have:true},
+  {id:'vanillezucker', n:'Vanillezucker', u:'g', k:400, p:0, c:100, f:0, g:'Süße & Textur', tl:4, have:true},
+  {id:'honig', n:'Honig', u:'g', k:304, p:0.3, c:76, f:0, g:'Süße & Textur', tl:7, have:true},
+  {id:'salz', n:'Salz', u:'g', k:0, p:0, c:0, f:0, g:'Süße & Textur', tl:6, have:true},
+  // Aromen
+  {id:'kakao', n:'Backkakao (stark entölt)', u:'g', k:352, p:23, c:12, f:11, g:'Aromen', tl:2.5, have:true},
+  {id:'vanille', n:'Vanilleextrakt (mit Zuckersirup)', u:'g', k:388, p:0, c:94.5, f:0, g:'Aromen', tl:5, have:true},
+  {id:'tonka', n:'Tonkabohne gemahlen', u:'g', k:0, p:0, c:0, f:0, g:'Aromen', tl:2, have:true},
+  {id:'butteraroma', n:'Butteraroma (Fläschchen)', u:'ml', k:0, p:0, c:0, f:0, g:'Aromen', have:true},
+  {id:'drops_pist', n:'FlavDrops Pistazie', u:'ml', k:0, p:0, c:0, f:0, g:'Aromen', have:true},
+  {id:'drops_nuss', n:'FlavDrops Nuss-Nougat', u:'ml', k:0, p:0, c:0, f:0, g:'Aromen', have:true},
+  {id:'obw', n:'Orangenblütenwasser', u:'ml', k:0, p:0, c:0, f:0, g:'Aromen', tl:5, have:true},
+  {id:'zitronia', n:'Zitronia Sun (Gewürz)', u:'g', k:0, p:0, c:0, f:0, g:'Aromen', tl:3, have:true},
+  {id:'zitrone', n:'Zitronensaft', u:'ml', k:22, p:0.4, c:6.9, f:0.2, g:'Aromen', tl:5, have:true},
+  {id:'zabrieb', n:'Zitronenschalenabrieb', u:'g', k:47, p:1.5, c:5, f:0.3, g:'Aromen', tl:2, have:true},
+  {id:'oabrieb', n:'Orangenschalenabrieb (Päckchen)', u:'g', k:97, p:1.5, c:25, f:0.2, g:'Aromen', tl:2, have:true},
+  {id:'jasmintee', n:'Jasmintee (lose)', u:'g', k:0, p:0, c:0, f:0, g:'Aromen', tl:2, have:true},
+  {id:'zimt', n:'Zimt', u:'g', k:247, p:4, c:27, f:1.2, g:'Aromen', tl:2.6, have:true},
+  {id:'kardamom', n:'Kardamom gemahlen', u:'g', k:0, p:0, c:0, f:0, g:'Aromen', tl:2, have:false},
+  {id:'farbe_gelb', n:'Lebensmittelfarbe gelb', u:'ml', k:0, p:0, c:0, f:0, g:'Aromen', have:true},
+  {id:'farbe_gruen', n:'Lebensmittelfarbe grün', u:'ml', k:0, p:0, c:0, f:0, g:'Aromen', have:true},
+  {id:'instkaffee', n:'Instant-Kaffee (für Vanillepunkte)', u:'g', k:0, p:0, c:0, f:0, g:'Aromen', have:true},
+  // Frucht
+  {id:'banane', n:'Banane, überreif (geschält)', u:'g', k:89, p:1.1, c:20, f:0.3, g:'Frucht', pc:120, have:true},
+  {id:'himbeeren', n:'Himbeeren TK', u:'g', k:43, p:1.3, c:4.8, f:0.3, g:'Frucht', have:true},
+  {id:'mango', n:'Mango TK (Stücke)', u:'g', k:60, p:0.8, c:13, f:0.4, g:'Frucht', have:true},
+  {id:'kirschen', n:'Kirschen aus dem Glas (abgetropft)', u:'g', k:70, p:0.7, c:16, f:0.3, g:'Frucht', have:true},
+  {id:'kirschsaft', n:'Kirschsaft aus dem Glas', u:'ml', k:55, p:0.3, c:13, f:0, g:'Frucht', tl:5, have:true},
+  {id:'pfirsich', n:'Pfirsiche Dose (abgetropft)', u:'g', k:60, p:0.4, c:13.9, f:0.1, g:'Frucht', have:false},
+  {id:'pfirsichsaft', n:'Pfirsichsaft aus der Dose', u:'ml', k:48, p:0, c:12, f:0, g:'Frucht', have:false},
+  {id:'birne', n:'Birne (Fruchtfleisch)', u:'g', k:55, p:0.4, c:12.4, f:0.3, g:'Frucht', have:false},
+  // Deluxe & Mix-ins
+  {id:'pisti', n:'Pisti Pistaziencreme (45 %)', u:'g', k:573, p:9.7, c:46, f:38, g:'Deluxe & Mix-ins', tl:6, have:true},
+  {id:'pistazien', n:'Pistazien gesalzen, gehackt', u:'g', k:572, p:20.6, c:17, f:45, g:'Deluxe & Mix-ins', have:true},
+  {id:'zartbitter', n:'Zartbitterschokolade 70 %', u:'g', k:570, p:8, c:33, f:42, g:'Deluxe & Mix-ins', pc:5, have:true},
+  {id:'weisseschoko', n:'Weiße Schokolade', u:'g', k:550, p:6, c:58, f:32, g:'Deluxe & Mix-ins', have:true},
+  {id:'nutella', n:'Nutella', u:'g', k:539, p:6.3, c:57.5, f:30.9, g:'Deluxe & Mix-ins', tl:7, have:true},
+  {id:'kokosraspeln', n:'Kokosraspeln', u:'g', k:660, p:6.6, c:7, f:64, g:'Deluxe & Mix-ins', tl:2, have:true},
+  {id:'raffaello', n:'Raffaello', u:'g', k:628, p:7.5, c:39.6, f:48.6, g:'Deluxe & Mix-ins', pc:10, have:true},
+  {id:'macadamia', n:'Macadamias gesalzen', u:'g', k:740, p:8, c:5, f:77, g:'Deluxe & Mix-ins', have:true},
+  {id:'butter', n:'Butter', u:'g', k:741, p:0.7, c:0.6, f:82, g:'Deluxe & Mix-ins', tl:5, have:true},
+  {id:'lotus', n:'Lotus Biscoff Kekse', u:'g', k:484, p:4.9, c:72.6, f:19, g:'Deluxe & Mix-ins', pc:6.25, have:true},
+  {id:'oreo', n:'Oreo', u:'g', k:476, p:5, c:69, f:20, g:'Deluxe & Mix-ins', pc:11, have:true},
+  {id:'schokolinsen', n:'Bunte Schokolinsen', u:'g', k:465, p:4.4, c:70, f:18, g:'Deluxe & Mix-ins', have:false},
+];
+
+/* ---------- KATEGORIEN ---------- */
+SN.CATS = {
+  protein:{label:'Protein', long:'High Protein · Low Cal', icon:'💪', color:'#FF4D7E'},
+  natur:{label:'Frucht', long:'Frucht & Natur · ohne Protein', icon:'🍌', color:'#F59E0B'},
+  deluxe:{label:'Deluxe', long:'Gönnung ohne Limit', icon:'👑', color:'#B7832F'},
+};
+SN.FAMS = {
+  schoko:'🍫 Schoko', vanille:'🍦 Vanille & Creme', cheesecake:'🍰 Cheesecake', frucht:'🍓 Fruchtig', nuss:'🌰 Nussig', floral:'🌸 Floral', kaffee:'☕ Kaffee'
+};
+SN.STATUS = {
+  final:{label:'Final', dot:'#22C55E'},
+  testen:{label:'Nächster Test', dot:'#F59E0B'},
+  neu:{label:'Neu entwickelt', dot:'#8B5CF6'},
+  idee:{label:'Idee', dot:'#94A3B8'},
+};
+SN.FLOWS = {
+  lite:['LITE ICE CREAM','Ränder abkratzen','RE-SPIN'],
+  ice:['ICE CREAM','Ränder abkratzen','RE-SPIN'],
+  sorbet:['SORBET','Ränder abkratzen','RE-SPIN'],
+  gelato:['GELATO','Ränder abkratzen','RE-SPIN'],
+};
+const STD = [
+  'Alles in einen Messbecher und mit Milchaufschäumer/Stabmixer mind. 30 Sek. mixen, bis sich Erythrit & Johannisbrotkernmehl komplett gelöst haben.',
+  'Abschmecken: Es muss leicht übersüß schmecken – Kälte schluckt Süße.',
+  'In den Becher bis max. zur Linie füllen und OHNE Deckel 24 h einfrieren. Erst danach Deckel drauf.'
+];
+
+/* ---------- REZEPTE ----------
+   i: [zutatId, menge, einheit, {max, note, opt, name}]
+   x: -1 fruchtig … +1 sahnig · y: +1 leicht … -1 schwer
+   a: Grafik {c:[Kugelfarben], bg, v:'pint'|'cone'|'bowl', t:[Toppings]} */
+SN.RECIPES = [
+{ id:'schoko-nutella', name:'Schoko-Nutella', sub:'Chocolate Fudge mit Nuss-Nougat-Kick', cat:'protein', fam:'schoko', emoji:'🍫🌰💪', status:'final', ver:'Final', rank:1, fav:true, x:.75, y:-.25,
+  i:[['mandel',200,'ml'],['hafer',50,'ml'],['whey',30,'g'],['kakao',20,'g',{note:'neuer Standard – viel schokoladiger'}],['erythrit',45,'g'],['pud_s',5,'g',{note:'Schoko-, nicht Vanillepudding!'}],['jbkm',.25,'TL'],['salz',1,'Prise'],['drops_nuss',6,'Tropfen',{max:8,note:'ohne Drops = Chocolate Fudge'}]],
+  steps:STD, flow:'lite',
+  mix:['Stracciatella: 2 Stücke Zartbitter in der Mikrowelle schmelzen, nach dem ersten Spin flüssig drüberträufeln → MIX-IN = perfekte Schokoadern','Geröstete Haselnüsse, grob gehackt'],
+  notes:['20 g Kakao statt 10 g = viel intensiver, seitdem Standard.','Mit mehr Kakao braucht es mehr Nuss-Nougat-Drops, sonst ist die Haselnuss weg.','Ohne Nuss-Nougat-Drops ist es dein „Chocolate Fudge“ – beide auf Platz 1.','Kakao wandert beim Gefrieren manchmal nach oben (oben dunkler, unten heller) – kein Fehler.'],
+  a:{c:['#5B3527','#7A4A33'], bg:'#F3DFD2', v:'pint', t:['choc-drizzle','nuts']} },
+
+{ id:'tiramisu', name:'Tiramisu', sub:'Espresso, Amaretto & Kakao – deine 10/10', cat:'protein', fam:'kaffee', emoji:'☕🍰💪', status:'final', ver:'Final', rank:2, fav:true, x:.55, y:-.12,
+  i:[['mandel',145,'ml'],['hafer',100,'ml'],['espresso',40,'ml',{note:'doppelter Siebträger, Einzeltassen-Taste; abkühlen lassen'}],['whey',30,'g'],['skyr',45,'g'],['erythrit',50,'g'],['pud_v',5,'g'],['jbkm',.25,'TL'],['amaretto',1,'EL',{note:'nur Cassella – Rialto wird hinten raus bitter'}],['kakao',.5,'TL'],['drops_pist',3,'Tropfen',{note:'Marzipan-Note, macht es rund'}],['salz',1,'Prise']],
+  steps:STD.concat(['Zum Servieren mit etwas Backkakao bestäuben.']), flow:'lite',
+  mix:['Butterkeks- oder Löffelbiskuit-Krümel als Mix-In','Kakao-Nibs für Crunch'],
+  notes:['10/10 – mit +5 g Erythrit perfekt (jetzt 50 g).','Neutrales Whey ist gar nicht süß → mehr Erythrit, sonst herb.','Experiment mit 200 g körnigem Frischkäse war nix → bewährte Version.'],
+  a:{c:['#C9A27E','#EAD7BF'], bg:'#EADCC9', v:'pint', t:['cocoa','coffee']} },
+
+{ id:'lemon-cheesecake', name:'Lemon Cheesecake', sub:'Frisch, cremig, Keksboden-Vibe', cat:'protein', fam:'cheesecake', emoji:'🍋🍰💪', status:'final', ver:'Final', rank:3, fav:true, x:.1, y:-.35, src:'FFAE',
+  i:[['fk',170,'g'],['hafer',180,'ml'],['whey',30,'g'],['erythrit',50,'g',{max:55}],['pud_v',5,'g'],['jbkm',.25,'TL'],['zitrone',1,'TL',{max:2}],['zitronia',.25,'TL',{note:'max. ¼ TL – sonst künstlich'}],['zabrieb',.25,'TL',{max:.5,note:'gehört unbedingt rein'}],['butteraroma',.5,'Fläschchen',{note:'Game-Changer'}]],
+  steps:STD, flow:'lite',
+  mix:['5–7 g Butterkeks oder Lotus fein zerbröseln → MIX-IN (Cheesecake-Boden)'],
+  notes:['Kein Salz – der körnige Frischkäse vom Lidl ist schon salzig genug.','Süße musste mehrfach hoch: 1,5× Erythrit war der Durchbruch.','½ TL Zitronia Sun war zu künstlich → max. ¼ TL.','Ursprung: Lemon Cheesecake von FitFoodAE, auf deutsche Zutaten umgebaut.'],
+  a:{c:['#FFF0A3','#FFE27A'], bg:'#FFF5C9', v:'pint', t:['lemon','cookie']} },
+
+{ id:'banane-pur', name:'Banane pur', sub:'Eine Zutat. Alle sind baff.', cat:'natur', fam:'frucht', emoji:'🍌🍌🍌', status:'final', ver:'Final', rank:4, fav:true, x:-.35, y:.25,
+  i:[['banane',4,'Stk',{max:5,name:'überreife Bananen (außen braun) – 3 bis 5'}]],
+  steps:['Bananen schälen und mit der Faust in den Becher drücken, bis alles zermatscht ist. 3 Bananen ≈ ⅔ voll, 5 = voll.','Sonst nichts. Kein Zucker, kein Protein.','Ohne Deckel einfrieren.'], flow:'ice',
+  mix:['Schokodrops','Lotus-Kekse','Flüssige Zartbitter → Stracciatella'],
+  notes:['Pur schlägt jede Bananen-Variante mit Extras.','Wird im Gefrierer braun (Oxidation) – im Creami wieder hell durch eingeschlagene Luft & Lichtstreuung.','Variante „Banana Blossom“: ¼ TL Orangenblütenwasser.'],
+  a:{c:['#FFF0B0','#FBE39C'], bg:'#FFF3C4', v:'bowl', t:['banana','choc-chips']} },
+
+{ id:'coco-vanille', name:'Coco Vanille', sub:'Legit Coconut Cream', cat:'protein', fam:'vanille', emoji:'🥥🍦💪', status:'final', ver:'Final · neutral', rank:5, fav:true, x:.7, y:-.55,
+  i:[['kokos_light',200,'ml',{note:'½ Dose – vorher gut aufschütteln (oben Creme, unten flüssig)'}],['hafer',100,'ml'],['whey',30,'g'],['erythrit',45,'g',{note:'+10 g wegen neutralem Whey'}],['pud_v',5,'g'],['jbkm',.25,'TL'],['salz',1,'Prise'],['vanille',.5,'TL',{note:'ersetzt das Aroma vom alten ESN-Vanille'}],['kokosraspeln',1,'TL',{max:2,opt:true}]],
+  steps:STD.concat(['Topping: geröstete Kokoschips.']), flow:'ice',
+  mix:['Geröstete Kokoschips','Kokosraspeln','Weiße Schoko, geschmolzen → Raffaello-Vibe'],
+  notes:['Original mit ESN Vanilla Whey + 35 g Erythrit war „der Hammer“ – hier auf Better neutral umgerechnet.','Mit nur 80–100 ml Kokosmilch schmeckt es nur nach Vanille → ½ Dose ist Pflicht.','Viel Fett → ICE CREAM statt Lite.'],
+  a:{c:['#FFFFFF','#F3EEE4'], bg:'#E3F1EE', v:'pint', t:['coconut']} },
+
+{ id:'pistazie-v3', name:'Pistazie Protein', sub:'Pisti-Creme + Drops, nicht künstlich', cat:'protein', fam:'nuss', emoji:'🌱💪✨', status:'final', ver:'V3', fav:true, x:.8, y:-.5,
+  i:[['pisti',50,'g',{note:'40 g läuft gerade als Test'}],['mandel',200,'ml'],['hafer',50,'ml'],['whey',30,'g'],['erythrit',10,'g',{max:15}],['jbkm',.25,'TL'],['salz',1,'Prise'],['drops_pist',6,'Tropfen',{note:'8 war leicht künstlich'}],['farbe_gruen',1,'Tropfen',{max:2,opt:true}]],
+  steps:STD.concat(['Topping: gehackte Pistazien.']), flow:'ice',
+  mix:['Gehackte, geröstete Pistazien','1 TL Pisti warm als Swirl'],
+  notes:['Vanille-Protein + Vanillepudding haben die Pistazie komplett überdeckt (Hybrid V1/V2).','Creme + Pistazien-Drops = Way to go. 8 Tropfen = grünes Marzipan.','Fett aus der Creme → ICE CREAM statt Lite.'],
+  a:{c:['#B6D78A','#A3CB77'], bg:'#E8F2DA', v:'pint', t:['pistachio']} },
+
+{ id:'vanilla-tonka', name:'Vanilla Tonka', sub:'Vanille-Butter-Creme mit Tonka', cat:'protein', fam:'vanille', emoji:'🍦✨💪', status:'final', ver:'Final', x:.85, y:.2,
+  i:[['mandel',200,'ml'],['hafer',50,'ml'],['whey',30,'g'],['erythrit',40,'g',{max:45}],['pud_v',5,'g'],['jbkm',.25,'TL'],['salz',1,'Prise'],['vanille',.5,'TL'],['tonka',.125,'TL',{note:'nicht mehr – ½ TL war zu parfümig'}],['butteraroma',.25,'Fläschchen'],['farbe_gelb',2,'Tropfen'],['instkaffee',1,'Körnchen',{opt:true,note:'zerrieben = Fake-Vanillepunkte'}]],
+  steps:STD, flow:'lite',
+  mix:['Lotus-Krümel','Flüssige Zartbitter → Stracciatella'],
+  notes:['Butteraroma macht es „reicher“ – Kuchenteig-Vibe. Max. ½ Fläschchen, sonst Popcorn-Kino.','Vanillepunkte faken: 1 Körnchen Instant-Kaffee zwischen den Fingern zerreiben.'],
+  a:{c:['#FFF2C4','#FBE6A2'], bg:'#FFF7E2', v:'pint', t:['vanilla','star']} },
+
+{ id:'himbeer-protein', name:'Himbeer Protein', sub:'Pure Himbeere, aber cremig', cat:'protein', fam:'frucht', emoji:'🍇🥛💪', status:'final', ver:'Final', x:-.6, y:.3,
+  i:[['himbeeren',200,'g',{note:'kurz antauen & fein pürieren'}],['mandel',150,'ml'],['whey',30,'g'],['erythrit',35,'g',{max:45}],['pud_v',5,'g'],['jbkm',.25,'TL'],['salz',1,'Prise'],['zitrone',1,'TL',{max:2}]],
+  steps:STD, flow:'sorbet',
+  mix:['Gefriergetrocknete Himbeeren','Weiße Schoko-Splitter'],
+  notes:['Kein Vanilleextrakt, kein Tonka – die Himbeere soll klar bleiben.','Das reine Sorbet war zu sauer & ohne Körper → Milch + Protein puffern die Säure.','Zu fest? 1–2 EL Mandelmilch, dann Re-Spin.'],
+  a:{c:['#EE4F78','#FF7B9A'], bg:'#FFE1E9', v:'pint', t:['berries']} },
+
+{ id:'frozen-yogurt', name:'Frozen Yogurt', sub:'Frisch, leicht säuerlich, 41 g Protein', cat:'protein', fam:'cheesecake', emoji:'🍦🍋💪', status:'final', ver:'Final', x:0, y:.55,
+  i:[['joghurt',300,'g'],['whey',30,'g'],['erythrit',45,'g'],['pud_v',5,'g'],['jbkm',.25,'TL'],['salz',1,'Prise'],['zitrone',1,'TL'],['vanille',2,'Tropfen',{opt:true}],['zabrieb',1,'Prise',{opt:true}]],
+  steps:STD, flow:'lite',
+  mix:['+100 g Himbeeren pürieren = lila FroYo','½ Fläschchen Butteraroma = Cheesecake-FroYo','Kakao + Nuss-Drops = Schoko-FroYo'],
+  notes:['Dein Creami hat keinen FroYo-Knopf → LITE ICE CREAM ist genau dafür.','Ohne Süße wird Joghurt hart, sauer & eisig.'],
+  a:{c:['#FFFFFF','#F3F1FF'], bg:'#ECEEFF', v:'pint', t:['zest']} },
+
+{ id:'cheesecake', name:'Classic Cheesecake', sub:'Vanille-Cheesecake mit Butter-Boden-Aroma', cat:'protein', fam:'cheesecake', emoji:'🍰🥛💪', status:'final', ver:'Final · neutral', x:.55, y:-.45,
+  i:[['fk',200,'g',{note:'ganzer Becher'}],['hafer',180,'ml',{note:'mehr passt nicht rein – macht es cheesecakiger'}],['whey',35,'g'],['erythrit',55,'g'],['pud_v',5,'g'],['jbkm',.25,'TL'],['zitrone',.5,'TL',{max:1}],['zitronia',.25,'TL',{note:'max.'}],['vanille',.5,'TL'],['butteraroma',.5,'Fläschchen',{note:'Game-Changer'}]],
+  steps:STD, flow:'lite',
+  mix:['Himbeer-Swirl: 150 g Himbeeren + 30–40 g Erythrit kurz pürieren. Nach dem 1. Spin 3–4 Mulden drücken, Swirl reingießen → MIX-IN. Danach kein Re-Spin!','Butterkeks-Krümel'],
+  notes:['Kein Salz (körniger Frischkäse).','Butteraroma = absoluter Game-Changer (Keksboden).','Original mit 40 g ESN Vanilla + 45 g Erythrit → auf neutral umgerechnet.','Krümelig? 1–2 EL Hafermilch + Re-Spin.'],
+  a:{c:['#FFF7E4','#F6E6C4'], bg:'#FBEED8', v:'pint', t:['cookie','swirl']} },
+
+{ id:'marrakech', name:'Marrakech Blossom Cream', sub:'Deine Eigenkreation: Orangenblüte, Marzipan, Butterkeks', cat:'protein', fam:'floral', emoji:'🌸🍊💪', status:'testen', ver:'V2', fav:true, sig:true, x:.2, y:-.3,
+  i:[['fk',150,'g'],['hafer',50,'ml'],['mandel',170,'ml',{note:'bis zur Linie auffüllen'}],['whey',30,'g'],['erythrit',45,'g',{max:50}],['pud_v',5,'g'],['jbkm',.25,'TL'],['obw',1,'TL'],['drops_pist',8,'Tropfen',{note:'= die Marzipan-Note'}],['oabrieb',.25,'TL',{max:.5}],['zitronia',.25,'TL'],['zitrone',.5,'TL'],['vanille',.25,'TL'],['tonka',.125,'TL'],['farbe_gelb',1,'Tropfen',{opt:true}]],
+  steps:STD, flow:'lite',
+  mix:['Fein gehackte Pistazien','Butterkeks-Krümel'],
+  notes:['Erinnerung an den Keks aus der Bäckerei in der Seitengasse in Marokko: butterig, vanillig, Orangenblüte, Marzipankern.','V1: mit ⅓ Dose fettarmer Kokosmilch, 30 g Vanille-Whey, 35 g Erythrit, Prise Salz (~495 kcal).','V2: ohne Kokos, auf neutrales Whey (+10–15 g Erythrit), Salz raus wegen körnigem Frischkäse.','⅛ TL Tonka seit V1.1 fest drin – Feedback noch offen.'],
+  a:{c:['#FFE6C2','#FFD39A'], bg:'#FCE9D2', v:'pint', t:['flower','pistachio']} },
+
+{ id:'solero', name:'Solero', sub:'Mango-Maracuja mit cremigem Kern', cat:'protein', fam:'frucht', emoji:'🥭☀️💪', status:'testen', ver:'V2', x:-.55, y:.1,
+  i:[['skyr',80,'g'],['mandel',50,'ml'],['whey',15,'g'],['pud_v',5,'g'],['erythrit',35,'g',{max:40}],['jbkm',.25,'TL'],['zitrone',1,'TL'],['salz',1,'Prise',{note:'macht Mango „lauter“'}],['mango',250,'g',{note:'Stücke – NICHT pürieren'}],['maracuja',90,'ml'],['farbe_gelb',2,'Tropfen',{opt:true}]],
+  steps:['Base (Skyr, Mandelmilch, Whey, Pudding, Erythrit, JBKM, Zitrone, Salz) glatt mixen und in den Becher.','Mangostücke drauf, Maracujasaft drübergießen – nicht umrühren.','Ohne Deckel einfrieren. Volumen ist auf ~455 ml gerechnet.'], flow:'lite',
+  mix:['Mango-Würfel frisch obendrauf','Kokosraspeln'],
+  notes:['V1: Base zu groß → Becher war bei 100 g Mango voll.','Base pur probiert = schmeckt 1:1 wie Solero.','Skyr statt Magerquark (Quark nur Notlösung).','Lebensmittelfarbe gelb wirkt kaum – optional.'],
+  a:{c:['#FFB52E','#FFD56E'], bg:'#FFF0C6', v:'pint', t:['mango']} },
+
+{ id:'mango-lassi', name:'Mango Lassi', sub:'Skyr, Mango & ein Hauch Kardamom', cat:'protein', fam:'frucht', emoji:'🥭🥛💪', status:'testen', ver:'V3', x:-.4, y:.38,
+  i:[['mango',170,'g'],['skyr',120,'g'],['mandel',100,'ml'],['hafer',30,'ml'],['whey',20,'g',{note:'neutral – Vanille überdeckt die Mango'}],['erythrit',35,'g',{max:40}],['jbkm',.25,'TL'],['salz',1,'Prise'],['kardamom',1,'Prise',{opt:true,note:'klassischer Lassi-Twist'}]],
+  steps:STD, flow:'lite',
+  mix:['Gehackte Pistazien','Mango-Würfel'],
+  notes:['V1 war ~200 ml zu viel und zu vanillig.','V3 neu auf ~450 ml gerechnet, damit es sicher passt.'],
+  a:{c:['#FFC24D','#FFE3A3'], bg:'#FFF2D3', v:'pint', t:['mango']} },
+
+{ id:'jasmine', name:'Jasmine Cheesecake', sub:'Jasmin in Milch gezogen – ohne Eisschnee', cat:'protein', fam:'floral', emoji:'🌸🍰💪', status:'neu', ver:'V3', x:.1, y:.45,
+  i:[['mandel',220,'ml'],['hafer',80,'ml'],['jasmintee',3,'TL',{note:'in der warmen Milch ziehen lassen'}],['fk',150,'g'],['whey',20,'g',{note:'nicht mehr – Jasmin ist fein'}],['erythrit',50,'g'],['pud_v',5,'g'],['jbkm',.25,'TL'],['zitrone',1,'TL']],
+  steps:['Mandel- und Hafermilch auf ca. 80 °C erhitzen (nicht kochen), Jasmintee 4 Min. ziehen lassen, abseihen, abkühlen.','Mit allen anderen Zutaten glatt mixen. Kein Salz (körniger Frischkäse).','Abschmecken: leicht übersüß.','Ohne Deckel einfrieren.'], flow:'lite',
+  mix:['3–5 g Butterkeks, sehr fein'],
+  notes:['V1 (Tee mit Wasser): geschmacklich Bombe, aber Schnee & harte Eiskristalle – zu viel freies Wasser.','V3: Aroma direkt in der Milch extrahieren → kein Extra-Wasser, Fett trägt den Duft.','Jasmin ist Duft, kein Geschmack: max. 4 Min. ziehen, sonst bitter.','Bei Tee-Eis ggf. 2× Re-Spin.'],
+  a:{c:['#F4F1E0','#E4EED6'], bg:'#ECF3E8', v:'pint', t:['flower']} },
+
+{ id:'cosmic-brownie', name:'Cosmic Brownie', sub:'Der Benchmark aus dem YouTube-Video', cat:'protein', fam:'schoko', emoji:'🍫🚀🪐', status:'testen', ver:'DE-Adaption', x:.9, y:-.72, src:'FDL',
+  i:[['mandel',200,'ml'],['hafer',50,'ml'],['whey',30,'g'],['kakao',20,'g'],['erythrit',45,'g'],['pud_s',5,'g'],['jbkm',.25,'TL'],['salz',1,'Prise'],['zartbitter',15,'g',{note:'Mix-In: Brownie-Chunks'}],['schokolinsen',10,'g',{note:'Mix-In: die „cosmic“ Streusel'}]],
+  steps:STD, flow:'lite',
+  mix:['Nach Re-Spin: Ränder abkratzen, gehackte Zartbitter + bunte Schokolinsen rein → MIX-IN'],
+  notes:['Flexible Dieting Lifestyle (FDL) nutzt Schoko-Brownie-Protein – wir bauen es mit deiner Schoko-Base nach.','Der Grund, warum du den Creami gekauft hast.'],
+  a:{c:['#4A2A1E','#5E3626'], bg:'#2C2342', v:'pint', t:['cosmic']} },
+
+{ id:'baki', name:'Baki', sub:'Banane unten, Kirschmus oben', cat:'natur', fam:'frucht', emoji:'🍌🍒', status:'testen', ver:'V2', x:-.5, y:0,
+  i:[['banane',3,'Stk'],['kirschen',150,'g'],['kirschsaft',2,'EL'],['jbkm',.25,'TL',{note:'nur ins Kirschmus'}],['erythrit',5,'g',{max:10}]],
+  steps:['Bananen mit der Faust unten in den Becher drücken (≈ ⅔ voll). Optional 1–2 h anfrieren.','Kirschen, Saft, JBKM & Erythrit kurz pürieren → dickes Mus, kein Saft.','Kirschmus obendrauf, ohne Deckel einfrieren.'], flow:'ice',
+  mix:['Zartbitter-Splitter','Ein paar ganze Kirschen'],
+  notes:['Bei uns heißt KiBa Baki. 😄','V1: Base war schon voll → ⅓ raus, mit Kirschen aufgefüllt.','Kirschen pürieren: Saft = freies Wasser = harter Eisblock.','JBKM nur dahin, wo freies Wasser ist – Banane braucht keins.'],
+  a:{c:['#FFF0B0','#C8204E'], bg:'#FFE5EB', v:'bowl', t:['cherry','banana']} },
+
+{ id:'himbeer-sorbet', name:'Himbeer-Sorbet', sub:'Low Cal, fruchtig – jetzt weniger sauer', cat:'natur', fam:'frucht', emoji:'🍇❄️', status:'testen', ver:'V2', x:-.9, y:.82,
+  i:[['himbeeren',300,'g'],['wasser',60,'ml'],['mandel',70,'ml',{note:'puffert die Säure'}],['erythrit',55,'g'],['jbkm',.25,'TL'],['salz',1,'Prise']],
+  steps:['Erythrit & JBKM in Wasser + Mandelmilch auflösen (Milchaufschäumer, mind. 30 Sek.).','Himbeeren dazu und pürieren.','Ohne Deckel einfrieren.'], flow:'sorbet',
+  mix:['Weiße Schoko-Splitter'],
+  notes:['V1: sehr dicht, hart & zu sauer → +10–15 g Erythrit, etwas Milch, Flüssigkeit vor dem Re-Spin.','Vor dem Re-Spin 2–3 EL Mandelmilch zugeben.','Willst du mehr Körper: Himbeer Protein.'],
+  a:{c:['#E63E6D','#FF5C86'], bg:'#FFDFE8', v:'bowl', t:['berries']} },
+
+{ id:'pfirsich', name:'Pfirsich aus der Dose', sub:'Ganze Dose rein, fertig', cat:'natur', fam:'frucht', emoji:'🍑❄️', status:'final', ver:'Final', x:-.82, y:.68,
+  i:[['pfirsich',430,'g',{name:'Pfirsiche aus 1 Dose (820 g)'}],['pfirsichsaft',100,'ml',{note:'mit Dosensaft bis zur Linie'}],['salz',1,'Prise',{opt:true}],['zitrone',1,'TL',{opt:true}]],
+  steps:['Pfirsiche in Stücken in den Becher.','Mit dem Saft aus der Dose bis zur Linie auffüllen.','Ohne Deckel einfrieren.'], flow:'sorbet',
+  mix:[], notes:['Ganze Dose mit Saft eingefroren und durchgemixt = „total geil“.'],
+  a:{c:['#FFB089','#FFCBA6'], bg:'#FFEADC', v:'bowl', t:['peach']} },
+
+{ id:'birne', name:'Birnen-Sorbet', sub:'Überreife Birnen, pur & mild', cat:'natur', fam:'frucht', emoji:'🍐❄️', status:'testen', ver:'V1', x:-.72, y:.58,
+  i:[['birne',375,'g',{name:'Birnenfleisch (3–4 überreife Birnen)'}],['erythrit',20,'g',{max:30}],['salz',1,'Prise'],['zitrone',.5,'TL'],['jbkm',.25,'TL'],['zimt',1,'Msp',{opt:true}]],
+  steps:['Birnen schälen, entkernen, in Stücke schneiden.','Mit allem im Becher pürieren, glatt streichen.','Ohne Deckel einfrieren.'], flow:'sorbet',
+  mix:[], notes:['Birne hat viel Pektin → cremiger als andere Sorbets.','Zu dicht? 1–2 EL Wasser + Re-Spin. Zimt erst beim zweiten Versuch.'],
+  a:{c:['#E6E59C','#F1EEB9'], bg:'#F2F5D8', v:'bowl', t:['pear']} },
+
+{ id:'mango-sorbet', name:'Mango-Maracuja Sorbet', sub:'Die Mango aus der Truhe', cat:'natur', fam:'frucht', emoji:'🥭❄️', status:'neu', ver:'V1', x:-.95, y:.48,
+  i:[['mango',350,'g'],['maracuja',100,'ml'],['erythrit',20,'g'],['zitrone',1,'TL'],['salz',1,'Prise'],['jbkm',.25,'TL']],
+  steps:['Erythrit & JBKM im Maracujasaft auflösen.','Mango dazu, pürieren.','Ohne Deckel einfrieren.'], flow:'sorbet',
+  mix:['Kokosraspeln'], notes:['Mango ist die beste Alternative zu Banane – halb cremig, halb Sorbet.'],
+  a:{c:['#FFA81F','#FFC85A'], bg:'#FFEFC8', v:'bowl', t:['mango']} },
+
+{ id:'pistazie-deluxe', name:'Pistazie Gelato Deluxe', sub:'Bis heute dein bestes Eis', cat:'deluxe', fam:'nuss', emoji:'🌱🍦✨', status:'final', ver:'Final', fav:true, champ:true, x:.6, y:-.86,
+  i:[['vollmilch',200,'ml'],['sahne',60,'ml'],['pisti',90,'g'],['salz',1,'Prise'],['jbkm',.25,'TL'],['eigelb',1,'Stk',{opt:true,note:'nur als Custard (82–84 °C)'}],['pistazien',10,'g',{note:'Topping'}]],
+  steps:['Milch, Sahne, Pistaziencreme, Salz & JBKM kalt mit dem Stabmixer komplett glatt mixen. Creme NICHT erhitzen.','Optional mit Eigelb: Milch + Sahne auf ~75 °C, Eigelb temperieren, zurück in den Topf und bei 82–84 °C rühren, bis es den Löffel überzieht. Creme erst danach einrühren.','1–4 h (ideal über Nacht) im Kühlschrank reifen lassen.','Ohne Deckel einfrieren.'], flow:'ice',
+  mix:['Finish: 1 TL Pisti leicht erwärmen, als Rauten-Swirl drüber, gehackte Pistazien drauf – nur grün, nur Pistazie.'],
+  notes:['Weihnachts-Original (Cremefine 7 %, Hafermilch, 70 g Zucker, 120 g Pistaziencreme, Butter, Salz) = bis heute das beste Eis.','Pisti hat schon Zucker, Fett & Emulgator → kein extra Zucker.','Kein Erythrit und keine Hafermilch – macht Pistazie flach & müslig.'],
+  a:{c:['#A9CF7E','#BEDC96'], bg:'#E4EFD3', v:'cone', t:['pistachio','swirl-green']} },
+
+{ id:'raffaello', name:'Raffaello', sub:'Kokos, weiße Schoko, Dessertbombe', cat:'deluxe', fam:'vanille', emoji:'🥥🍬', status:'final', ver:'Weihnachten', x:.45, y:-.95,
+  i:[['kokosmilch',200,'ml'],['hafersahne',200,'ml'],['weisseschoko',80,'g',{note:'geschmolzen'}],['kokosraspeln',40,'g'],['zucker',15,'g'],['vanillezucker',1,'TL'],['salz',1,'Prise'],['raffaello',4,'Stk',{note:'Mix-In, geviertelt'}]],
+  steps:['Kokosmilch + Hafersahne leicht erwärmen, weiße Schoko komplett darin schmelzen.','Rest dazu (ohne Raffaellos), glatt mixen.','Abkühlen, ohne Deckel einfrieren.'], flow:'ice',
+  mix:['Nach dem ersten Spin: geviertelte Raffaellos → MIX-IN','Himbeer-Swirl für Kontrast'],
+  notes:['Weiße Schoko + Kokos = ICE CREAM. Nicht over-spinnen, sonst schmierig.'],
+  a:{c:['#FFFFFF','#F6F0E4'], bg:'#F4EEE6', v:'cone', t:['raffaello','coconut']} },
+
+{ id:'tonka-deluxe', name:'Tonka Custard', sub:'Edel, warm, nicht parfümig', cat:'deluxe', fam:'vanille', emoji:'🌰✨🍦', status:'testen', ver:'V2', x:.92, y:-.8,
+  i:[['vollmilch',250,'ml'],['sahne',100,'ml'],['eigelb',2,'Stk'],['zucker',60,'g'],['tonka',.25,'TL',{note:'gemahlen ¼ TL · frisch gerieben ⅛ TL · ½ TL ist zu viel'}],['salz',1,'Prise'],['jbkm',.25,'TL']],
+  steps:['Milch + Sahne erhitzen, Tonka einrühren, 10 Min. ziehen lassen.','Eigelb + Zucker cremig rühren, heiße Milch langsam einrühren (temperieren).','Zurück in den Topf, bei 82–84 °C rühren bis leicht dicklich. Nicht kochen.','JBKM + Salz einmixen. KALT abschmecken – warm versteckt sich Tonka.','Abkühlen, ohne Deckel einfrieren.'], flow:'ice',
+  mix:['Karamellisierte Nüsse','Butterkeks'],
+  notes:['V1 mit Hafermilch & ½ TL Tonka: Freunde fanden es super, dir zu intensiv.','Kuhmilch + Sahne tragen Tonka, Hafer überlagert es.','Tonka enthält Cumarin – Genuss, nicht täglich.'],
+  a:{c:['#F5E2B8','#E9CF98'], bg:'#F6EBDA', v:'cone', t:['star','vanilla']} },
+
+{ id:'banana-split', name:'Banana Split', sub:'Bananeneis mit Stracciatella', cat:'deluxe', fam:'frucht', emoji:'🍌🍫🍦', status:'idee', ver:'Idee', x:-.15, y:-.68,
+  i:[['banane',3,'Stk'],['cremefine7',200,'ml'],['hafer',150,'ml'],['zucker',40,'g'],['vanillezucker',1,'TL'],['salz',1,'Prise'],['zartbitter',90,'g',{note:'Mix-In, geschmolzen'}]],
+  steps:['Bananen mit Cremefine, Hafermilch, Zucker, Vanillezucker & Salz komplett glatt mixen.','Ohne Deckel einfrieren.'], flow:'ice',
+  mix:['Schoko schmelzen, nach dem 1. Spin dünn reinlaufen lassen → MIX-IN','Finish: Schokosauce, Bananenscheiben, Kirsche'],
+  notes:['Banane macht Eis weicher → ICE CREAM, nicht Gelato.'],
+  a:{c:['#FFF0B0','#F7E6A6'], bg:'#FBEFD4', v:'cone', t:['choc-drizzle','cherry']} },
+
+{ id:'wcm', name:'White Chocolate Macadamia', sub:'Hell, buttrig, krank dekadent', cat:'deluxe', fam:'nuss', emoji:'🤍🍦🌰', status:'idee', ver:'Idee', x:.3, y:-.9,
+  i:[['cremefine15',250,'ml'],['hafer',150,'ml'],['zucker',60,'g'],['vanillezucker',1,'TL'],['salz',1,'Prise'],['weisseschoko',120,'g',{note:'schmelzen – sonst Wachsgeschmack'}],['butter',40,'g'],['macadamia',30,'g',{note:'Mix-In, grob gehackt'}]],
+  steps:['Weiße Schoko mit Butter schmelzen.','Mit allem anderen (ohne Macadamias) glatt mixen.','Ohne Deckel einfrieren.'], flow:'ice',
+  mix:['Macadamias grob gehackt → MIX-IN','Himbeer-Swirl'], notes:[],
+  a:{c:['#FFFDF7','#F3EAD8'], bg:'#F1ECE2', v:'cone', t:['nuts']} },
+
+{ id:'nutella-dark', name:'Nutella Dark', sub:'Publikumsliebling für Gäste', cat:'deluxe', fam:'schoko', emoji:'🍫🌰', status:'idee', ver:'Idee', x:.97, y:-.97,
+  i:[['cremefine15',250,'ml'],['hafer',150,'ml'],['zucker',50,'g'],['nutella',150,'g'],['kakao',2,'EL'],['salz',1,'Prise']],
+  steps:['Alles glatt mixen (Nutella leicht erwärmen hilft).','Ohne Deckel einfrieren.'], flow:'ice',
+  mix:['Warmes Nutella beim Servieren drüber','Oreo-Crumbs'], notes:['Ein Schluck Kaffee verstärkt die Schoko.'],
+  a:{c:['#4E2C20','#6B3E2C'], bg:'#EAD7CA', v:'cone', t:['choc-drizzle']} },
+
+{ id:'golden-honey', name:'Golden Honey', sub:'Edel & warm', cat:'deluxe', fam:'vanille', emoji:'🍯✨', status:'idee', ver:'Idee', x:.38, y:-.6,
+  i:[['cremefine7',250,'ml'],['hafer',150,'ml'],['honig',120,'g'],['butter',15,'g'],['zimt',1,'Prise'],['vanille',1,'TL']],
+  steps:['Alles warm verrühren, bis der Honig gelöst ist.','Abkühlen, ohne Deckel einfrieren.'], flow:'gelato',
+  mix:['Karamellisierte Nüsse','Lebkuchen-Crunch'], notes:[],
+  a:{c:['#FFD877','#F7C350'], bg:'#FFF1CF', v:'cone', t:['honey']} },
+];
+
+/* ---------- IDEEN-POOL ---------- */
+SN.IDEAS = [
+  ['Birthday Cake Batter','FDL'],['Apple Pie','FDL'],['Pumpkin Pie','FDL'],['Crunch Bar','FDL'],['Oreo Cookies & Cream','FDL'],['Coffee Oreo Chip','FDL'],['Cherry Garcia','FDL'],['Biscoff / Lotus','FDL'],['Reese’s / Peanut Butter Cup','FFAE'],['Strawberry Cheesecake','FFAE'],['Blueberry Cheesecake','FDL'],['Frosted Lemonade','FDL'],['Watermelon Italian Ice','FDL'],['Cereal Milk (Milch über Cerealien ziehen lassen)','FDL'],['Chocolate Covered Banana','FFAE'],['Jasmin Milk Tea',''],['Orange Blossom Butter Biscuit',''],['Baklava-Vibe (Orangenblüte + Pistazie + Honig)',''],['Tonka × Pistazie',''],['Creamsicle (Orangensaft + Orangenblüte)',''],['Granatapfel-Swirl',''],['Quittengelee-Swirl im Cheesecake',''],['Preiselbeer-Swirl im Schokoeis',''],['Hagebutte × Vanille',''],['Lebkuchen',''],['Kokos-Mango Solero',''],
+];
+
+/* ---------- WISSEN ---------- */
+SN.RULES = [
+  ['🧊','Ohne Deckel einfrieren','Mit Deckel entsteht in der Mitte ein harter Eis-Hügel (Wasser dehnt sich ~9 % aus und weicht nach oben aus). Die Klinge knallt drauf. Ohne Deckel bleibt die Oberfläche glatt – danach Deckel drauf.'],
+  ['🥄','Scrape the edges','Vor jedem Re-Spin oder Mix-In die Eisschicht am Rand abkratzen. Sonst bleibt sie als Ring stehen.'],
+  ['🍬','Leicht übersüß abschmecken','Kälte schluckt Süße und verstärkt Bitteres. Was flüssig „perfekt“ ist, wird gefroren fade.'],
+  ['🌾','¼ TL Johannisbrotkernmehl – immer','Bindet freies Wasser → keine Eiskristalle. Muss gelöst werden: mind. 30 Sek. mixen (dein Milchaufschäumer reicht).'],
+  ['🧂','Prise Salz – außer bei körnigem Frischkäse','Salz hebt Schoko & Frucht. Der Lidl-Frischkäse ist schon salzig genug.'],
+  ['🔁','Nur Re-Spin oder Mix-In','Einen „halben Re-Spin“ gibt es nicht. Mix-In wirkt wie ein halber Re-Spin.'],
+  ['💧','Zu fest? 1–2 EL Flüssigkeit','Dann Re-Spin. Nicht noch dreimal trocken spinnen.'],
+  ['📏','Max-Linie ≈ 460 ml','Alles drüber: Abschöpfen, Hügel, Chaos.'],
+  ['⏱️','24 h frieren','Erst wenn der Block komplett durch ist, wird’s cremig.'],
+  ['🚫','Nie in die Mikrowelle','Becher ist nicht mikrowellenfest. 5–10 Min. stehen lassen oder kurz lauwarm von außen.'],
+];
+SN.MODES = [
+  ['LITE ICE CREAM','Dein Standard (90 %)','Viel Protein, wenig Fett & Zucker. Auch Frozen Yogurt (du hast keinen FroYo-Knopf).'],
+  ['ICE CREAM','Fett & Zucker','Sahne, Eigelb/Custard, Kokosmilch, Pistaziencreme, Banane pur.'],
+  ['SORBET','Wasser & Frucht','Saft, Fruchtpüree, kaum Fett. Klarer, kälter, körniger.'],
+  ['GELATO','Milchlastig, wenig Fett','Dicht, elastisch, Aroma vorne. Ei ≠ Gelato – Fett & Zieltextur entscheiden.'],
+  ['RE-SPIN','Textur-Korrektur','Kein Fehlerzeichen, sondern Teil des Prozesses.'],
+  ['MIX-IN','Stücke & Swirls','Nach dem Spin: Mulde machen, Zutat rein, MIX-IN. Wirkt wie halber Re-Spin.'],
+];
+SN.KNOW = [
+ {t:'Die Physik: Gefrierpunkt & freies Wasser', i:'🧪', b:[
+  'Eis = Wasser + Fett + Zucker + Bindung. Wasser friert zu Kristallen – je größer, desto „Schnee“.',
+  'Zucker und Fett senken den Gefrierpunkt → weicher Block, cremige Textur. Darum ist Gönnungs-Eis so easy.',
+  'Diät-Eis hat wenig Zucker & Fett → mehr freies Wasser → härter, eisiger. Deshalb ersetzen wir: Erythrit (Masse + Gefrierpunkt), Protein (Struktur), Puddingpulver (Stärke) und Johannisbrotkernmehl (bindet Wasser).',
+  'Freies Wasser = Wasser, das an nichts gebunden ist (Tee, Saft, Kirschsaft). Es friert als harte Kristalle. Regel: JBKM gehört dahin, wo freies Wasser ist.',
+  'Der Creami fräst einen statischen Block – er kann nichts emulgieren oder aktivieren. Alles, was vorher nicht sauber gemischt ist, bleibt ein Problem.']},
+ {t:'Universal-Formel zum Freestylen', i:'🧩', b:[
+  'Flüssigkeit 250–300 ml (Standard: 200 ml Mandel + 50 ml Barista-Hafer, Rest auffüllen)',
+  'Protein 30 g Better Whey neutral (+ optional Skyr/Frischkäse)',
+  'Süße 40–55 g Erythrit (neutrales Whey ist NULL süß → +10–15 g gegenüber Vanille-Whey)',
+  'Textur 5 g Puddingpulver + ¼ TL Johannisbrotkernmehl',
+  'Aroma: Vanilleextrakt nur wo es passt (nicht bei Himbeere, Pistazie, Jasmin)',
+  'Salz: Prise – außer mit körnigem Frischkäse',
+  'Zwei Grundbasen: Milch-Base (~200–260 kcal, ~29 g P) und Cheesecake-Base mit körnigem Frischkäse (~380–420 kcal, ~45 g P).']},
+ {t:'Süße & Protein-Pulver', i:'🍬', b:[
+  'Erythrit ist gut verträglich (fast komplett im Dünndarm aufgenommen). Der Blähungs-Ruf kommt von Xylit.',
+  'Better Protein neutral: 117 kcal / 23,4 g P pro 30 g, kein Süßstoff → du steuerst Süße & Aroma selbst.',
+  'ESN Vanilla Ice Cream hatte Sucralose + Stevia → schmeckte viel süßer als es auf dem Papier aussieht. (leer)',
+  'FlavDrops enthalten Sucralose – extrem süß, nur tropfenweise.',
+  'Gestrichen: Bulk Cinnamon Cereal Protein (Geschmack nicht mehr ertragbar, gefroren eklig) und Ironmaxx Cooking Protein Plants („Chemiefabrik“).',
+  'Aromatisierte Protein-Pulver kippen in der Kälte: Süße weg, Süßstoff-Nachgeschmack bleibt.']},
+ {t:'Aroma-Dosierungen, die sitzen', i:'🎯', b:[
+  'Tonka: ⅛ TL im Protein-Eis, ¼ TL gemahlen im Custard. ½ TL = parfümig.',
+  'Pistazien-Drops: 6 Tropfen. 8 = leicht künstlich / grünes Marzipan.',
+  'Nuss-Nougat-Drops: 6–8 Tropfen (mehr bei 20 g Kakao).',
+  'Butteraroma: ¼ Fläschchen (Vanille) bis ½ Fläschchen (Cheesecake). Wird gefroren intensiver.',
+  'Zitronia Sun: max. ¼ TL.',
+  'Orangenblütenwasser: ¼–1 TL. Immer mit Vanille/Fett, nie mit Schoko oder Kaffee.',
+  'Jasmintee: max. 4 Min. ziehen, sonst bitter.',
+  'Amaretto: 1 EL Cassella. Rialto wird hinten raus bitter.',
+  'Vanillepunkte faken: 1 Körnchen Instant-Kaffee zerreiben.',
+  'Lebensmittelfarbe: 1–2 Tropfen grün bei Pistazie, gelb bei Vanille. Augen essen mit.']},
+ {t:'Mix-Ins & Swirls', i:'🍪', b:[
+  'Stracciatella: Zartbitter schmelzen, nach dem ersten Spin flüssig drüberträufeln → MIX-IN. Ergibt feine Schokoadern.',
+  'Swirl: dickes Fruchtmus (Himbeere + Erythrit). 3–4 Mulden, reingießen, MIX-IN – danach kein Re-Spin mehr, sonst alles pink.',
+  'Top: geröstete Nüsse, Kakao-Nibs, Lotus/Oreo grob, gefriergetrocknete Himbeeren.',
+  'Okay: Mini-Marshmallows (max. 10 g), Kokoschips, Cornflakes.',
+  'Eher nicht: weiche Schokostücke (steinhart), frische Beeren roh (Eisbrocken), große Karamellstücke.']},
+ {t:'Fehlerbild → Fix', i:'🩺', b:[
+  'Schnee / pulvrig: zu wenig Bindung oder Süße → mehr Erythrit/JBKM, 1–2 EL Milch + Re-Spin.',
+  'Wässrig-kristallig: freies Wasser (Tee, Saft) → Aroma in Milch statt Wasser, Frucht pürieren.',
+  'Sehr dicht & hart: zu viel Feststoff → 2–3 EL Flüssigkeit vor dem Re-Spin.',
+  'Schmierig: zu viel Fett im Lite-Modus oder over-spinned → ICE CREAM, weniger spinnen.',
+  'Nicht süß genug: Kälte! Beim nächsten Mal +10 g Erythrit.',
+  'Eklig-süßer Nachgeschmack: aromatisiertes Protein-Pulver. Neutral nehmen.',
+  'Oben dunkler, unten heller: Kakao ordnet sich beim Gefrieren. Länger mixen – oder genießen.',
+  'Hügel in der Mitte: mit Deckel eingefroren. Notfalls abschaben, bevor du spinnst.',
+  'Becher zu voll: Rezept nach Volumen rechnen. Max ≈ 460 ml.']},
+ {t:'Deluxe-Technik', i:'👑', b:[
+  'Custard: Milch + Sahne auf ~75 °C, Eigelb + Zucker cremig, temperieren (heiße Milch langsam), zurück bei 82–84 °C bis es den Löffel überzieht. Nie kochen.',
+  'Reifen lassen: Base 1–4 h (ideal über Nacht) kalt stellen – Proteine hydratisieren, Emulsion stabilisiert sich.',
+  'Aromen, die extrahiert werden (Tonka, Vanilleschote, Zimt, Tee), in heißer Milch/Sahne ziehen lassen. Pistaziencreme nie erhitzen.',
+  'Für feine Aromen (Pistazie, Tonka) Kuhmilch + Sahne statt Hafer – Hafer schmeckt „müslig“.',
+  'Servieren: 10 Min. vorher raus, kurz Re-Spin, warmer Löffel, Salzflocken auf Schoko & Pistazie.']},
+ {t:'Frucht-Wissen', i:'🍌', b:[
+  'Banane ist einzigartig: genug Zucker, Pektin und Masse → pur perfektes Eis. Überreif = besser.',
+  'Banane wird im Gefrierer braun (Oxidation) und im Creami wieder hell (Luft + Lichtstreuung).',
+  'Mango kommt am nächsten ran, Birne hat viel Pektin. Granatapfel: nur Saft/Swirl, Kerne nie mitspinnen.',
+  'Dosenpfirsiche mit Saft = sofort Sorbet.',
+  'Aufbrauchen: Quittengelee, Preiselbeeren, Hagebuttenmark als Swirl – nicht als Base.',
+  'Gefrorene Stücke drinlassen ist okay – der Creami zerkleinert sie, nur nicht steinhart als Brocken obenauf.']},
+ {t:'Makros in Yazio eintragen', i:'📲', b:[
+  'Profil → Eigene Lebensmittel → Neu anlegen. Yazio will Werte pro 100 g – die stehen in jedem Rezept unter „Yazio“.',
+  'Portion anlegen: „1 Pint“ mit dem Gesamtgewicht aus dem Rezept.',
+  'Trick: Erst die Portion auswählen, DANN den Stern (Favorit) drücken – sonst speichert er Gramm statt Portion.',
+  'Zwei Sammel-Einträge reichen meist: „Protein-Eis Milch-Base“ und „Protein-Eis Cheesecake-Base“.']},
+];
+
+</script>
+<script>
+/* Scoopernova – generierte Eis-Illustrationen (SVG) */
+(function(){
+const SN = window.SN;
+function hash(s){let h=2166136261;for(const ch of String(s)){h^=ch.charCodeAt(0);h=Math.imul(h,16777619)}return h>>>0}
+function rng(seed){let a=seed||1;return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function hex(c){c=String(c||'#ccc').replace('#','');if(c.length===3)c=c.split('').map(x=>x+x).join('');const n=parseInt(c,16);return[(n>>16)&255,(n>>8)&255,n&255]}
+function mix(c,t,a){const x=hex(c),y=hex(t);return'#'+x.map((v,i)=>Math.round(v+(y[i]-v)*a).toString(16).padStart(2,'0')).join('')}
+function lum(c){const[r,g,b]=hex(c);return(0.299*r+0.587*g+0.114*b)/255}
+SN.mix=mix;SN.lum=lum;
+
+/* Kugel mit tropfendem Rand */
+function scoop(cx,cy,R,col,uid,face,R2){
+  const top=mix(col,'#ffffff',.35), bot=mix(col,'#000000',.12), id='g'+uid;
+  let d=`M${cx-R},${cy} A${R},${R*0.95} 0 0 1 ${cx+R},${cy}`;
+  const n=6,w=(2*R)/n;
+  for(let k=0;k<n;k++){const x0=cx+R-k*w, x1=x0-w, dip=(k%2?R*.22:R*.12)*(R2()*.5+.75);d+=` Q${x0-w/2},${cy+dip} ${x1},${cy}`}
+  d+='Z';
+  let s=`<defs><linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${top}"/><stop offset="1" stop-color="${bot}"/></linearGradient></defs>`;
+  s+=`<ellipse cx="${cx}" cy="${cy+R*.16}" rx="${R*.92}" ry="${R*.14}" fill="#000" opacity=".10"/>`;
+  s+=`<path d="${d}" fill="url(#${id})"/>`;
+  s+=`<ellipse cx="${cx-R*.38}" cy="${cy-R*.52}" rx="${R*.26}" ry="${R*.14}" fill="#fff" opacity=".45" transform="rotate(-28 ${cx-R*.38} ${cy-R*.52})"/>`;
+  if(face){
+    const dark=lum(col)<.35, ey=cy-R*.28, ex=R*.24, ink=dark?'#140a06':'#2b1a14';
+    s+=`<g class="face"><ellipse cx="${cx-ex}" cy="${ey}" rx="${R*.07}" ry="${R*.09}" fill="${ink}"/><ellipse cx="${cx+ex}" cy="${ey}" rx="${R*.07}" ry="${R*.09}" fill="${ink}"/>`;
+    s+=`<circle cx="${cx-ex+R*.025}" cy="${ey-R*.03}" r="${R*.025}" fill="#fff"/><circle cx="${cx+ex+R*.025}" cy="${ey-R*.03}" r="${R*.025}" fill="#fff"/>`;
+    s+=`<path d="M${cx-R*.1},${ey+R*.13} Q${cx},${ey+R*.23} ${cx+R*.1},${ey+R*.13}" stroke="${ink}" stroke-width="${R*.045}" fill="none" stroke-linecap="round"/>`;
+    s+=`<ellipse cx="${cx-ex-R*.12}" cy="${ey+R*.15}" rx="${R*.09}" ry="${R*.05}" fill="#FF6F91" opacity="${dark?.55:.4}"/><ellipse cx="${cx+ex+R*.12}" cy="${ey+R*.15}" rx="${R*.09}" ry="${R*.05}" fill="#FF6F91" opacity="${dark?.55:.4}"/></g>`;
+  }
+  return s;
+}
+
+/* kleine Deko-Elemente */
+const D={
+  berry:(x,y,r)=>{let s='';for(const[a,b]of[[0,0],[-.5,-.2],[.5,-.2],[-.25,-.6],[.25,-.6],[0,.4],[-.5,.3],[.5,.3]])s+=`<circle cx="${x+a*r}" cy="${y+b*r}" r="${r*.32}" fill="#E0305E"/><circle cx="${x+a*r-r*.08}" cy="${y+b*r-r*.08}" r="${r*.09}" fill="#fff" opacity=".5"/>`;return s},
+  cherry:(x,y,r)=>`<path d="M${x},${y-r} q${r*.3},${-r*1.2} ${r},${-r*1.5}" stroke="#5B7B2E" stroke-width="${r*.15}" fill="none" stroke-linecap="round"/><circle cx="${x}" cy="${y}" r="${r}" fill="#C8102E"/><circle cx="${x-r*.35}" cy="${y-r*.35}" r="${r*.25}" fill="#fff" opacity=".55"/>`,
+  lemon:(x,y,r)=>{let s=`<circle cx="${x}" cy="${y}" r="${r}" fill="#FFD43B"/><circle cx="${x}" cy="${y}" r="${r*.82}" fill="#FFF4B0"/>`;for(let k=0;k<8;k++){const a=k*Math.PI/4;s+=`<path d="M${x},${y} L${x+Math.cos(a-.3)*r*.72},${y+Math.sin(a-.3)*r*.72} A${r*.72},${r*.72} 0 0 1 ${x+Math.cos(a+.3)*r*.72},${y+Math.sin(a+.3)*r*.72}Z" fill="#FFE066"/>`}return s},
+  mango:(x,y,r,rot)=>`<rect x="${x-r/2}" y="${y-r/2}" width="${r}" height="${r}" rx="${r*.25}" fill="#FFA41B" transform="rotate(${rot} ${x} ${y})"/><rect x="${x-r/2+r*.15}" y="${y-r/2+r*.12}" width="${r*.35}" height="${r*.2}" rx="${r*.1}" fill="#FFD27A" transform="rotate(${rot} ${x} ${y})"/>`,
+  banana:(x,y,r)=>{let s=`<circle cx="${x}" cy="${y}" r="${r}" fill="#FFF3B8" stroke="#F2D46B" stroke-width="${r*.15}"/>`;for(let k=0;k<5;k++){const a=k*1.256;s+=`<circle cx="${x+Math.cos(a)*r*.35}" cy="${y+Math.sin(a)*r*.35}" r="${r*.07}" fill="#B89A4A"/>`}return s},
+  bean:(x,y,r,rot)=>`<g transform="rotate(${rot} ${x} ${y})"><ellipse cx="${x}" cy="${y}" rx="${r}" ry="${r*.7}" fill="#5A3420"/><path d="M${x-r*.8},${y} q${r*.8},${r*.4} ${r*1.6},0" stroke="#2E170C" stroke-width="${r*.14}" fill="none"/></g>`,
+  pist:(x,y,r,rot)=>`<g transform="rotate(${rot} ${x} ${y})"><ellipse cx="${x}" cy="${y}" rx="${r}" ry="${r*.65}" fill="#E9D7B5"/><ellipse cx="${x+r*.12}" cy="${y}" rx="${r*.72}" ry="${r*.45}" fill="#86B84E"/><ellipse cx="${x-r*.05}" cy="${y-r*.1}" rx="${r*.25}" ry="${r*.15}" fill="#B5DA7F"/></g>`,
+  nut:(x,y,r,rot)=>`<g transform="rotate(${rot} ${x} ${y})"><path d="M${x-r},${y} q${r*.2},${-r} ${r},${-r} q${r*.8},0 ${r},${r} q${-r*.3},${r*.8} ${-r},${r*.7} q${-r*.8},0 ${-r},${-r*.7}Z" fill="#B07A47"/><path d="M${x-r*.4},${y-r*.3} q${r*.4},${r*.3} ${r*.8},0" stroke="#7A4E28" stroke-width="${r*.12}" fill="none"/></g>`,
+  flower:(x,y,r)=>{let s='';for(let k=0;k<5;k++){const a=k*1.2566-1.57;s+=`<ellipse cx="${x+Math.cos(a)*r*.55}" cy="${y+Math.sin(a)*r*.55}" rx="${r*.45}" ry="${r*.3}" fill="#FFFFFF" transform="rotate(${a*57.3} ${x+Math.cos(a)*r*.55} ${y+Math.sin(a)*r*.55})"/>`}return s+`<circle cx="${x}" cy="${y}" r="${r*.28}" fill="#FFB347"/>`},
+  star:(x,y,r)=>`<path d="M${x},${y-r} Q${x+r*.18},${y-r*.18} ${x+r},${y} Q${x+r*.18},${y+r*.18} ${x},${y+r} Q${x-r*.18},${y+r*.18} ${x-r},${y} Q${x-r*.18},${y-r*.18} ${x},${y-r}Z" fill="#FFD25A"/>`,
+  cookie:(x,y,r,rot)=>`<g transform="rotate(${rot} ${x} ${y})"><rect x="${x-r}" y="${y-r*.6}" width="${r*2}" height="${r*1.2}" rx="${r*.25}" fill="#D9A35B"/><circle cx="${x-r*.5}" cy="${y-r*.15}" r="${r*.1}" fill="#A8723A"/><circle cx="${x}" cy="${y+r*.2}" r="${r*.1}" fill="#A8723A"/><circle cx="${x+r*.5}" cy="${y-r*.15}" r="${r*.1}" fill="#A8723A"/></g>`,
+  coco:(x,y,r,rot)=>`<path d="M${x-r},${y} q${r},${-r*.6} ${r*2},0" stroke="#FFFFFF" stroke-width="${r*.35}" fill="none" stroke-linecap="round" transform="rotate(${rot} ${x} ${y})"/>`,
+  peach:(x,y,r,rot)=>`<g transform="rotate(${rot} ${x} ${y})"><path d="M${x-r},${y} A${r},${r} 0 0 0 ${x+r},${y} Q${x},${y+r*.35} ${x-r},${y}Z" fill="#FF9F6E"/><path d="M${x-r*.8},${y+r*.12} A${r*.85},${r*.7} 0 0 0 ${x+r*.8},${y+r*.12}" stroke="#FFD0A8" stroke-width="${r*.15}" fill="none"/></g>`,
+  pear:(x,y,r)=>`<path d="M${x},${y-r*1.1} C${x+r*.5},${y-r*1.1} ${x+r*.35},${y-r*.3} ${x+r*.8},${y+r*.3} C${x+r},${y+r} ${x-r},${y+r} ${x-r*.8},${y+r*.3} C${x-r*.35},${y-r*.3} ${x-r*.5},${y-r*1.1} ${x},${y-r*1.1}Z" fill="#C9D65B"/><path d="M${x},${y-r*1.1} l${r*.1},${-r*.4}" stroke="#6B4B2B" stroke-width="${r*.12}" stroke-linecap="round"/>`,
+  ball:(x,y,r)=>`<circle cx="${x}" cy="${y}" r="${r}" fill="#FBF8F1"/>`+[0,1,2,3,4,5].map(k=>`<circle cx="${x+Math.cos(k)*r*.55}" cy="${y+Math.sin(k*1.7)*r*.55}" r="${r*.12}" fill="#E8E0D0"/>`).join(''),
+  honey:(x,y,r)=>`<path d="M${x},${y-r} C${x+r*.8},${y} ${x+r*.6},${y+r} ${x},${y+r} C${x-r*.6},${y+r} ${x-r*.8},${y} ${x},${y-r}Z" fill="#F5B92E"/>`,
+};
+
+function toppings(t,cx,cy,R,R2){
+  let s='';const top=(n,fn)=>{for(let k=0;k<n;k++){const a=-Math.PI*(0.15+0.7*R2()),rr=R*(0.35+0.5*R2());fn(cx+Math.cos(a)*rr*1.05,cy+Math.sin(a)*rr*0.9-R*0.1,k)}};
+  for(const x of t){
+    if(x==='sprinkles'||x==='cosmic'){const cols=['#FF4D7E','#FFD23F','#3DDC97','#5E8BFF','#FF8A3D','#B07CFF'];top(x==='cosmic'?16:12,(px,py,k)=>{s+=x==='cosmic'?`<circle cx="${px}" cy="${py}" r="${R*.07}" fill="${cols[k%6]}"/><circle cx="${px-R*.02}" cy="${py-R*.02}" r="${R*.025}" fill="#fff" opacity=".6"/>`:`<rect x="${px}" y="${py}" width="${R*.16}" height="${R*.05}" rx="${R*.025}" fill="${cols[k%6]}" transform="rotate(${R2()*180} ${px} ${py})"/>`})}
+    if(x==='choc-drizzle'||x==='honey-drizzle'||x==='swirl'||x==='swirl-green'||x==='honey'){
+      const col={'choc-drizzle':'#3B2015','swirl':'#E0305E','swirl-green':'#7FB44A','honey':'#F2B21C'}[x]||'#3B2015';
+      let d=`M${cx-R*.85},${cy-R*.35}`;for(let k=0;k<5;k++){d+=` Q${cx-R*.85+R*.34*(k+.5)},${cy-R*(k%2?.75:.2)} ${cx-R*.85+R*.34*(k+1)},${cy-R*.45}`}
+      s+=`<path d="${d}" stroke="${col}" stroke-width="${R*.11}" fill="none" stroke-linecap="round"/>`;
+      if(x==='choc-drizzle'||x==='honey')for(const dx of[-.45,.2,.6])s+=`<path d="M${cx+dx*R},${cy-R*.35} q${R*.04},${R*.3} 0,${R*.42}" stroke="${col}" stroke-width="${R*.1}" stroke-linecap="round" fill="none"/>`;
+    }
+    if(x==='nuts')top(5,(px,py)=>{s+=D.nut(px,py,R*.11,R2()*360)});
+    if(x==='pistachio')top(6,(px,py)=>{s+=D.pist(px,py,R*.12,R2()*360)});
+    if(x==='coconut')top(9,(px,py)=>{s+=`<path d="M${px},${py} q${R*.08},${-R*.06} ${R*.16},0" stroke="#fff" stroke-width="${R*.05}" stroke-linecap="round" fill="none" opacity=".95"/>`});
+    if(x==='cocoa'){for(let k=0;k<70;k++){const a=-Math.PI*R2(),rr=R*Math.sqrt(R2())*.95;s+=`<circle cx="${cx+Math.cos(a)*rr}" cy="${cy+Math.sin(a)*rr*.9}" r="${R*.018}" fill="#4A2A1A" opacity=".55"/>`}}
+    if(x==='vanilla'){for(let k=0;k<26;k++){const a=-Math.PI*R2(),rr=R*Math.sqrt(R2())*.9;s+=`<circle cx="${cx+Math.cos(a)*rr}" cy="${cy+Math.sin(a)*rr*.85}" r="${R*.014}" fill="#1a1a1a" opacity=".7"/>`}}
+    if(x==='choc-chips')top(6,(px,py)=>{s+=`<path d="M${px},${py-R*.07} l${R*.07},${R*.11} h${-R*.14}Z" fill="#3B2015"/>`});
+    if(x==='zest')top(5,(px,py)=>{s+=`<path d="M${px},${py} q${R*.06},${-R*.08} ${R*.14},${-R*.02}" stroke="#FFC400" stroke-width="${R*.04}" fill="none" stroke-linecap="round"/>`});
+  }
+  // Garnitur oben
+  const g=t.find(x=>['berries','cherry','lemon','mango','banana','coffee','cookie','flower','star','peach','pear','raffaello'].includes(x));
+  const gx=cx+R*.42, gy=cy-R*.86;
+  if(g==='berries')s+=D.berry(gx,gy,R*.22)+D.berry(gx-R*.42,gy+R*.05,R*.17);
+  if(g==='cherry')s+=D.cherry(cx+R*.05,cy-R*.98,R*.17);
+  if(g==='lemon')s+=D.lemon(gx,gy+R*.05,R*.26);
+  if(g==='mango')s+=D.mango(gx,gy+R*.05,R*.26,18)+D.mango(gx-R*.38,gy+R*.12,R*.2,-12);
+  if(g==='banana')s+=D.banana(gx,gy+R*.06,R*.22)+D.banana(gx-R*.38,gy+R*.1,R*.18);
+  if(g==='coffee')s+=D.bean(gx,gy+R*.05,R*.15,30)+D.bean(gx-R*.3,gy+R*.13,R*.12,-20);
+  if(g==='cookie')s+=D.cookie(gx,gy+R*.06,R*.22,-18);
+  if(g==='flower')s+=D.flower(gx,gy+R*.05,R*.22)+D.flower(gx-R*.42,gy+R*.16,R*.15);
+  if(g==='star')s+=D.star(gx,gy,R*.2)+D.star(gx-R*.36,gy+R*.1,R*.12);
+  if(g==='peach')s+=D.peach(gx,gy+R*.05,R*.24,-15);
+  if(g==='pear')s+=D.pear(gx,gy+R*.05,R*.2);
+  if(g==='raffaello')s+=D.ball(gx,gy+R*.05,R*.2)+D.ball(gx-R*.4,gy+R*.13,R*.16);
+  return s;
+}
+
+function bgDecor(t,R2,dark){
+  const pick=t.find(x=>['berries','cherry','lemon','mango','banana','coffee','cookie','flower','star','peach','pear','pistachio','nuts','coconut','raffaello','cosmic','honey'].includes(x))||'star';
+  let s='';const spots=[[38,52],[352,48],[30,232],[366,206],[84,140],[320,128],[60,286],[340,286]];
+  spots.forEach(([x,y],k)=>{const r=10+R2()*10,rot=R2()*360,o=.55+R2()*.3;let e='';
+    if(pick==='berries')e=D.berry(x,y,r*.9);else if(pick==='cherry')e=D.cherry(x,y,r*.6);else if(pick==='lemon')e=D.lemon(x,y,r);else if(pick==='mango')e=D.mango(x,y,r,rot);else if(pick==='banana')e=D.banana(x,y,r*.8);else if(pick==='coffee')e=D.bean(x,y,r*.7,rot);else if(pick==='cookie')e=D.cookie(x,y,r*.8,rot);else if(pick==='flower')e=D.flower(x,y,r);else if(pick==='peach')e=D.peach(x,y,r,rot);else if(pick==='pear')e=D.pear(x,y,r*.7);else if(pick==='pistachio')e=D.pist(x,y,r*.7,rot);else if(pick==='nuts')e=D.nut(x,y,r*.6,rot);else if(pick==='coconut')e=D.coco(x,y,r*.7,rot);else if(pick==='raffaello')e=D.ball(x,y,r*.7);else if(pick==='honey')e=D.honey(x,y,r*.7);else e=D.star(x,y,r*(pick==='cosmic'?.5:.7));
+    s+=`<g opacity="${dark?.9:o}" class="fl" style="animation-delay:${-k*0.7}s">${e}</g>`});
+  if(pick==='cosmic'){for(let k=0;k<40;k++)s+=`<circle cx="${R2()*400}" cy="${R2()*300}" r="${R2()*1.6+.4}" fill="#fff" opacity="${.4+R2()*.6}"/>`;s+=`<g opacity=".9"><circle cx="332" cy="70" r="22" fill="#FF8A3D"/><ellipse cx="332" cy="70" rx="38" ry="9" fill="none" stroke="#FFD23F" stroke-width="4" transform="rotate(-18 332 70)"/></g>`}
+  return s;
+}
+
+SN.art=function(r,opt){
+  opt=opt||{};const a=r.a||{};const seed=hash(r.id||r.name);const R2=rng(seed);const uid=(seed%1e6)+''+Math.floor(Math.random()*1e4);
+  const c=(a.c&&a.c.length?a.c:['#F7E7C6']);const c1=c[0],c2=c[1]||mix(c1,'#ffffff',.25);
+  const bg=a.bg||mix(c1,'#ffffff',.7);const v=a.v||(r.cat==='deluxe'?'cone':r.cat==='natur'?'bowl':'pint');const t=a.t||[];
+  const dark=lum(bg)<.35;
+  let s=`<svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" role="img" aria-label="${(r.name||'').replace(/[<>&"]/g,'')}">`;
+  s+=`<defs><radialGradient id="bg${uid}" cx=".5" cy=".42" r=".75"><stop offset="0" stop-color="${mix(bg,'#ffffff',dark?.08:.45)}"/><stop offset="1" stop-color="${bg}"/></radialGradient></defs>`;
+  s+=`<rect width="400" height="300" fill="url(#bg${uid})"/>`;
+  s+=`<circle cx="200" cy="170" r="118" fill="${mix(bg,'#ffffff',dark?.1:.55)}" opacity="${dark?.25:.7}"/>`;
+  if(!opt.plain)s+=bgDecor(t,R2,dark);
+  s+=`<ellipse cx="200" cy="284" rx="96" ry="10" fill="#000" opacity="${dark?.35:.08}"/>`;
+  const face=opt.face!==false;
+  if(v==='cone'){
+    s+=`<defs><pattern id="w${uid}" width="14" height="14" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="14" height="14" fill="#E3A85C"/><path d="M0 0H14M0 0V14" stroke="#C4843A" stroke-width="3"/></pattern></defs>`;
+    s+=`<path d="M150,170 L200,282 L250,170Z" fill="url(#w${uid})"/><path d="M150,170 L250,170 L246,180 L154,180Z" fill="#C4843A" opacity=".5"/>`;
+    s+=scoop(200,170,58,c2,uid+'b',false,R2);
+    s+=`<g class="top-scoop">`+scoop(200,118,54,c1,uid+'a',face,R2)+toppings(t,200,118,54,R2)+`</g>`;
+  }else if(v==='bowl'){
+    s+=scoop(160,198,46,c2,uid+'c',false,R2)+scoop(242,198,46,c2,uid+'d',false,R2);
+    s+=`<g class="top-scoop">`+scoop(200,170,56,c1,uid+'a',face,R2)+toppings(t,200,170,56,R2)+`</g>`;
+    s+=`<path d="M104,196 Q200,206 296,196 Q290,268 200,276 Q110,268 104,196Z" fill="${mix(bg,'#ffffff',.85)}"/><path d="M104,196 Q200,206 296,196" stroke="${mix(bg,'#000000',.12)}" stroke-width="3" fill="none"/><path d="M118,214 Q200,226 282,214" stroke="${c1}" stroke-width="7" fill="none" opacity=".55" stroke-linecap="round"/>`;
+  }else{
+    // Creami-Pint
+    const glass=dark?'rgba(255,255,255,.16)':'rgba(255,255,255,.65)';
+    s+=`<path d="M142,168 L148,272 Q200,284 252,272 L258,168Z" fill="${glass}" stroke="${dark?'rgba(255,255,255,.35)':'rgba(0,0,0,.10)'}" stroke-width="2"/>`;
+    s+=`<path d="M146,196 L150,268 Q200,279 250,268 L254,196Z" fill="${c2}" opacity=".9"/><path d="M146,196 L254,196 L254.6,206 Q200,214 145.6,206Z" fill="${mix(c2,'#ffffff',.2)}"/>`;
+    s+=`<rect x="161" y="222" width="78" height="26" rx="13" fill="${dark?'rgba(255,255,255,.85)':'#fff'}" opacity=".92"/><text x="200" y="240" text-anchor="middle" font-family="ui-rounded,Nunito,system-ui,sans-serif" font-weight="800" font-size="13" fill="#2b1a14">PINT</text>`;
+    s+=`<ellipse cx="200" cy="168" rx="58" ry="8" fill="none" stroke="${dark?'rgba(255,255,255,.4)':'rgba(0,0,0,.12)'}" stroke-width="2"/>`;
+    s+=`<g class="top-scoop">`+scoop(200,160,62,c1,uid+'a',face,R2)+toppings(t,200,160,62,R2)+`</g>`;
+    s+=`<path d="M152,176 L156,262" stroke="#fff" stroke-width="5" opacity=".5" stroke-linecap="round"/>`;
+  }
+  return s+'</svg>';
+};
+
+/* Mini-Pint für die Gefriertruhe */
+SN.pintIcon=function(col,fill,ready){
+  const c=col||'#ddd';
+  return `<svg viewBox="0 0 60 72" aria-hidden="true"><path d="M8,10 L12,66 Q30,72 48,66 L52,10Z" fill="rgba(255,255,255,.55)" stroke="currentColor" stroke-opacity=".18" stroke-width="2"/>${fill?`<path d="M10,${66-fill*52} L12,66 Q30,72 48,66 L50,${66-fill*52}Z" fill="${c}"/>`:''}<rect x="5" y="4" width="50" height="9" rx="4.5" fill="currentColor" opacity=".16"/>${ready?'<circle cx="46" cy="14" r="8" fill="#22C55E"/><path d="M42.5,14 l2.5,2.5 l4.5,-5" stroke="#fff" stroke-width="2.2" fill="none" stroke-linecap="round"/>':''}</svg>`;
+};
+
+SN.logo=function(){
+  return `<svg viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="lg1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFB3C8"/><stop offset="1" stop-color="#FF4D7E"/></linearGradient></defs><path d="M22,36 L32,60 L42,36Z" fill="#E3A85C"/><path d="M14,36 A18,17 0 0 1 50,36 Q46,41 41,37 Q36,42 32,37 Q27,42 23,37 Q18,41 14,36Z" fill="url(#lg1)"/><ellipse cx="24" cy="24" rx="5" ry="3" fill="#fff" opacity=".5" transform="rotate(-25 24 24)"/><g class="orbit"><ellipse cx="32" cy="30" rx="29" ry="8" fill="none" stroke="#FFC93C" stroke-width="2.4" transform="rotate(-16 32 30)" stroke-dasharray="70 12"/><circle cx="58" cy="22" r="3.4" fill="#5E8BFF"/></g><circle cx="12" cy="12" r="2" fill="#FFC93C"/><circle cx="52" cy="8" r="1.4" fill="#3DDC97"/></svg>`;
+};
+})();
+
+</script>
+<script>
+{
+const SN = window.SN;
+const $ = (s, el = document) => el.querySelector(s);
+const $$ = (s, el = document) => [...el.querySelectorAll(s)];
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const clone = o => JSON.parse(JSON.stringify(o));
+const UNITS = ['g','ml','TL','EL','Prise','Msp','Tropfen','Stk','Fläschchen','Körnchen'];
+const TOPS = ['choc-drizzle','choc-chips','sprinkles','cosmic','nuts','pistachio','swirl','swirl-green','coconut','cocoa','vanilla','berries','cherry','lemon','zest','mango','banana','coffee','cookie','flower','star','peach','pear','raffaello','honey'];
+
+/* ================= STATE ================= */
+const LS = 'scoopernova.v1', LSC = 'scoopernova.chat.v1';
+let S = {recipes:{}, deleted:[], order:[], pantry:{}, truhe:[null,null,null,null,null,null], made:{}, prefs:{cat:'all', fam:'', sort:'fav', q:''}, updatedAt:0};
+let CHAT = [];
+try { const j = JSON.parse(localStorage.getItem(LS) || 'null'); if (j) S = Object.assign(S, j); } catch (e) {}
+try { CHAT = JSON.parse(localStorage.getItem(LSC) || '[]') || []; } catch (e) {}
+S.prefs = Object.assign({cat:'all', fam:'', sort:'fav', q:''}, S.prefs || {});
+while (S.truhe.length < 6) S.truhe.push(null);
+
+function normRecipe(r) {
+  const n = clone(r);
+  if (!n.ings) n.ings = (r.i || []).map(l => Object.assign({ing:l[0], amount:l[1], unit:l[2]}, l[3] || {}));
+  delete n.i;
+  if (typeof n.flow === 'string') n.flow = (SN.FLOWS[n.flow] || SN.FLOWS.lite).slice();
+  n.steps = n.steps || []; n.mix = n.mix || []; n.notes = n.notes || []; n.a = n.a || {};
+  return n;
+}
+const SEEDS = SN.RECIPES.map(normRecipe);
+const SEEDMAP = Object.fromEntries(SEEDS.map(r => [r.id, r]));
+
+function allRecipes() {
+  const out = [];
+  for (const r of SEEDS) if (!S.deleted.includes(r.id)) out.push(S.recipes[r.id] || r);
+  for (const id in S.recipes) if (!SEEDMAP[id] && !S.deleted.includes(id)) out.push(S.recipes[id]);
+  return out;
+}
+const getR = id => S.deleted.includes(id) ? null : (S.recipes[id] || SEEDMAP[id] || null);
+function saveR(r, quiet) { r.updatedAt = Date.now(); S.recipes[r.id] = clone(r); if (S.deleted.includes(r.id)) S.deleted = S.deleted.filter(x => x !== r.id); persist(); if (!quiet) render(); }
+function pantry() { const m = {}; for (const p of SN.PANTRY) m[p.id] = Object.assign({}, p, S.pantry[p.id] || {}); for (const id in S.pantry) if (!m[id]) m[id] = S.pantry[id]; return m; }
+
+/* ================= MAKROS ================= */
+const FIX = {Prise:.4, Msp:.3, Tropfen:.04, 'Fläschchen':2, 'Körnchen':.02};
+function grams(l, p) {
+  const a = (+l.amount || 0) + (l.max ? ((+l.max) - (+l.amount || 0)) / 2 : 0);
+  if (l.unit === 'g' || l.unit === 'ml') return a;
+  if (l.unit === 'TL') return a * ((p && p.tl) || 5);
+  if (l.unit === 'EL') return a * 3 * ((p && p.tl) || 5);
+  if (l.unit === 'Stk') return a * ((p && p.pc) || 0);
+  return a * (FIX[l.unit] || 0);
+}
+function macros(r) {
+  const P = pantry(); let k = 0, pr = 0, c = 0, f = 0, g = 0; const unknown = [];
+  for (const l of r.ings || []) {
+    const p = P[l.ing]; if (!p) { if (l.name || l.ing) unknown.push(l.name || l.ing); continue; }
+    const gr = grams(l, p); g += gr; k += gr * p.k / 100; pr += gr * p.p / 100; c += gr * p.c / 100; f += gr * p.f / 100;
+  }
+  return {k, p:pr, c, f, g, unknown, dens: k ? pr / k * 100 : 0};
+}
+const FR = {0.125:'⅛', 0.25:'¼', 0.33:'⅓', 0.333:'⅓', 0.5:'½', 0.66:'⅔', 0.75:'¾'};
+function fnum(n) { n = +n; if (!isFinite(n)) return ''; const w = Math.floor(n), fr = +(n - w).toFixed(3); const s = FR[fr] || FR[+fr.toFixed(2)]; if (s) return (w ? w : '') + s; return (Math.round(n * 10) / 10).toString().replace('.', ','); }
+function famt(l) { return fnum(l.amount) + (l.max ? '–' + fnum(l.max) : '') + ' ' + (l.unit === 'Stk' ? '' : l.unit); }
+function iname(l) { const p = pantry()[l.ing]; return l.name || (p ? p.n : l.ing || 'Zutat'); }
+
+/* ================= PERSIST + DB ================= */
+let DB = null, DBDOC = null, CHATDOC = null, saveT = null, chatT = null;
+function persist() {
+  S.updatedAt = Date.now();
+  try { localStorage.setItem(LS, JSON.stringify(S)); } catch (e) {}
+  SYNC.schedule();
+  clearTimeout(saveT); saveT = setTimeout(() => { if (DBDOC) DBDOC.set({json: JSON.stringify(S), at: S.updatedAt}).catch(() => {}); }, 900);
+}
+function persistChat() {
+  const c = CHAT.slice(-60);
+  try { localStorage.setItem(LSC, JSON.stringify(c)); } catch (e) {}
+  SYNC.schedule();
+  clearTimeout(chatT); chatT = setTimeout(() => { if (CHATDOC) CHATDOC.set({json: JSON.stringify(c), at: Date.now()}).catch(() => {}); }, 1200);
+}
+async function readDoc(ref) {
+  const r = await ref.get(); if (!r) return null;
+  if (typeof r.data === 'function') return r.exists === false ? null : r.data();
+  if ('exists' in r && 'data' in r) return r.exists ? r.data : null;
+  if ('data' in r) return r.data; return r;
+}
+let CAP = {sample:null, dict:null, assets:null};
+async function initCaps() {
+  if (PWA) { SYNC.pull(); return; }
+  if (!window.claude || !claude.use) return;
+  claude.use('sample').then(s => { CAP.sample = s; if (VIEW === 'chat') render(); }).catch(() => {});
+  claude.use('dictation').then(d => { CAP.dict = d; if (d) setupDict(); if (VIEW === 'chat') render(); }).catch(() => {});
+  claude.use('assets').then(a => { CAP.assets = a; }).catch(() => {});
+  try {
+    const [db, user] = await Promise.all([claude.use('db'), claude.use('user')]);
+    if (!db || !user) return;
+    const id = await user.id(); if (!id) return;
+    const col = db.collection('data/users/' + id); DBDOC = col.doc('state'); CHATDOC = col.doc('chat');
+    const timer = new Promise(res => setTimeout(() => res('timeout'), 10000));
+    const got = await Promise.race([readDoc(DBDOC), timer]);
+    if (got && got !== 'timeout' && got.json) {
+      const remote = JSON.parse(got.json);
+      if ((remote.updatedAt || 0) > (S.updatedAt || 0)) { S = Object.assign(S, remote); try { localStorage.setItem(LS, JSON.stringify(S)); } catch (e) {} render(); }
+      else if ((S.updatedAt || 0) > (remote.updatedAt || 0)) DBDOC.set({json: JSON.stringify(S), at: S.updatedAt}).catch(() => {});
+    } else if (got !== 'timeout' && S.updatedAt) DBDOC.set({json: JSON.stringify(S), at: S.updatedAt}).catch(() => {});
+    const gc = await Promise.race([readDoc(CHATDOC), new Promise(r => setTimeout(() => r(null), 10000))]);
+    if (gc && gc.json) { const rc = JSON.parse(gc.json); if (rc.length > CHAT.length) { CHAT = rc; if (VIEW === 'chat') render(); } }
+    DB = db;
+  } catch (e) {}
+}
+
+
+/* ================= PWA-MODUS: SUPABASE (Konto wie FPV Cockpit) ================= */
+const VERSION = '1.1';
+const PWA = !!window.SN_PWA;
+const SB = {url:'https://esdcasflulavhtuumuhm.supabase.co', key:'sb_publishable_2sNRKSgMxkNa-ngjs4h4Sg_hDUBWS1K'};
+const AU = {
+  s: (() => { try { return JSON.parse(localStorage.getItem('scoopernova.auth') || 'null'); } catch (e) { return null; } })(),
+  keep(s) { this.s = s; try { s ? localStorage.setItem('scoopernova.auth', JSON.stringify(s)) : localStorage.removeItem('scoopernova.auth'); } catch (e) {} },
+  async req(path, body) { const r = await fetch(SB.url + '/auth/v1/' + path, {method:'POST', headers:{apikey:SB.key, 'Content-Type':'application/json'}, body:JSON.stringify(body || {})}); const j = await r.json().catch(() => ({})); if (!r.ok) throw new Error(j.error_description || j.msg || j.message || 'Anmeldung fehlgeschlagen'); return j; },
+  sess(j) { if (!j.access_token) throw new Error('Keine Sitzung'); this.keep({access_token:j.access_token, refresh_token:j.refresh_token, exp:Date.now() + (j.expires_in || 3600) * 1000, id:j.user && j.user.id, email:j.user && j.user.email}); return this.s; },
+  async login(email, pw) { return this.sess(await this.req('token?grant_type=password', {email, password:pw})); },
+  async signup(email, pw) { const j = await this.req('signup', {email, password:pw, data:{name:'Nico'}}); if (j.access_token) return this.sess(j); throw new Error('Konto angelegt – bitte E-Mail bestätigen, dann anmelden.'); },
+  async token() { if (!this.s) return null; if (this.s.exp - Date.now() < 90e3) { try { this.sess(await this.req('token?grant_type=refresh_token', {refresh_token:this.s.refresh_token})); } catch (e) { this.keep(null); return null; } } return this.s.access_token; },
+  logout() { const s = this.s; this.keep(null); if (s) fetch(SB.url + '/auth/v1/logout', {method:'POST', headers:{apikey:SB.key, Authorization:'Bearer ' + s.access_token}}).catch(() => {}); },
+};
+async function sbq(method, path, body, prefer) {
+  const t = await AU.token(); if (!t) throw new Error('nicht angemeldet');
+  const r = await fetch(SB.url + '/rest/v1/' + path, {method, headers:Object.assign({apikey:SB.key, Authorization:'Bearer ' + t, 'Content-Type':'application/json'}, prefer ? {Prefer:prefer} : {}), body:body ? JSON.stringify(body) : undefined});
+  if (!r.ok) throw new Error('Sync ' + r.status); return r.status === 204 ? null : r.json().catch(() => null);
+}
+const SYNC = {
+  state:'', last:0, t:null,
+  icon() { if (!PWA) return '☁️'; return AU.s ? (this.state === 'err' ? '⚠️' : '👤') : '🔑'; },
+  label() { if (!PWA) return 'Läuft in Claude – Daten & Scoopy über dein Claude-Konto.'; if (!AU.s) return 'Nicht angemeldet – Daten nur auf diesem Gerät, Scoopy aus.'; return this.state === 'err' ? 'Sync-Fehler – Tabelle in Supabase angelegt?' : 'Angemeldet als ' + (AU.s.email || '') + (this.last ? ' · zuletzt ' + new Date(this.last).toLocaleTimeString('de-DE', {hour:'2-digit', minute:'2-digit'}) : ''); },
+  schedule() { if (!PWA || !AU.s) return; clearTimeout(this.t); this.t = setTimeout(() => this.push(), 1200); },
+  async push() { try { await sbq('POST', 'scoopernova_state?on_conflict=user_id', {user_id:AU.s.id, data:{state:S, chat:CHAT.slice(-60)}, updated_at:new Date().toISOString()}, 'resolution=merge-duplicates,return=minimal'); this.state = 'ok'; this.last = Date.now(); } catch (e) { this.state = 'err'; } },
+  async pull() {
+    if (!PWA || !AU.s) return;
+    try { const rows = await sbq('GET', 'scoopernova_state?select=data,updated_at&user_id=eq.' + AU.s.id); const d = rows && rows[0] && rows[0].data;
+      if (d && d.state && (d.state.updatedAt || 0) > (S.updatedAt || 0)) { S = Object.assign(S, d.state); try { localStorage.setItem(LS, JSON.stringify(S)); } catch (e) {} }
+      else if (S.updatedAt) await this.push();
+      if (d && d.chat && d.chat.length > CHAT.length) { CHAT = d.chat; try { localStorage.setItem(LSC, JSON.stringify(CHAT)); } catch (e) {} }
+      this.state = 'ok'; this.last = Date.now(); render();
+    } catch (e) { this.state = 'err'; render(); }
+  },
+};
+/* Scoopy im PWA-Modus: Supabase Edge Function „scoopy“ → Claude API, Tool-Loop hier im Browser */
+async function remoteChat(sys, hist, tl, image, onText, signal) {
+  const t = await AU.token(); if (!t) throw {code:'login'};
+  const msgs = hist.map(m => ({role:m.role, content:m.content}));
+  if (image) { const b64 = await new Promise(res => { const fr = new FileReader(); fr.onload = () => res(String(fr.result).split(',')[1]); fr.readAsDataURL(image); }); const last = msgs[msgs.length - 1]; last.content = [{type:'image', source:{type:'base64', media_type:'image/jpeg', data:b64}}, {type:'text', text:last.content}]; }
+  let text = '';
+  for (let i = 0; i < 8; i++) {
+    const r = await fetch(SB.url + '/functions/v1/scoopy', {method:'POST', signal, headers:{apikey:SB.key, Authorization:'Bearer ' + (await AU.token()), 'Content-Type':'application/json'},
+      body:JSON.stringify({system:sys, messages:msgs, tools:tl.map(x => ({name:x.name, description:x.description, input_schema:x.inputSchema}))})});
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) throw {message:(j.error && (j.error.message || j.error)) || ('Scoopy-Server ' + r.status), code:r.status === 404 ? 'nofn' : r.status === 403 ? 'forbidden' : ''};
+    const content = j.content || []; msgs.push({role:'assistant', content});
+    const tx = content.filter(c => c.type === 'text').map(c => c.text).join(''); if (tx) { text += (text ? '\n\n' : '') + tx; onText({text}); }
+    const uses = content.filter(c => c.type === 'tool_use'); if (!uses.length || j.stop_reason !== 'tool_use') break;
+    msgs.push({role:'user', content:uses.map(u => { const tool = tl.find(x => x.name === u.name); try { return {type:'tool_result', tool_use_id:u.id, content:JSON.stringify(tool ? tool.execute(u.input || {}) : {error:'unbekanntes Tool'})}; } catch (e) { return {type:'tool_result', tool_use_id:u.id, is_error:true, content:String(e.message || e)}; } })});
+  }
+  return {text};
+}
+function openSettings() {
+  openSheet(`<div style="text-align:center;padding:6px 0 4px"><div style="width:72px;height:72px;margin:0 auto">${SN.logo()}</div><h2 class="d-title" style="margin:8px 0 0">Scoopernova</h2><p class="muted" style="margin:2px 0 0">created by munkolas · Version ${VERSION}</p></div>
+   <div class="card" style="padding:14px;margin-top:16px"><b>${PWA ? 'Konto' : 'Speicher'}</b><p class="muted" style="margin:4px 0 10px;font-size:15px">${esc(SYNC.label())}</p>
+   ${PWA ? (AU.s ? `<div class="row"><button class="btn" data-act="syncnow" style="flex:1">↻ Jetzt synchronisieren</button><button class="btn danger" data-act="logout" style="flex:1">Abmelden</button></div>`
+     : `<form class="ed" id="lgf"><p class="muted" style="margin:0;font-size:14px">Gleiches Konto wie FPV Cockpit.</p><input class="field" name="e" type="email" autocomplete="email" placeholder="E-Mail" required><input class="field" name="p" type="password" autocomplete="current-password" placeholder="Passwort (mind. 6 Zeichen)" required minlength="6"><div class="row"><button class="btn pri" style="flex:2">Anmelden</button><button type="button" class="btn" data-act="signup" style="flex:1">Neu</button></div><p class="muted" id="lgerr" style="margin:0;font-size:14px"></p></form>`) : ''}</div>
+   <div class="card" style="padding:14px;margin-top:12px"><b>Neu in ${VERSION}</b><ul class="bul" style="margin-top:8px"><li>Rezepte als eigener Tab, Start aufgeräumt</li><li>Lust-Matrix jetzt in den Rezepten (Umschalter oben)</li><li>iPhone-App über GitHub & Supabase</li></ul></div>`, true);
+  const f = $('#lgf'); if (f) f.addEventListener('submit', async e => { e.preventDefault(); const fd = new FormData(f); try { await AU.login(fd.get('e'), fd.get('p')); closeSheet(); toast('Angemeldet 🍨'); await SYNC.pull(); } catch (err) { $('#lgerr').textContent = err.message; } });
+}
+
+/* ================= UI HELPERS ================= */
+function toast(msg, btn, fn, ms) {
+  const t = $('#toast'); t.innerHTML = `<span>${esc(msg)}</span>` + (btn ? `<button id="tbtn">${esc(btn)}</button>` : '');
+  t.classList.add('on'); if (btn) $('#tbtn').onclick = () => { fn && fn(); t.classList.remove('on'); };
+  clearTimeout(t._t); t._t = setTimeout(() => t.classList.remove('on'), ms || 3200);
+}
+function confetti(snow) {
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const d = document.createElement('div'); d.className = 'conf' + (snow ? ' snow' : '');
+  const cols = ['#FF4D7E','#FFD23F','#3DDC97','#5E8BFF','#FF8A3D','#B07CFF'];
+  for (let i = 0; i < (snow ? 70 : 60); i++) { const e = document.createElement('i'); e.style.left = Math.random() * 100 + 'vw'; e.style.background = cols[i % 6]; e.style.setProperty('--dx', (Math.random() * 120 - 60) + 'px'); e.style.setProperty('--rot', (Math.random() * 720) + 'deg'); e.style.animationDelay = Math.random() * (snow ? 2 : .4) + 's'; d.appendChild(e); }
+  document.body.appendChild(d); setTimeout(() => d.remove(), snow ? 6500 : 2600);
+}
+function openSheet(html, small) {
+  const sh = $('#sheet'), sc = $('#scrim');
+  sh.className = 'sheet' + (small ? ' small' : ''); sh.innerHTML = `<div class="grab"><span></span><button class="iconbtn" data-act="close" aria-label="Schließen">✕</button></div><div class="sheet-body">${html}</div>`;
+  sh.scrollTop = 0; sc.classList.remove('hide'); sh.setAttribute('aria-hidden', 'false');
+  requestAnimationFrame(() => { sc.classList.add('on'); sh.classList.add('on'); });
+  return sh;
+}
+function closeSheet() {
+  const sh = $('#sheet'), sc = $('#scrim'); sh.classList.remove('on'); sc.classList.remove('on'); sh.setAttribute('aria-hidden', 'true');
+  setTimeout(() => sc.classList.add('hide'), 300);
+  if (location.hash.startsWith('#r-')) history.replaceState(null, '', '#' + VIEW);
+  SHEET = null;
+}
+let SHEET = null;
+function img(r, opt) { return r.photo && r.photo.url ? `<img src="${esc(r.photo.url)}" alt="${esc(r.name)}">` : SN.art(r, opt); }
+const catColor = c => (SN.CATS[c] || {}).color || '#999';
+function statusTag(r) { const s = SN.STATUS[r.status] || SN.STATUS.idee; return `<span class="st"><i style="background:${s.dot}"></i>${esc(s.label)}</span>`; }
+
+/* ================= TABS / ROUTER ================= */
+const ICONS = {
+  start:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11 12 4l9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-5h4v5"/></svg>',
+  rezepte:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 11a5 5 0 0 1 10 0"/><path d="M6 11h12l-6 11z"/></svg>',
+  matrix:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3v18M3 12h18"/><circle cx="7.5" cy="7.5" r="1.6" fill="currentColor"/><circle cx="16" cy="15.5" r="1.6" fill="currentColor"/><circle cx="16.5" cy="7" r="1.6" fill="currentColor"/></svg>',
+  chat:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"/><path d="M9 10h.01M12 10h.01M15 10h.01"/></svg>',
+  wissen:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 21V5M9 8h6"/></svg>',
+  vorrat:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3h8v4l2 3v11H6V10l2-3z"/><path d="M6 13h12"/></svg>',
+};
+const TABS = [['start','Start'],['rezepte','Rezepte'],['chat','Scoopy'],['wissen','Wissen'],['vorrat','Vorrat']];
+let VIEW = 'start';
+function renderTabs() {
+  $('#tabs').innerHTML = TABS.map(([k, l]) => k === 'chat'
+    ? `<button class="tab chat" data-tab="chat" ${VIEW === k ? 'aria-current="page"' : ''}><span class="bub">${ICONS.chat}</span>${l}</button>`
+    : `<button class="tab" data-tab="${k}" ${VIEW === k ? 'aria-current="page"' : ''}>${ICONS[k]}${l}</button>`).join('');
+}
+function route() {
+  const h = location.hash.slice(1);
+  if (h.startsWith('r-')) { const id = h.slice(2); if (getR(id)) { if (!SHEET || SHEET !== id) openDetail(id, true); return; } }
+  if (SHEET) closeSheet();
+  const v = TABS.find(t => t[0] === h) ? h : (h === 'eis' ? 'start' : h === 'matrix' ? (S.prefs.view = 'matrix', 'rezepte') : 'start');
+  if (v !== VIEW || !$('#main').innerHTML) { VIEW = v; render(); window.scrollTo(0, 0); }
+}
+window.addEventListener('hashchange', route);
+
+/* ================= RENDER ================= */
+function render() {
+  renderTabs();
+  $('#hdrbtns').innerHTML = (VIEW === 'rezepte' ? `<button class="iconbtn" data-act="new" aria-label="Neues Rezept">＋</button>` : VIEW === 'chat' ? `<button class="iconbtn" data-act="clearchat" aria-label="Chat leeren">🧹</button>` : VIEW === 'vorrat' ? `<button class="iconbtn" data-act="newing" aria-label="Neue Zutat">＋</button>` : '') + `<button class="iconbtn" data-act="settings" aria-label="Konto & Info">${SYNC.icon()}</button>`;
+  const m = $('#main');
+  if (VIEW === 'start') m.innerHTML = vStart();
+  else if (VIEW === 'rezepte') { m.innerHTML = vRezepte(); if (S.prefs.view === 'matrix') layoutMatrix(); }
+  else if (VIEW === 'chat') { m.innerHTML = vChat(); bindChat(); }
+  else if (VIEW === 'wissen') m.innerHTML = vWissen();
+  else m.innerHTML = vVorrat();
+}
+const pageTitle = (t, sub) => `<div class="ptitle"><h2>${t}</h2>${sub ? `<p>${sub}</p>` : ''}</div>`;
+
+/* ---------- REZEPTE ---------- */
+function sorted(list) {
+  const s = S.prefs.sort, mc = new Map(list.map(r => [r.id, macros(r)]));
+  const stOrd = {final:0, testen:1, neu:2, idee:3};
+  const fav = (a, b) => ((a.rank || 99) - (b.rank || 99)) || ((b.champ ? 1 : 0) - (a.champ ? 1 : 0)) || ((b.fav ? 1 : 0) - (a.fav ? 1 : 0)) || (stOrd[a.status] - stOrd[b.status]) || a.name.localeCompare(b.name);
+  const f = {
+    fav, name:(a, b) => a.name.localeCompare(b.name),
+    kcal:(a, b) => mc.get(a.id).k - mc.get(b.id).k,
+    protein:(a, b) => mc.get(b.id).p - mc.get(a.id).p,
+    dichte:(a, b) => mc.get(b.id).dens - mc.get(a.id).dens,
+    made:(a, b) => ((S.made[b.id] || {}).last || 0) - ((S.made[a.id] || {}).last || 0),
+    mine:(a, b) => { const ia = S.order.indexOf(a.id), ib = S.order.indexOf(b.id); return (ia < 0 ? 999 : ia) - (ib < 0 ? 999 : ib) || fav(a, b); },
+  }[s] || fav;
+  return list.slice().sort(f);
+}
+const SORTS = [['fav','Favoriten & Rang'],['mine','Meine Reihenfolge'],['protein','Meiste Proteine'],['dichte','Protein pro kcal'],['kcal','Wenigste Kalorien'],['made','Zuletzt gemacht'],['name','A–Z']];
+function filtered() {
+  const {cat, fam, q} = S.prefs; const Q = (q || '').toLowerCase().trim();
+  return allRecipes().filter(r => (cat === 'all' || r.cat === cat) && (!fam || (fam === 'fav' ? r.fav : r.fam === fam)) &&
+    (!Q || (r.name + ' ' + (r.sub || '') + ' ' + (r.emoji || '') + ' ' + (r.ings || []).map(iname).join(' ')).toLowerCase().includes(Q)));
+}
+function card(r, i, n) {
+  const m = macros(r);
+  return `<article class="card rc"><button data-open="${esc(r.id)}" style="text-align:left;display:flex;flex-direction:column" aria-label="${esc(r.name)} öffnen">
+    <div class="im">${img(r)}${statusTag(r)}<span class="emo">${esc(r.emoji || '')}</span></div>
+    <div class="tx"><b>${esc(r.name)}</b><span class="sub">${esc(r.sub || '')}</span>
+    <div class="mac"><span class="pill">${Math.round(m.k)} kcal</span>${m.p >= 10 ? `<span class="pill p">${Math.round(m.p)} g P</span>` : ''}</div></div></button>
+    <button class="heart ${r.fav ? 'on' : ''}" data-fav="${esc(r.id)}" aria-label="Favorit">${r.fav ? '❤️' : '🤍'}</button>
+    ${S.prefs.sort === 'mine' ? `<div class="sorthandle"><button class="btn sm" data-mv="${esc(r.id)}:-1" ${i === 0 ? 'disabled' : ''} aria-label="nach oben">↑</button><button class="btn sm" data-mv="${esc(r.id)}:1" ${i === n - 1 ? 'disabled' : ''} aria-label="nach unten">↓</button></div>` : ''}
+  </article>`;
+}
+function hello() { const h = new Date().getHours(); return h < 11 ? 'Guten Morgen, Nico' : h < 17 ? 'Hey Nico' : 'Guten Abend, Nico'; }
+function vStart() {
+  const all = allRecipes();
+  const hof = all.filter(r => r.rank).sort((a, b) => a.rank - b.rank).concat(all.filter(r => r.champ));
+  return `<div class="view">
+  ${pageTitle(hello() + ' 🍨', 'Was landet heute im Becher?')}
+  ${vTruhe()}
+  <section class="sec card maker"><div class="row" style="justify-content:space-between"><h3>✨ Eis entwickeln</h3><div class="seg mini" id="mkcat" role="group" aria-label="Kategorie">${['protein','natur','deluxe'].map(c => `<button aria-pressed="${MKCAT === c}" data-mk="${c}" aria-label="${SN.CATS[c].label}">${SN.CATS[c].icon}</button>`).join('')}</div></div>
+   <div class="cbar" style="box-shadow:none"><input class="field" id="mkin" placeholder="Zutaten, z. B. Mango, Skyr …" enterkeyhint="go" style="border:0;background:transparent;min-height:44px"><button class="iconbtn" data-act="scan" aria-label="Zutaten fotografieren">📷</button><button class="iconbtn send" data-act="mkgo" aria-label="Entwickeln">↑</button></div>
+  </section>
+  <section class="sec"><div class="sec-h"><h2>Deine Top 5</h2><a class="lnk" href="#rezepte">Alle Rezepte ›</a></div>
+   <div class="hof">${hof.map(r => { const m = macros(r); return `<button class="card hcard" data-open="${esc(r.id)}"><div class="im">${img(r)}</div>
+     ${r.champ ? '<span class="rank champ">👑 Bestes Eis ever</span>' : `<span class="rank r${r.rank}">${r.rank}</span>`}
+     <div class="tx"><b>${esc(r.name)}</b><span class="muted" style="font-size:14px">${Math.round(m.k)} kcal${m.p >= 10 ? ' · ' + Math.round(m.p) + ' g P' : ''}</span></div></button>`; }).join('')}</div></section>
+  </div>`;
+}
+function vRezepte() {
+  const list = sorted(filtered()); const p = S.prefs; const mx = p.view === 'matrix';
+  return `<div class="view">
+  ${pageTitle('Rezepte', `${allRecipes().length} Sorten · ${allRecipes().filter(r => r.status === 'final').length} final`)}
+  <div class="tools">
+   <div class="search"><input class="field" id="q" type="search" placeholder="Sorte oder Zutat suchen" value="${esc(p.q)}"><button class="iconbtn" data-act="sortmenu" aria-label="Sortieren">⇅</button><div class="seg vt" role="group" aria-label="Ansicht"><button aria-pressed="${!mx}" data-view="grid" aria-label="Kacheln"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/></svg></button><button aria-pressed="${mx}" data-view="matrix" aria-label="Lust-Matrix">${ICONS.matrix.replace('<svg ', '<svg width="20" height="20" ')}</button></div></div>
+   <div class="seg" role="group" aria-label="Kategorie">${[['all','Alle']].concat(Object.entries(SN.CATS).map(([k, c]) => [k, c.icon + ' ' + c.label])).map(([k, l]) => `<button aria-pressed="${p.cat === k}" data-cat="${k}">${l}</button>`).join('')}</div>
+   ${mx ? '' : `<div class="chips" role="group" aria-label="Geschmack">${[['', 'Alle'], ['fav', '❤️ Favoriten']].concat(Object.entries(SN.FAMS)).map(([k, l]) => `<button class="chip" aria-pressed="${p.fam === k}" data-fam="${k}">${l}</button>`).join('')}</div>`}
+  </div>
+  ${mx ? vMatrix() : `<p class="cnt">${list.length} Sorte${list.length === 1 ? '' : 'n'} · sortiert nach ${esc((SORTS.find(x => x[0] === p.sort) || SORTS[0])[1])}</p>
+   ${list.length ? `<div class="grid">${list.map((r, i) => card(r, i, list.length)).join('')}</div>` : `<div class="empty"><span class="melt">🍦</span><p>Nix gefunden – schmilzt dahin.</p><button class="btn pri" data-ask="Entwickle mir ein Eis: ${esc(p.q)}">Scoopy fragen</button></div>`}
+   <details class="acc" style="margin-top:22px"><summary><span style="font-size:22px">💡</span>Ideen-Pool <span class="muted" style="font:600 14px system-ui;margin-left:6px">${SN.IDEAS.length} Ideen</span></summary><div style="padding:0 16px 16px"><p class="muted" style="margin:0 0 10px;font-size:14px">Aus dem FDL-Buch, von FitFoodAE und unseren Gesprächen. Antippen – Scoopy arbeitet es aus.</p><div class="ideas">${SN.IDEAS.map(([n, s2]) => `<button data-ask="Entwickle mir ein finales Rezept für „${esc(n)}“ – passend zu meinem Vorrat und meinen Regeln.">${esc(n)}${s2 ? `<small>${s2}</small>` : ''}</button>`).join('')}</div></div></details>`}
+  </div>`;
+}
+function vTruhe() {
+  const used = S.truhe.filter(Boolean).length;
+  return `<section class="sec card truhe"><div class="truhe-top"><div><b>🧊 Gefriertruhe</b> <span class="muted" style="font-size:14px;font-weight:600">${used}/6</span></div>${used < 6 && used > 0 ? `<button class="btn sm" data-ask="In meiner Truhe sind: ${S.truhe.filter(Boolean).map(t => (getR(t.rid) || {}).name).filter(Boolean).join(', ')}. Was mache ich als nächste Sorte? Gib mir 3 Vorschläge, die sich davon abheben.">Was als Nächstes? ✨</button>` : ''}</div>
+  <div class="slots">${S.truhe.map((t, i) => { const r = t && getR(t.rid); if (!r) return `<button class="slot empty" data-slot="${i}" aria-label="Becher ${i + 1} leer"><span class="plus">＋</span><small>frei</small></button>`;
+    const left = t.at + 864e5 - Date.now(), ready = left <= 0; const h = Math.ceil(left / 36e5);
+    return `<button class="slot ${ready ? 'ready' : ''}" data-slot="${i}" aria-label="${esc(r.name)}">${ready ? '' : '<span class="frost"></span>'}<span class="em">${esc((r.emoji || '').split(/(?=[\uD800-\uDBFF])/)[0] || '🍨')}</span>${SN.pintIcon((r.a.c || [])[0], ready ? .82 : .6, ready)}<small>${ready ? 'bereit' : 'noch ' + h + ' h'}</small></button>`; }).join('')}</div></section>`;
+}
+
+/* ---------- DETAIL ---------- */
+function openDetail(id, fromHash) {
+  const r = getR(id); if (!r) return; SHEET = id;
+  if (!fromHash) history.replaceState(null, '', '#r-' + id);
+  const m = macros(r), P = pantry(), c = SN.CATS[r.cat] || {};
+  const made = S.made[id];
+  const per = v => m.g ? (v / m.g * 100) : 0;
+  const html = `<div class="hero">${img(r)}</div>
+  <h2 class="d-title">${esc(r.name)} <span style="font-size:.7em">${esc(r.emoji || '')}</span></h2>
+  <div class="muted" style="font-size:17px">${esc(r.sub || '')}</div>
+  <div class="d-meta"><span class="tag" style="color:${c.color}">${c.icon || ''} ${esc(c.label || '')}</span><span class="tag">${esc(SN.FAMS[r.fam] || '')}</span><span class="tag"><i style="width:8px;height:8px;border-radius:50%;background:${(SN.STATUS[r.status] || {}).dot}"></i>${esc((SN.STATUS[r.status] || {}).label || '')} · ${esc(r.ver || '')}</span>${r.rank ? `<span class="tag">🏆 Platz ${r.rank}</span>` : ''}${r.champ ? '<span class="tag">👑 Bestes Eis ever</span>' : ''}${r.sig ? '<span class="tag">✍️ Eigenkreation</span>' : ''}${r.src ? `<span class="tag">nach ${esc(r.src)}</span>` : ''}${made ? `<span class="tag">✓ ${made.count}× gemacht</span>` : ''}</div>
+  <div class="macros"><div class="mbox k"><b>${Math.round(m.k)}</b><span>kcal</span></div><div class="mbox p"><b>${Math.round(m.p)}</b><span>g Protein</span></div><div class="mbox"><b>${Math.round(m.c)}</b><span>g KH</span></div><div class="mbox"><b>${Math.round(m.f)}</b><span>g Fett</span></div></div>
+  <p class="muted" style="font-size:14px;margin:-4px 0 0">Ganzer Pint ≈ ${Math.round(m.g)} g · exakt berechnet aus deinem Vorrat${m.dens >= 5 ? ` · ${fnum(Math.round(m.dens * 10) / 10)} g Protein pro 100 kcal` : ''}${m.unknown.length ? ` · ohne: ${esc(m.unknown.join(', '))}` : ''}</p>
+  <div class="actions"><button class="btn ${r.fav ? 'pri' : ''}" data-fav="${esc(id)}">${r.fav ? '❤️ Favorit' : '🤍 Favorit'}</button><button class="btn" data-act="truhe" data-id="${esc(id)}">🧊 In die Truhe</button><button class="btn" data-edit="${esc(id)}">✏️ Bearbeiten</button><button class="btn" data-ask="Ich will „${esc(r.name)}“ (id: ${esc(id)}) anpassen: " data-prefill="1">💬 Mit Scoopy</button></div>
+  <div class="d-sec"><h3>Creami-Programm</h3><div class="flow">${(r.flow || []).map((f, i) => `${i ? '<span class="farr">→</span>' : ''}<span class="fstep ${/abkratzen|EL|Mandel|Flüss/i.test(f) ? 'soft' : ''}">${esc(f)}</span>`).join('')}</div><p class="muted" style="font-size:14px;margin:6px 0 0">Ohne Deckel einfrieren · vor jedem Re-Spin/Mix-In Ränder abkratzen.</p></div>
+  <div class="d-sec"><h3>Zutaten <span class="muted" style="font-size:14px;font-weight:600">· 1 Pint · antippen zum Abhaken</span></h3><ul class="ing">${(r.ings || []).map((l, i) => { const p = P[l.ing]; return `<li data-ck="${i}"><span class="ck">✓</span><span class="nm">${esc(iname(l))}${l.opt ? '<span class="opt">optional</span>' : ''}${p && p.have === false ? '<span class="miss">fehlt</span>' : ''}${l.note ? `<span class="nt">${esc(l.note)}</span>` : ''}</span><span class="amt">${esc(famt(l))}</span></li>`; }).join('')}</ul></div>
+  <div class="d-sec"><h3>Zubereitung</h3><ol class="steps">${(r.steps || []).map(s => `<li><span>${esc(s)}</span></li>`).join('')}</ol></div>
+  ${(r.mix || []).length ? `<div class="d-sec"><h3>Mix-Ins & Finish</h3><ul class="bul">${r.mix.map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>` : ''}
+  <div class="d-sec"><h3>Learnings & Versionen</h3>${(r.notes || []).length ? `<div class="timeline">${r.notes.map(n => `<div>${esc(n)}</div>`).join('')}</div>` : '<p class="muted">Noch keine Notizen.</p>'}
+   <div class="row" style="margin-top:10px;flex-wrap:nowrap"><input class="field" id="fb" placeholder="Feedback: z. B. „zu wenig süß“"><button class="btn pri" data-act="fb" data-id="${esc(id)}">Merken</button></div></div>
+  <div class="d-sec"><h3>Für Yazio · pro 100 g</h3><div class="yz"><table><tr><td>Kalorien</td><td>${fnum(Math.round(per(m.k) * 10) / 10)} kcal</td></tr><tr><td>Protein</td><td>${fnum(Math.round(per(m.p) * 10) / 10)} g</td></tr><tr><td>Kohlenhydrate</td><td>${fnum(Math.round(per(m.c) * 10) / 10)} g</td></tr><tr><td>Fett</td><td>${fnum(Math.round(per(m.f) * 10) / 10)} g</td></tr><tr><td>Portion „1 Pint“</td><td>${Math.round(m.g)} g</td></tr></table><span class="muted" style="font-size:13px">Erythrit zählt 0 kcal und ist nicht in den KH. Erst Portion wählen, dann Stern drücken.</span><button class="btn sm" data-act="copyyz" data-id="${esc(id)}">Werte kopieren</button></div></div>
+  <div class="actions"><button class="btn" data-act="copywa" data-id="${esc(id)}">📋 WhatsApp-Text</button><button class="btn" data-act="made" data-id="${esc(id)}">🎉 Gemacht!</button><button class="btn" data-act="photo" data-id="${esc(id)}">📸 Eigenes Foto</button><button class="btn" data-act="dup" data-id="${esc(id)}">⧉ Duplizieren</button></div>
+  <div class="row" style="justify-content:center;margin-top:14px">${SEEDMAP[id] && S.recipes[id] ? `<button class="btn ghost" data-act="reset" data-id="${esc(id)}">Original wiederherstellen</button>` : ''}<button class="btn ghost danger" data-act="del" data-id="${esc(id)}">Löschen</button></div>`;
+  openSheet(html);
+}
+function waText(r) {
+  const m = macros(r);
+  return `${r.emoji || ''} *${r.name}* (1 Pint)\n\n*Zutaten*\n` + r.ings.map(l => `• ${famt(l).trim()} ${iname(l)}${l.opt ? ' (optional)' : ''}`).join('\n') +
+    `\n\n*So geht’s*\n` + r.steps.map((s, i) => `${i + 1}. ${s}`).join('\n') + `\n\n*Creami*\n${(r.flow || []).join(' → ')}\n` + ((r.mix || []).length ? `\n*Mix-In*\n${r.mix.map(x => '• ' + x).join('\n')}\n` : '') +
+    `\n*Makros pro Pint*\n${Math.round(m.k)} kcal · ${Math.round(m.p)} g Protein · ${Math.round(m.c)} g KH · ${Math.round(m.f)} g Fett`;
+}
+async function copy(t, ok) { try { await navigator.clipboard.writeText(t); toast(ok || 'Kopiert'); } catch (e) { openSheet(`<h3 class="d-title" style="font-size:24px">Zum Kopieren</h3><textarea class="field" style="min-height:300px">${esc(t)}</textarea>`, true); } }
+
+/* ---------- EDITOR ---------- */
+let ED = null;
+function openEditor(id, preset) {
+  const r = preset ? normRecipe(preset) : id ? clone(getR(id)) : normRecipe({id:'', name:'', sub:'', cat:'protein', fam:'vanille', emoji:'🍦💪', status:'neu', ver:'V1', x:0, y:0, i:[['mandel',200,'ml'],['hafer',50,'ml'],['whey',30,'g'],['erythrit',45,'g'],['pud_v',5,'g'],['jbkm',.25,'TL'],['salz',1,'Prise']], steps:[...SN.RECIPES[0].steps], flow:'lite', a:{c:['#FFF2C4'], t:[]}});
+  ED = r; const P = pantry();
+  const flowKey = Object.entries(SN.FLOWS).find(([, f]) => f.join() === (r.flow || []).join());
+  const html = `<h2 class="d-title" style="font-size:28px">${id ? 'Rezept bearbeiten' : 'Neues Rezept'}</h2>
+  <form class="ed" id="edf" autocomplete="off">
+   <datalist id="pl">${Object.values(P).map(p => `<option value="${esc(p.n)}">`).join('')}</datalist>
+   <label>Name<input class="field" name="name" value="${esc(r.name)}" required></label>
+   <label>Untertitel<input class="field" name="sub" value="${esc(r.sub || '')}"></label>
+   <div class="two"><label>Emojis (max. 3)<input class="field" name="emoji" value="${esc(r.emoji || '')}"></label><label>Version<input class="field" name="ver" value="${esc(r.ver || '')}"></label></div>
+   <div class="two"><label>Kategorie<select class="field" name="cat">${Object.entries(SN.CATS).map(([k, c]) => `<option value="${k}" ${r.cat === k ? 'selected' : ''}>${c.icon} ${c.label}</option>`).join('')}</select></label>
+   <label>Geschmack<select class="field" name="fam">${Object.entries(SN.FAMS).map(([k, l]) => `<option value="${k}" ${r.fam === k ? 'selected' : ''}>${l}</option>`).join('')}</select></label></div>
+   <div class="two"><label>Status<select class="field" name="status">${Object.entries(SN.STATUS).map(([k, s]) => `<option value="${k}" ${r.status === k ? 'selected' : ''}>${s.label}</option>`).join('')}</select></label>
+   <label>Top-5-Platz<select class="field" name="rank"><option value="">–</option>${[1,2,3,4,5].map(n => `<option ${r.rank === n ? 'selected' : ''}>${n}</option>`).join('')}</select></label></div>
+   <div><div style="font-size:14px;font-weight:700;color:var(--mute);margin-bottom:6px">Zutaten</div><div class="ired" id="ired"></div><button type="button" class="btn sm" data-act="addrow" style="margin-top:8px">＋ Zutat</button></div>
+   <label>Zubereitung (ein Schritt pro Zeile)<textarea class="field" name="steps" rows="5">${esc((r.steps || []).join('\n'))}</textarea></label>
+   <label>Creami-Programm<select class="field" name="flowk">${Object.keys(SN.FLOWS).map(k => `<option value="${k}" ${flowKey && flowKey[0] === k ? 'selected' : ''}>${SN.FLOWS[k].join(' → ')}</option>`).join('')}<option value="custom" ${flowKey ? '' : 'selected'}>Eigenes (unten)</option></select></label>
+   <label>Eigenes Programm (eine Station pro Zeile)<textarea class="field" name="flow" rows="3">${esc((r.flow || []).join('\n'))}</textarea></label>
+   <label>Mix-Ins & Finish (eine pro Zeile)<textarea class="field" name="mix" rows="3">${esc((r.mix || []).join('\n'))}</textarea></label>
+   <label>Learnings (eine pro Zeile)<textarea class="field" name="notes" rows="4">${esc((r.notes || []).join('\n'))}</textarea></label>
+   <label>Lust-Matrix: fruchtig ↔ sahnig<input type="range" name="x" min="-1" max="1" step=".05" value="${r.x || 0}"></label>
+   <label>Lust-Matrix: schwer ↔ leicht<input type="range" name="y" min="-1" max="1" step=".05" value="${r.y || 0}"></label>
+   <div class="two"><label>Kugelfarbe<input type="color" class="field" name="c1" value="${esc((r.a.c || [])[0] || '#FFF2C4')}"></label><label>Hintergrund<input type="color" class="field" name="bg" value="${esc(r.a.bg || '#FFF7EE')}"></label></div>
+   <label>Gefäß<select class="field" name="v"><option value="">automatisch</option>${[['pint','Creami-Pint'],['cone','Waffel'],['bowl','Schale']].map(([k, l]) => `<option value="${k}" ${r.a.v === k ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
+   <div><div style="font-size:14px;font-weight:700;color:var(--mute);margin-bottom:6px">Toppings in der Grafik</div><div class="tpick">${TOPS.map(t => `<button type="button" class="chip" data-top="${t}" aria-pressed="${(r.a.t || []).includes(t)}">${t}</button>`).join('')}</div></div>
+   <div class="livemac" id="livemac"></div>
+   <div class="row"><button type="button" class="btn" data-act="close" style="flex:1">Abbrechen</button><button class="btn pri" style="flex:2">Speichern</button></div>
+  </form>`;
+  openSheet(html); SHEET = 'edit'; drawRows(); liveMac();
+  $('#edf').addEventListener('input', e => { if (e.target.closest('.irow')) readRows(); liveMac(); });
+  $('#edf').addEventListener('submit', e => { e.preventDefault(); submitEditor(id); });
+}
+function drawRows() {
+  const P = pantry();
+  $('#ired').innerHTML = ED.ings.map((l, i) => `<div class="irow" data-row="${i}">
+   <input class="field" list="pl" data-k="n" value="${esc(iname(l))}" aria-label="Zutat">
+   <input class="field" data-k="a" inputmode="decimal" value="${esc(String(l.amount ?? '').replace('.', ','))}" aria-label="Menge">
+   <select class="field" data-k="u" aria-label="Einheit">${UNITS.map(u => `<option ${l.unit === u ? 'selected' : ''}>${u}</option>`).join('')}</select>
+   <button type="button" class="del" data-act="delrow" data-i="${i}" aria-label="Entfernen">✕</button>
+   <div class="ex"><input class="field" data-k="m" inputmode="decimal" placeholder="bis" value="${esc(l.max ? String(l.max).replace('.', ',') : '')}" aria-label="Maximal"><input class="field" data-k="no" placeholder="Notiz" value="${esc(l.note || '')}"><label><input type="checkbox" data-k="o" ${l.opt ? 'checked' : ''}> opt.</label></div>
+   ${P[l.ing] ? '' : `<div class="muted" style="grid-column:1/-1;font-size:13px">Nicht im Vorrat → zählt nicht in die Makros. Im Tab Vorrat anlegen.</div>`}</div>`).join('');
+}
+function readRows() {
+  const P = Object.values(pantry()); const num = v => { v = String(v || '').replace(',', '.').trim(); const fr = {'¼':.25,'½':.5,'¾':.75,'⅛':.125,'⅓':.333}; if (fr[v]) return fr[v]; return v === '' ? null : +v; };
+  ED.ings = $$('.irow').map(row => { const g = k => $(`[data-k="${k}"]`, row);
+    const n = g('n').value.trim(); const p = P.find(x => x.n.toLowerCase() === n.toLowerCase());
+    const l = {ing: p ? p.id : '', amount: num(g('a').value) || 0, unit: g('u').value};
+    if (!p) l.name = n; const mx = num(g('m').value); if (mx) l.max = mx; if (g('no').value.trim()) l.note = g('no').value.trim(); if (g('o').checked) l.opt = true; return l; });
+}
+function liveMac() { const m = macros(ED); const el = $('#livemac'); if (el) el.innerHTML = `<span class="pill">${Math.round(m.k)} kcal</span><span class="pill p">${Math.round(m.p)} g Protein</span><span class="pill">${Math.round(m.c)} g KH</span><span class="pill">${Math.round(m.f)} g Fett</span><span class="muted" style="font-size:13px">≈ ${Math.round(m.g)} g</span>`; }
+function slug(s) { return (s || 'eis').toLowerCase().replace(/[äöüß]/g, c => ({ä:'ae',ö:'oe',ü:'ue',ß:'ss'}[c])).replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 32) || 'eis'; }
+function submitEditor(id) {
+  readRows(); const f = new FormData($('#edf')); const lines = k => String(f.get(k) || '').split('\n').map(s => s.trim()).filter(Boolean);
+  const r = ED; r.name = f.get('name').trim(); r.sub = f.get('sub').trim(); r.emoji = f.get('emoji').trim(); r.ver = f.get('ver').trim();
+  r.cat = f.get('cat'); r.fam = f.get('fam'); r.status = f.get('status'); const rk = f.get('rank'); r.rank = rk ? +rk : undefined;
+  r.steps = lines('steps'); r.mix = lines('mix'); r.notes = lines('notes');
+  r.flow = f.get('flowk') === 'custom' ? lines('flow') : SN.FLOWS[f.get('flowk')].slice();
+  r.x = +f.get('x'); r.y = +f.get('y');
+  r.a = Object.assign({}, r.a, {c:[f.get('c1'), (r.a.c || [])[1] && (r.a.c || [])[0] === f.get('c1') ? r.a.c[1] : SN.mix(f.get('c1'), '#ffffff', .25)], bg:f.get('bg'), v:f.get('v') || undefined, t:$$('[data-top][aria-pressed=true]').map(b => b.dataset.top)});
+  if (r.rank) for (const o of allRecipes()) if (o.id !== r.id && o.rank === r.rank) { const c = clone(o); delete c.rank; saveR(c, true); }
+  if (!r.id) { r.id = slug(r.name); while (getR(r.id) || SEEDMAP[r.id]) r.id += '-' + Math.floor(Math.random() * 90 + 10); }
+  const before = id ? clone(getR(id)) : null;
+  saveR(r); closeSheet();
+  toast(id ? 'Gespeichert' : 'Neues Rezept angelegt', before ? 'Rückgängig' : 'Öffnen', () => { if (before) saveR(before); else openDetail(r.id); });
+}
+
+/* ---------- MATRIX ---------- */
+let MXSEL = null;
+function vMatrix() {
+  return `<p class="muted" style="margin:4px 0 8px;font-size:15px">Links fruchtig, rechts sahnig, oben leicht, unten schwer. Tipp ins Feld – ich zeig dir, was in der Ecke liegt.</p>
+  <div class="mx-wrap"><div class="mx" id="mx"><span class="ax l">🍓 fruchtig</span><span class="ax r">sahnig 🥛</span><span class="ax t">☁️ leicht</span><span class="ax b">schwer 🍫</span></div></div>
+  <div class="legend">${Object.values(SN.CATS).map(c => `<span><i style="border-color:${c.color}"></i>${c.icon} ${c.label}</span>`).join('')}</div>
+  <div class="mx-tip" id="mxtip"></div>`;
+}
+function layoutMatrix() {
+  const mx = $('#mx'); if (!mx) return;
+  const list = allRecipes(); const pts = list.map(r => ({r, x:.5 + (+r.x || 0) * .41, y:.5 - (+r.y || 0) * .41}));
+  const W = mx.clientWidth || 640, bw = Math.min(.2, 100 / W), bh = Math.min(.13, 62 / W);
+  for (let it = 0; it < 120; it++) for (let i = 0; i < pts.length; i++) for (let j = i + 1; j < pts.length; j++) {
+    const a = pts[i], b = pts[j], dx = b.x - a.x, dy = b.y - a.y;
+    if (Math.abs(dx) < bw && Math.abs(dy) < bh) { const ox = (bw - Math.abs(dx)) / 2, oy = (bh - Math.abs(dy)) / 2;
+      if (ox < oy) { const s = dx >= 0 ? 1 : -1; a.x -= s * ox * .5; b.x += s * ox * .5; } else { const s = dy >= 0 ? 1 : -1; a.y -= s * oy * .5; b.y += s * oy * .5; } }
+    pts[i].x = Math.min(.93, Math.max(.07, pts[i].x)); pts[i].y = Math.min(.93, Math.max(.08, pts[i].y));
+  }
+  $$('.dot', mx).forEach(d => d.remove());
+  mx.insertAdjacentHTML('beforeend', pts.map(({r, x, y}) => `<button class="dot ${S.prefs.cat !== 'all' && r.cat !== S.prefs.cat ? 'dim' : ''} ${MXSEL === r.id ? 'sel' : ''}" style="left:${x * 100}%;top:${y * 100}%;--c:${catColor(r.cat)}" data-mx="${esc(r.id)}" aria-label="${esc(r.name)}"><span class="b">${esc([...(r.emoji || '🍨')].filter(ch => !/[‍️]/.test(ch)).slice(0, 1).join(''))}</span><span class="n">${esc(r.name.length > 14 ? r.name.split(' ')[0] : r.name)}</span></button>`).join(''));
+  if (!mx._b) { mx._b = 1; mx.addEventListener('click', e => { if (e.target.closest('.dot')) return; const b = mx.getBoundingClientRect(); const x = ((e.clientX - b.left) / b.width - .5) / .41, y = -((e.clientY - b.top) / b.height - .5) / .41;
+    const near = allRecipes().filter(r => S.prefs.cat === 'all' || r.cat === S.prefs.cat).map(r => [r, Math.hypot(r.x - x, r.y - y)]).sort((a, b) => a[1] - b[1]).slice(0, 3).map(a => a[0]);
+    MXSEL = null; $('#mxtip').innerHTML = `<div class="card" style="padding:14px"><b style="font:800 17px var(--title)">${x < 0 ? 'Fruchtig' : 'Sahnig'} & ${y > 0 ? 'leicht' : 'schwer'} – das liegt in der Ecke:</b><div class="list-pick" style="margin-top:10px">${near.map(pickRow).join('')}</div></div>`; }); }
+}
+function pickRow(r) { const m = macros(r); return `<button data-open="${esc(r.id)}"><span class="mini">${img(r, {plain:true})}</span><span><b>${esc(r.name)}</b> ${esc(r.emoji || '')}<br><span class="muted" style="font-size:14px">${Math.round(m.k)} kcal${m.p >= 10 ? ' · ' + Math.round(m.p) + ' g P' : ''}</span></span></button>`; }
+
+/* ---------- WISSEN ---------- */
+let MF = {b:'milch', f:'wenig', z:'cremig'};
+function modeFinder() {
+  const {b, f, z} = MF; let m = 'LITE ICE CREAM', why = 'Viel Protein, wenig Fett – dein Standard.';
+  if (b === 'frucht' && f === 'wenig') { m = 'SORBET'; why = 'Wasser & Frucht ohne Fett.'; if (z === 'cremig') { m = 'LITE ICE CREAM'; why = 'Frucht mit Milch/Protein → Lite (oder Sorbet, wenn’s sehr fruchtig ist).'; } }
+  else if (b === 'sahne' || f === 'viel') { m = 'ICE CREAM'; why = 'Viel Fett/Zucker (Sahne, Eigelb, Kokos, Pistaziencreme, Banane pur).'; }
+  else if (z === 'dicht' && f === 'mittel') { m = 'GELATO'; why = 'Milchlastig mit etwas Fett, dicht & aromatisch.'; }
+  else if (z === 'frisch') { m = b === 'frucht' ? 'SORBET' : 'LITE ICE CREAM'; why = 'Klar & frisch.'; }
+  const q = (k, opts) => `<div class="seg" role="group">${opts.map(([v, l]) => `<button data-mf="${k}:${v}" aria-pressed="${MF[k] === v}">${l}</button>`).join('')}</div>`;
+  return `<div class="card finder"><b style="font:800 18px var(--title)">🎛️ Modus-Finder</b>
+   ${q('b', [['milch','🥛 Milch/Protein'],['frucht','🍓 Frucht/Saft'],['sahne','🧈 Sahne/Ei/Creme']])}
+   ${q('f', [['wenig','wenig Fett'],['mittel','etwas'],['viel','viel Fett']])}
+   ${q('z', [['cremig','cremig'],['dicht','dicht & edel'],['frisch','frisch & klar']])}
+   <div class="res"><b>${m}</b>${esc(why)} → Ränder abkratzen → RE-SPIN</div></div>`;
+}
+function vWissen() {
+  return `<div class="view">
+  <section class="sec"><div class="sec-h"><h2>Die 10 Gebote</h2></div><div class="rules">${SN.RULES.map(r => `<div class="card rule"><span class="ri">${r[0]}</span><div><b>${esc(r[1])}</b><p>${esc(r[2])}</p></div></div>`).join('')}</div></section>
+  <section class="sec" id="mf">${modeFinder()}</section>
+  <section class="sec"><div class="sec-h"><h2>Die Modi</h2><span class="muted" style="font-size:14px">dein Basis-Creami</span></div><div class="modes">${SN.MODES.map(m => `<div class="card mode"><b>${esc(m[0])}</b><em>${esc(m[1])}</em><p>${esc(m[2])}</p></div>`).join('')}</div></section>
+  <section class="sec"><div class="sec-h"><h2>Deep Dive</h2></div>${SN.KNOW.map((k, i) => `<details class="acc" ${i === 0 ? 'open' : ''}><summary><span style="font-size:24px">${k.i}</span>${esc(k.t)}</summary><ul>${k.b.map(x => `<li>${esc(x)}</li>`).join('')}</ul></details>`).join('')}</section>
+  <section class="sec card tip"><span class="ti">🤔</span><p>Frage, die hier nicht steht? <button class="btn sm pri" data-ask="" data-prefill="1" style="margin-left:6px">Scoopy fragen</button></p></section></div>`;
+}
+
+/* ---------- VORRAT ---------- */
+let PQ = '', PMISS = false;
+function vVorrat() {
+  const P = Object.values(pantry()); const groups = [...new Set(P.map(p => p.g || 'Sonstiges'))];
+  const Q = PQ.toLowerCase(); const vis = p => (!Q || p.n.toLowerCase().includes(Q)) && (!PMISS || p.have === false);
+  return `<div class="view">
+  <section class="sec card tip"><span class="ti">🥣</span><p><b>Deine Standard-Base:</b> 200 ml Mandelmilch + 50 ml Barista-Hafer · 30 g Better Whey neutral · 40–50 g Erythrit · 5 g Puddingpulver · ¼ TL JBKM · Prise Salz. Scoopy rechnet alles mit diesen Werten – exakt, nicht geschätzt.</p></section>
+  <div class="tools"><div class="search"><input class="field" id="pq" type="search" placeholder="Zutat suchen" value="${esc(PQ)}"></div>
+  <div class="chips"><button class="chip" aria-pressed="${!PMISS}" data-pm="0">Alle</button><button class="chip" aria-pressed="${PMISS}" data-pm="1">🛒 Fehlt / Einkaufsliste</button></div></div>
+  ${groups.map(g => { const items = P.filter(p => (p.g || 'Sonstiges') === g && vis(p)); if (!items.length) return '';
+   return `<div class="pgrp">${esc(g)}</div><div class="plist">${items.map(p => `<div class="prow"><button class="hv ${p.have !== false ? 'on' : ''}" data-have="${esc(p.id)}" aria-label="${p.have !== false ? 'vorhanden' : 'fehlt'}">✓</button><button class="nm" data-ing="${esc(p.id)}"><span>${esc(p.n)}</span><small>pro 100 ${p.u}: ${fnum(p.p)} g P · ${fnum(p.c)} g KH · ${fnum(p.f)} g F</small></button><span class="kc">${p.k} kcal</span></div>`).join('')}</div>`; }).join('')}
+  <p class="muted" style="font-size:14px;margin-top:14px">Antippen zum Bearbeiten. Häkchen = hab ich da – Scoopy nutzt das beim Entwickeln.</p></div>`;
+}
+function openIng(id) {
+  const p = id ? pantry()[id] : {id:'', n:'', u:'g', k:0, p:0, c:0, f:0, g:'Sonstiges', have:true};
+  const fld = (k, l, t) => `<label>${l}<input class="field" name="${k}" ${t || 'inputmode="decimal"'} value="${esc(p[k] ?? '')}"></label>`;
+  openSheet(`<h2 class="d-title" style="font-size:26px">${id ? 'Zutat bearbeiten' : 'Neue Zutat'}</h2><form class="ed" id="ingf">
+   ${fld('n', 'Name', 'required')}<div class="two"><label>Einheit<select class="field" name="u"><option ${p.u === 'g' ? 'selected' : ''}>g</option><option ${p.u === 'ml' ? 'selected' : ''}>ml</option></select></label>${fld('g', 'Gruppe', '')}</div>
+   <div class="two">${fld('k', 'kcal / 100')}${fld('p', 'Protein g / 100')}</div><div class="two">${fld('c', 'KH g / 100')}${fld('f', 'Fett g / 100')}</div>
+   <div class="two">${fld('tl', 'Gramm pro TL')}${fld('pc', 'Gramm pro Stück')}</div>
+   <div class="row"><button type="button" class="btn" data-act="close" style="flex:1">Abbrechen</button><button class="btn pri" style="flex:2">Speichern</button></div></form>`, true);
+  $('#ingf').addEventListener('submit', e => { e.preventDefault(); const f = new FormData(e.target); const n = v => +String(v || '0').replace(',', '.') || 0;
+    const o = Object.assign({}, p, {n:f.get('n').trim(), u:f.get('u'), g:f.get('g').trim() || 'Sonstiges', k:n(f.get('k')), p:n(f.get('p')), c:n(f.get('c')), f:n(f.get('f'))});
+    if (f.get('tl')) o.tl = n(f.get('tl')); if (f.get('pc')) o.pc = n(f.get('pc'));
+    if (!o.id) { o.id = 'x-' + slug(o.n); } S.pantry[o.id] = o; persist(); closeSheet(); render(); toast('Zutat gespeichert'); });
+}
+
+/* ================= TRUHE ================= */
+function slotAction(i) {
+  const t = S.truhe[i];
+  if (!t || !getR(t.rid)) {
+    openSheet(`<h2 class="d-title" style="font-size:26px">Becher ${i + 1} befüllen</h2><input class="field" id="tq" type="search" placeholder="Sorte suchen"><div class="list-pick" id="tl" style="margin-top:10px">${sorted(allRecipes()).map(pickRowT).join('')}</div>`, true);
+    $('#tq').addEventListener('input', e => { const q = e.target.value.toLowerCase(); $('#tl').innerHTML = sorted(allRecipes()).filter(r => r.name.toLowerCase().includes(q)).map(pickRowT).join(''); });
+    SLOT = i; return;
+  }
+  const r = getR(t.rid), left = t.at + 864e5 - Date.now();
+  openSheet(`<div style="display:grid;grid-template-columns:88px minmax(0,1fr);gap:14px;align-items:center"><div class="hero" style="aspect-ratio:1">${img(r, {plain:true})}</div><div><h2 class="d-title" style="font-size:24px;margin:0">${esc(r.name)}</h2><p class="muted" style="margin:4px 0 0">Eingefroren ${new Date(t.at).toLocaleString('de-DE', {weekday:'short', hour:'2-digit', minute:'2-digit'})} · ${left <= 0 ? 'bereit ✓' : 'noch ' + Math.ceil(left / 36e5) + ' h'}</p></div></div>
+   <div class="actions" style="grid-template-columns:1fr"><button class="btn pri" data-act="eaten" data-i="${i}">🎉 Gegessen – Becher frei</button><button class="btn" data-open="${esc(r.id)}">Rezept & Programm öffnen</button><button class="btn" data-act="unfreeze" data-i="${i}">Rausnehmen</button></div>`, true);
+}
+let SLOT = null;
+function pickRowT(r) { return pickRow(r).replace('data-open=', 'data-put='); }
+function putTruhe(rid, i) {
+  if (i == null) i = S.truhe.findIndex(x => !x || !getR(x.rid));
+  if (i < 0) { toast('Truhe ist voll – erst was essen 😋'); return; }
+  S.truhe[i] = {rid, at:Date.now()}; persist(); closeSheet(); if (VIEW === 'start') render(); toast(`${getR(rid).name} friert – in 24 h bereit 🧊`);
+}
+function markMade(id) { const m = S.made[id] || {count:0}; m.count++; m.last = Date.now(); S.made[id] = m; persist(); confetti(); }
+
+/* ================= PHOTO ================= */
+function loadImage(file) { return new Promise((res, rej) => { const u = URL.createObjectURL(file); const im = new Image(); im.onload = () => res(im); im.onerror = rej; im.src = u; }); }
+function shrink(im, max, q) { const s = Math.min(1, max / Math.max(im.width, im.height)); const c = document.createElement('canvas'); c.width = Math.round(im.width * s); c.height = Math.round(im.height * s); c.getContext('2d').drawImage(im, 0, 0, c.width, c.height); return {url:c.toDataURL('image/jpeg', q), blob:new Promise(r => c.toBlob(r, 'image/jpeg', q))}; }
+let PHOTOFOR = null;
+$('#filePhoto').addEventListener('change', async e => {
+  const f = e.target.files[0]; e.target.value = ''; if (!f || !PHOTOFOR) return; const r = clone(getR(PHOTOFOR));
+  try { const im = await loadImage(f);
+    if (CAP.assets) { const s = shrink(im, 1400, .85); const up = await CAP.assets.upload(await s.blob); r.photo = {id:up.id, url:up.url || '/_blob/' + up.id}; }
+    else { r.photo = {url:shrink(im, 720, .78).url}; }
+    saveR(r, true); openDetail(r.id); toast('Foto gespeichert 📸');
+  } catch (err) { toast('Foto ging nicht – nochmal?'); }
+});
+
+/* ================= SCOOPY (KI-CHAT) ================= */
+let PENDING_IMG = null, BUSY = false, ABORT = null, UNDO = {};
+function sysPrompt() {
+  const P = Object.values(pantry());
+  return `Du bist „Scoopy“, der Ninja-Creami-Coach in Nicos App „Scoopernova“. Antworte auf Deutsch, locker, mit Emojis sparsam. Rezepte & Antworten kurz und knackig, kein Gelaber.
+
+GERÄT: Ninja Creami Basismodell (Modi: ICE CREAM, LITE ICE CREAM, SORBET, GELATO, MILKSHAKE, SMOOTHIE BOWL, MIX-IN, RE-SPIN; KEIN Frozen-Yogurt-Knopf → LITE ICE CREAM). 6 Becher. Max-Linie ≈ 460 ml – Rezepte immer nach Volumen prüfen.
+
+NICOS FESTE REGELN (immer einhalten & im Rezept erwähnen):
+- Ohne Deckel einfrieren (sonst Hügel). 24 h frieren.
+- Vor jedem Re-Spin/Mix-In: Ränder abkratzen („scrape the edges“).
+- Es gibt nur Re-Spin oder Mix-In (Mix-In ≈ halber Re-Spin). Nie „½ Re-Spin“ sagen.
+- Johannisbrotkernmehl immer, in TL angeben (Standard ¼ TL). Gut lösen (≥30 Sek mixen).
+- Prise Salz überall – AUSSER wenn körniger Frischkäse drin ist (der ist schon salzig).
+- Abschmecken: leicht übersüß.
+- Protein-Pulver: NUR noch Better Protein Whey neutral (kein Süßstoff, kein Aroma). Gegenüber Vanille-Whey +10–15 g Erythrit; Vanilleextrakt nur wo es passt (nicht bei Himbeere, Pistazie, Jasmin).
+- Standard-Milch: 200 ml Mandelmilch + 50 ml Barista-Hafermilch (Rest mit Mandel auffüllen).
+- Makros EXAKT berechnen (Tool calc_macros), nicht schätzen. Ganze Zahlen reichen.
+- Gestrichen: Bulk Cinnamon Cereal Protein, Ironmaxx Cooking Protein. Amaretto nur Cassella (Rialto bitter).
+- Dosierungen: Tonka ⅛ TL (Protein) / ¼ TL (Custard), Pistazien-FlavDrops 6, Nuss-Nougat-Drops 6–8, Butteraroma ¼–½ Fläschchen, Zitronia Sun max ¼ TL, Orangenblütenwasser ¼–1 TL, Jasmintee max 4 Min ziehen.
+- Freies Wasser (Tee, Saft) → Kristalle. Aromen lieber in Milch extrahieren, Frucht pürieren, JBKM dahin wo freies Wasser ist.
+- Erythrit statt Zucker (gut verträglich). Lebensmittelfarbe gerne für schöne Farbe.
+- Kiba heißt bei uns „Baki“.
+
+KATEGORIEN: protein = High Protein Low Cal (Nicos Alltag, Standard), natur = Frucht/Sorbet/Nicecream ohne Protein, deluxe = Gönnung ohne Limit (Vollmilch, Sahne, Zucker, Eigelb/Custard erlaubt; keine Hafermilch bei feinen Aromen).
+FAVORITEN: 1 Schoko-Nutella, 2 Tiramisu, 3 Lemon Cheesecake, 4 Banane pur, 5 Coco Vanille. Bestes Eis ever: Pistazie Gelato Deluxe. Eigenkreation: Marrakech Blossom Cream.
+
+VORRAT (id | Name | Einheit | kcal/P pro 100 | da?):
+${P.map(p => `${p.id} | ${p.n} | ${p.u} | ${p.k}/${p.p} | ${p.have === false ? 'fehlt' : 'da'}`).join('\n')}
+
+REZEPTE in der App (id | Name | Kategorie | Status):
+${allRecipes().map(r => `${r.id} | ${r.name} | ${r.cat} | ${r.status}`).join('\n')}
+
+TOOLS:
+- get_recipe für Details eines bestehenden Rezepts.
+- update_recipe NUR wenn Nico ein bestehendes Rezept ändern will – setzt die Änderung direkt (Nico kann rückgängig machen).
+- log_feedback, wenn Nico Feedback zu einem gemachten Eis gibt.
+- propose_recipe für JEDES neue Rezept, das du entwickelst (die App zeigt eine Karte mit „Speichern“). Danach im Text nur kurz erklären, nicht das ganze Rezept wiederholen.
+- Zutaten immer mit Vorrats-ids (ing). Fehlt eine Zutat in der DB: add_ingredient mit Nährwerten pro 100, dann deren id nutzen.
+- set_have, wenn Nico sagt, was er da hat oder was leer ist (z. B. nach einem Foto vom Kühlschrank).
+Bei Fotos: Zutaten erkennen, auflisten, dann 2–3 Eis-Ideen in der gewünschten Kategorie und für die beste direkt propose_recipe.`;
+}
+const ING_SCHEMA = {type:'object', properties:{ing:{type:'string', description:'Vorrats-id'}, name:{type:'string', description:'nur wenn keine id passt'}, amount:{type:'number'}, max:{type:'number', description:'obere Grenze bei Spannen'}, unit:{type:'string', enum:UNITS}, note:{type:'string'}, opt:{type:'boolean'}}, required:['amount','unit']};
+const REC_SCHEMA = {type:'object', properties:{
+  name:{type:'string'}, sub:{type:'string', description:'kurzer Untertitel'}, cat:{type:'string', enum:['protein','natur','deluxe']}, fam:{type:'string', enum:Object.keys(SN.FAMS)},
+  emoji:{type:'string', description:'max. 3 Emojis; Protein immer mit 💪, Himbeere = 🍇, Pistazie = 🌱'}, status:{type:'string', enum:Object.keys(SN.STATUS)}, ver:{type:'string'},
+  ings:{type:'array', items:ING_SCHEMA}, steps:{type:'array', items:{type:'string'}}, flow:{type:'array', items:{type:'string'}, description:'z. B. ["LITE ICE CREAM","Ränder abkratzen","RE-SPIN"]'},
+  mix:{type:'array', items:{type:'string'}}, notes:{type:'array', items:{type:'string'}},
+  x:{type:'number', description:'-1 fruchtig … 1 sahnig'}, y:{type:'number', description:'1 leicht … -1 schwer'},
+  colors:{type:'array', items:{type:'string'}, description:'1–2 Hex-Farben der Eiskugel'}, bg:{type:'string', description:'Hex Hintergrund, hell'}, toppings:{type:'array', items:{type:'string', enum:TOPS}}}, required:['name','cat','ings']};
+function fromAI(o, base) {
+  const r = base ? clone(base) : {id:'', status:'neu', ver:'V1', steps:[], mix:[], notes:[], a:{}};
+  for (const k of ['name','sub','cat','fam','emoji','status','ver','steps','flow','mix','notes','x','y']) if (o[k] !== undefined) r[k] = o[k];
+  if (o.ings) r.ings = o.ings.map(l => { const x = {ing:l.ing || '', amount:+l.amount || 0, unit:UNITS.includes(l.unit) ? l.unit : 'g'}; if (l.max) x.max = +l.max; if (l.note) x.note = l.note; if (l.opt) x.opt = true; if (!pantry()[x.ing]) x.name = l.name || l.ing; return x; });
+  if (o.colors || o.bg || o.toppings) r.a = Object.assign({}, r.a, o.colors ? {c:o.colors} : {}, o.bg ? {bg:o.bg} : {}, o.toppings ? {t:o.toppings} : {});
+  if (!r.flow || !r.flow.length) r.flow = SN.FLOWS[r.cat === 'natur' ? 'sorbet' : r.cat === 'deluxe' ? 'ice' : 'lite'].slice();
+  if (!r.steps.length) r.steps = SN.RECIPES[0].steps.slice();
+  if (!r.fam) r.fam = 'vanille'; if (r.x == null) r.x = 0; if (r.y == null) r.y = 0;
+  return r;
+}
+const mshort = m => ({kcal:Math.round(m.k), protein_g:Math.round(m.p), kh_g:Math.round(m.c), fett_g:Math.round(m.f), gewicht_g:Math.round(m.g), ohne_naehrwerte:m.unknown});
+let CUR = null;
+function tools() {
+  return [
+    {name:'get_recipe', description:'Holt ein Rezept komplett (Zutaten, Schritte, Learnings, Makros).', inputSchema:{type:'object', properties:{id:{type:'string'}}, required:['id']},
+     execute:({id}) => { const r = getR(id); if (!r) throw new Error('Rezept nicht gefunden'); return {id, name:r.name, cat:r.cat, status:r.status, ver:r.ver, ings:r.ings.map(l => ({ing:l.ing, name:iname(l), amount:l.amount, max:l.max, unit:l.unit, note:l.note, opt:l.opt})), steps:r.steps, flow:r.flow, mix:r.mix, notes:r.notes, macros:mshort(macros(r))}; }},
+    {name:'calc_macros', description:'Berechnet exakte Makros für eine Zutatenliste mit den Vorrats-Nährwerten.', inputSchema:{type:'object', properties:{ings:{type:'array', items:ING_SCHEMA}}, required:['ings']},
+     execute:({ings}) => mshort(macros({ings:fromAI({ings, cat:'protein', name:'x'}).ings}))},
+    {name:'propose_recipe', description:'Schlägt ein NEUES Rezept vor. Die App zeigt es als Karte mit Speichern-Button.', inputSchema:REC_SCHEMA,
+     execute:(o) => { const r = fromAI(o); CUR && CUR.cards.push({type:'proposal', recipe:r}); return {ok:true, macros:mshort(macros(r))}; }},
+    {name:'update_recipe', description:'Ändert ein bestehendes Rezept direkt. Nur Felder angeben, die sich ändern; ings ersetzt die komplette Zutatenliste.', inputSchema:{type:'object', properties:Object.assign({id:{type:'string'}}, REC_SCHEMA.properties), required:['id']},
+     execute:(o) => { const old = getR(o.id); if (!old) throw new Error('Rezept nicht gefunden'); const nr = fromAI(o, old); const key = 'u' + Date.now(); UNDO[key] = clone(old); saveR(nr, true); CUR && CUR.cards.push({type:'update', id:o.id, name:nr.name, undo:key}); return {ok:true, macros:mshort(macros(nr))}; }},
+    {name:'log_feedback', description:'Speichert Nicos Feedback als Learning im Rezept.', inputSchema:{type:'object', properties:{id:{type:'string'}, text:{type:'string'}}, required:['id','text']},
+     execute:({id, text}) => { const r = clone(getR(id)); if (!r) throw new Error('Rezept nicht gefunden'); r.notes.push(new Date().toLocaleDateString('de-DE') + ': ' + text); saveR(r, true); CUR && CUR.cards.push({type:'update', id, name:r.name + ' · Learning gemerkt'}); return {ok:true}; }},
+    {name:'add_ingredient', description:'Legt eine neue Zutat mit Nährwerten pro 100 g/ml an.', inputSchema:{type:'object', properties:{name:{type:'string'}, unit:{type:'string', enum:['g','ml']}, kcal:{type:'number'}, protein:{type:'number'}, carbs:{type:'number'}, fat:{type:'number'}, have:{type:'boolean'}}, required:['name','unit','kcal','protein','carbs','fat']},
+     execute:(o) => { const id = 'x-' + slug(o.name); S.pantry[id] = {id, n:o.name, u:o.unit, k:o.kcal, p:o.protein, c:o.carbs, f:o.fat, g:'Sonstiges', have:o.have !== false}; persist(); return {id}; }},
+    {name:'set_have', description:'Markiert Vorrats-Zutaten als vorhanden oder fehlend.', inputSchema:{type:'object', properties:{ids:{type:'array', items:{type:'string'}}, have:{type:'boolean'}}, required:['ids','have']},
+     execute:({ids, have}) => { const P = pantry(); let n = 0; for (const id of ids) if (P[id]) { S.pantry[id] = Object.assign({}, P[id], {have}); n++; } persist(); return {ok:true, geaendert:n}; }},
+  ];
+}
+function md(t) {
+  const lines = esc(t).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').replace(/(^|[^*])\*([^*\n]+)\*/g, '$1<i>$2</i>').split('\n');
+  let h = '', ul = false;
+  for (let l of lines) { const li = l.match(/^\s*(?:[-•*]|\d+\.)\s+(.*)/);
+    if (li) { if (!ul) { h += '<ul>'; ul = true; } h += `<li>${li[1]}</li>`; continue; }
+    if (ul) { h += '</ul>'; ul = false; }
+    const hd = l.match(/^#{1,4}\s+(.*)/); if (hd) { h += `<h4>${hd[1]}</h4>`; continue; }
+    if (l.trim()) h += `<p>${l}</p>`; }
+  return h + (ul ? '</ul>' : '');
+}
+function msgHtml(m, i) {
+  let h = m.role === 'user' ? `<div class="m u">${m.img ? `<img src="${esc(m.img)}" alt="Foto">` : ''}${md(m.text || '')}</div>` : (m.text ? `<div class="m a">${md(m.text)}</div>` : '');
+  (m.cards || []).forEach((c, j) => {
+    if (c.type === 'proposal') { const r = c.recipe, mc = macros(r); h += `<div class="card prop"><div class="im">${SN.art(r)}</div><div class="tx"><b>${esc(r.name)} ${esc(r.emoji || '')}</b><span class="muted" style="font-size:14px">${esc(r.sub || '')}</span><div class="mac"><span class="pill">${Math.round(mc.k)} kcal</span><span class="pill p">${Math.round(mc.p)} g P</span><span class="pill">${r.ings.length} Zutaten</span></div>
+      ${c.saved ? `<button class="btn" data-open="${esc(c.saved)}">✓ Gespeichert – öffnen</button>` : `<div class="row"><button class="btn pri" data-save="${i}:${j}" style="flex:1">Speichern</button><button class="btn" data-peek="${i}:${j}">Ansehen</button></div>`}</div></div>`; }
+    if (c.type === 'update') h += `<div class="upd">✓ ${esc(c.name)} aktualisiert <button class="btn sm" data-open="${esc(c.id)}">Öffnen</button>${c.undo && UNDO[c.undo] ? `<button class="btn sm" data-undo="${esc(c.undo)}:${esc(c.id)}">Rückgängig</button>` : ''}</div>`;
+  });
+  return h;
+}
+const SUGG = ['Was mache ich als nächste Sorte?','Lemon Cheesecake 10 % süßer machen','Neues Eis aus Mango & Skyr','Warum wird mein Eis kristallig?','Deluxe-Eis für Gäste am Wochenende'];
+function vChat() {
+  const off = PWA ? !AU.s : !CAP.sample;
+  return `<div class="view chatv"><div class="msgs" id="msgs">
+   ${!CHAT.length ? `<div class="m a"><p><b>Hey Nico, ich bin Scoopy 🍨</b></p><p>Ich kenne alle deine Rezepte, Regeln und Learnings. Frag mich nach Techniken, lass Rezepte anpassen („Tiramisu 5 g mehr Erythrit“), nenn mir Zutaten – oder schick ein Foto vom Kühlschrank, dann bau ich dir ein Eis.</p></div>` : CHAT.map(msgHtml).join('')}
+   ${off ? (PWA ? `<div class="m a"><p>Melde dich kurz an (gleiches Konto wie FPV Cockpit), dann bin ich da. 🔑</p><p><button class="btn sm pri" data-act="settings">Anmelden</button></p></div>` : `<div class="m a"><p>Scoopy wacht gerade nicht auf 😴 – der Chat braucht die Claude-Verbindung. Öffne Scoopernova auf claude.ai und erlaube „Claude fragen“.</p></div>`) : ''}
+  </div>
+  <div class="composer">
+   ${!CHAT.length ? `<div class="sugg">${SUGG.map(s => `<button data-ask="${esc(s)}">${esc(s)}</button>`).join('')}</div>` : ''}
+   ${PENDING_IMG ? `<div class="thumb"><img src="${esc(PENDING_IMG.url)}" alt="Foto"><span class="muted" style="font-size:14px">Foto angehängt</span><button class="btn sm" data-act="rmimg">Entfernen</button></div>` : ''}
+   <div class="cbar"><button class="iconbtn" data-act="scan" aria-label="Foto">📷</button><textarea id="cin" rows="1" placeholder="Frag Scoopy …" aria-label="Nachricht"></textarea>${CAP.dict ? `<button class="iconbtn mic" id="mic" aria-label="Diktieren">🎤</button>` : ''}<button class="iconbtn send" data-act="send" aria-label="${BUSY ? 'Stopp' : 'Senden'}">${BUSY ? '■' : '↑'}</button></div>
+  </div></div>`;
+}
+function bindChat() {
+  const ta = $('#cin'); if (!ta) return;
+  ta.value = DRAFT; ta.addEventListener('input', () => { DRAFT = ta.value; ta.style.height = 'auto'; ta.style.height = Math.min(140, ta.scrollHeight) + 'px'; });
+  ta.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey && !matchMedia('(pointer:coarse)').matches) { e.preventDefault(); sendChat(); } });
+  setTimeout(() => { window.scrollTo(0, document.body.scrollHeight); }, 30);
+}
+let DRAFT = '';
+async function sendChat(text) {
+  if (BUSY) { ABORT && ABORT.abort(); return; }
+  text = (text ?? DRAFT).trim(); if (!text && !PENDING_IMG) return;
+  if (PWA ? !AU.s : !CAP.sample) { if (PWA) openSettings(); else toast('Scoopy ist offline – Claude-Verbindung fehlt'); return; }
+  const imgp = PENDING_IMG; PENDING_IMG = null; DRAFT = '';
+  CHAT.push({role:'user', text:text || 'Was kann ich daraus machen?', img:imgp ? imgp.thumb : null});
+  CUR = {role:'assistant', text:'', cards:[]}; CHAT.push(CUR); BUSY = true; render();
+  const box = $('#msgs'); box.insertAdjacentHTML('beforeend', '<div class="m a" id="live"><span class="typing"><i></i><i></i><i></i></span></div>'); window.scrollTo(0, document.body.scrollHeight);
+  const hist = []; for (const m of CHAT.slice(-17, -1)) { const c = (m.text || '') + ((m.cards || []).length ? '\n[' + m.cards.map(x => x.type === 'proposal' ? 'Vorschlag: ' + x.recipe.name : 'aktualisiert: ' + x.name).join(', ') + ']' : ''); if (!c.trim()) continue; const last = hist[hist.length - 1]; if (last && last.role === m.role) last.content += '\n' + c; else hist.push({role:m.role, content:c}); }
+  while (hist.length && hist[0].role !== 'user') hist.shift();
+  const input = [{role:'user', content:sysPrompt() + '\n\nVerstanden?'}, {role:'assistant', content:'Alles klar, ich bin Scoopy. 🍨'}].concat(hist);
+  if (input[input.length - 1].role !== 'user') input.push({role:'user', content:text});
+  ABORT = new AbortController();
+  const opts = {tools:tools(), signal:ABORT.signal, cache:false, modelTier:'default', onText:({text:t}) => { CUR.text = t; const l = $('#live'); if (l) l.innerHTML = md(t) || '<span class="typing"><i></i><i></i><i></i></span>'; }};
+  try {
+    if (PWA) { const res = await remoteChat(sysPrompt(), hist.concat(hist.length && hist[hist.length - 1].role === 'user' ? [] : [{role:'user', content:text}]), opts.tools, imgp ? await imgp.blob : null, opts.onText, ABORT.signal); CUR.text = res.text || CUR.text; } else {
+    if (imgp) { let ok = true; try { ok = !!(await CAP.sample.limits()).images; } catch (e) {} if (ok) opts.images = [await imgp.blob]; else toast('Bilder gehen gerade nicht – ich antworte ohne Foto'); }
+    const res = await CAP.sample(input, opts); CUR.text = res.text || CUR.text; }
+  } catch (e) {
+    CUR.text = (e && e.text) || CUR.text || (e && e.code === 'not_granted' ? 'Ohne deine Erlaubnis kann ich nicht antworten – tipp nochmal auf Senden und erlaube „Claude fragen“.' : e && e.code === 'nofn' ? 'Der Scoopy-Server (Supabase-Funktion „scoopy“) ist noch nicht eingerichtet – siehe Einrichtung.' : e && e.code === 'forbidden' ? 'Dein Konto ist für Scoopy nicht freigeschaltet (ALLOWED_EMAILS).' : e && e.code === 'login' ? 'Bitte neu anmelden.' : e && e.code === 'rate_limited' ? 'Kurze Eispause – zu viele Anfragen. Gleich nochmal versuchen.' : (e && e.name === 'AbortError') ? CUR.text || 'Gestoppt.' : 'Da ist was schiefgelaufen. Nochmal?');
+  }
+  BUSY = false; ABORT = null; persistChat(); if (VIEW === 'chat') render(); else toast('Scoopy hat geantwortet', 'Ansehen', () => { location.hash = 'chat'; });
+  CUR = null;
+}
+function ask(text, prefill) {
+  if (SHEET) closeSheet();
+  if (prefill) { DRAFT = text; location.hash = 'chat'; if (VIEW === 'chat') render(); setTimeout(() => { const t = $('#cin'); if (t) { t.focus(); t.setSelectionRange(t.value.length, t.value.length); } }, 80); return; }
+  if (location.hash !== '#chat') location.hash = 'chat'; setTimeout(() => sendChat(text), 60);
+}
+$('#fileImg').addEventListener('change', async e => {
+  const f = e.target.files[0]; e.target.value = ''; if (!f) return;
+  try { const im = await loadImage(f); const big = shrink(im, 1280, .85); PENDING_IMG = {url:shrink(im, 240, .7).url, thumb:shrink(im, 240, .7).url, blob:big.blob};
+    if (MKPEND) { const t = MKPEND; MKPEND = null; ask(t); } else { if (VIEW !== 'chat') location.hash = 'chat'; else render(); }
+  } catch (err) { toast('Foto konnte nicht geladen werden'); }
+});
+let MKPEND = null, MKCAT = 'protein';
+function setupDict() {
+  const d = CAP.dict; let base = '';
+  d.onPartial(({text}) => { const t = $('#cin'); if (t) t.value = base + text; });
+  d.onFinal(({text}) => { base = (base + ' ' + text).trim() + ' '; DRAFT = base; const t = $('#cin'); if (t) t.value = base; });
+  d.onState(({state}) => { const b = $('#mic'); if (b) b.classList.toggle('on', state === 'listening'); if (state === 'listening') base = DRAFT ? DRAFT.trim() + ' ' : ''; });
+}
+
+/* ================= EVENTS ================= */
+document.addEventListener('click', e => {
+  const t = e.target.closest('button,[data-ck],a'); if (!t) { if (e.target.id === 'scrim') closeSheet(); return; }
+  const d = t.dataset;
+  if (d.tab) { if (SHEET) closeSheet(); location.hash = d.tab; if (VIEW === d.tab) window.scrollTo({top:0, behavior:'smooth'}); return; }
+  if (d.open) { openDetail(d.open); return; }
+  if (d.put) { putTruhe(d.put, SLOT); return; }
+  if (d.fav) { const r = clone(getR(d.fav)); r.fav = !r.fav; saveR(r, true); if (r.fav) confetti(); if (SHEET === d.fav) openDetail(d.fav); render(); return; }
+  if (d.cat) { S.prefs.cat = d.cat; persist(); render(); return; }
+  if (d.fam !== undefined && t.classList.contains('chip')) { S.prefs.fam = d.fam; persist(); render(); return; }
+  if (d.mv) { const [id, dir] = d.mv.split(':'); const ids = sorted(filtered()).map(r => r.id); if (!S.order.length) S.order = sorted(allRecipes()).map(r => r.id);
+    let ord = S.order.filter(x => getR(x)); for (const x of ids) if (!ord.includes(x)) ord.push(x); const i = ord.indexOf(id), j = i + (+dir);
+    if (j >= 0 && j < ord.length) { [ord[i], ord[j]] = [ord[j], ord[i]]; } S.order = ord; persist(); render(); return; }
+  if (d.slot) { slotAction(+d.slot); return; }
+  if (d.ck !== undefined) { t.classList.toggle('done'); return; }
+  if (d.edit) { openEditor(d.edit); return; }
+  if (d.ask !== undefined) { ask(d.ask, d.prefill); return; }
+  if (d.view) { S.prefs.view = d.view; persist(); render(); return; }
+  if (d.mx) { MXSEL = d.mx; $$('.dot').forEach(x => x.classList.toggle('sel', x.dataset.mx === d.mx)); $('#mxtip').innerHTML = `<div class="card" style="padding:12px"><div class="list-pick">${pickRow(getR(d.mx))}</div></div>`; return; }
+  if (d.mf) { const [k, v] = d.mf.split(':'); MF[k] = v; $('#mf').innerHTML = modeFinder(); return; }
+  if (d.have) { const p = pantry()[d.have]; S.pantry[d.have] = Object.assign({}, p, {have:p.have === false}); persist(); render(); return; }
+  if (d.ing) { openIng(d.ing); return; }
+  if (d.pm) { PMISS = d.pm === '1'; render(); return; }
+  if (d.mk) { MKCAT = d.mk; $$('[data-mk]').forEach(b => b.setAttribute('aria-pressed', b.dataset.mk === d.mk)); toast(SN.CATS[d.mk].long); return; }
+  if (d.top) { t.setAttribute('aria-pressed', t.getAttribute('aria-pressed') !== 'true'); return; }
+  if (d.save) { const [i, j] = d.save.split(':').map(Number); const c = CHAT[i].cards[j]; const r = clone(c.recipe); r.id = slug(r.name); while (getR(r.id)) r.id += '-' + Math.floor(Math.random() * 90 + 10); saveR(r, true); c.saved = r.id; persistChat(); render(); confetti(); toast(r.name + ' gespeichert', 'Öffnen', () => openDetail(r.id)); return; }
+  if (d.peek) { const [i, j] = d.peek.split(':').map(Number); openEditor(null, CHAT[i].cards[j].recipe); return; }
+  if (d.undo) { const [k, id] = d.undo.split(':'); if (UNDO[k]) { saveR(UNDO[k], true); delete UNDO[k]; render(); toast('Rückgängig gemacht'); } return; }
+  const a = d.act; if (!a) return;
+  if (a === 'close') closeSheet();
+  else if (a === 'new') openEditor(null);
+  else if (a === 'settings') openSettings();
+  else if (a === 'logout') { AU.logout(); closeSheet(); render(); toast('Abgemeldet'); }
+  else if (a === 'syncnow') { SYNC.pull().then(() => toast('Synchronisiert ✓')); closeSheet(); }
+  else if (a === 'signup') { const f = $('#lgf'), fd = new FormData(f); AU.signup(fd.get('e'), fd.get('p')).then(() => { closeSheet(); toast('Konto angelegt 🍨'); SYNC.pull(); }, err => { $('#lgerr').textContent = err.message; }); }
+  else if (a === 'newing') openIng(null);
+  else if (a === 'sortmenu') openSheet(`<h2 class="d-title" style="font-size:26px">Sortieren</h2><div class="list-pick">${SORTS.map(([k, l]) => `<button data-act="setsort" data-k="${k}"><span style="width:28px;text-align:center">${S.prefs.sort === k ? '✓' : ''}</span><b>${l}</b></button>`).join('')}</div><p class="muted" style="font-size:14px">„Meine Reihenfolge“ blendet ↑↓-Knöpfe an jeder Karte ein.</p>`, true);
+  else if (a === 'setsort') { S.prefs.sort = d.k; if (d.k === 'mine' && !S.order.length) S.order = sorted(allRecipes()).map(r => r.id); persist(); closeSheet(); render(); }
+  else if (a === 'truhe') putTruhe(d.id);
+  else if (a === 'eaten') { const t2 = S.truhe[+d.i]; if (t2) markMade(t2.rid); S.truhe[+d.i] = null; persist(); closeSheet(); render(); toast('Lass es dir schmecken 😋'); }
+  else if (a === 'unfreeze') { S.truhe[+d.i] = null; persist(); closeSheet(); render(); }
+  else if (a === 'made') { markMade(d.id); openDetail(d.id); toast('Eingetragen 🎉'); }
+  else if (a === 'fb') { const v = $('#fb').value.trim(); if (!v) return; const r = clone(getR(d.id)); r.notes.push(new Date().toLocaleDateString('de-DE') + ': ' + v); saveR(r, true); openDetail(d.id); toast('Learning gemerkt', 'Scoopy anpassen lassen', () => ask(`Feedback zu „${r.name}“ (id ${r.id}): ${v}. Pass das Rezept entsprechend an.`)); }
+  else if (a === 'copywa') copy(waText(getR(d.id)), 'WhatsApp-Text kopiert');
+  else if (a === 'copyyz') { const r = getR(d.id), m = macros(r), p = v => (Math.round(v / m.g * 1000) / 10).toString().replace('.', ','); copy(`${r.name} – pro 100 g: ${p(m.k)} kcal, ${p(m.p)} g Protein, ${p(m.c)} g KH, ${p(m.f)} g Fett. Portion 1 Pint = ${Math.round(m.g)} g`, 'Yazio-Werte kopiert'); }
+  else if (a === 'dup') { const r = clone(getR(d.id)); r.id = ''; r.name += ' (Kopie)'; delete r.rank; delete r.champ; r.status = 'neu'; openEditor(null, Object.assign(r, {i:undefined})); }
+  else if (a === 'photo') { PHOTOFOR = d.id; $('#filePhoto').click(); }
+  else if (a === 'del') { const old = clone(getR(d.id)); if (SEEDMAP[d.id]) S.deleted.push(d.id); else delete S.recipes[d.id]; persist(); closeSheet(); render(); toast(old.name + ' gelöscht', 'Rückgängig', () => { S.deleted = S.deleted.filter(x => x !== d.id); S.recipes[d.id] = old; persist(); render(); }, 6000); }
+  else if (a === 'reset') { const old = clone(S.recipes[d.id]); delete S.recipes[d.id]; persist(); openDetail(d.id); render(); toast('Original wiederhergestellt', 'Rückgängig', () => { S.recipes[d.id] = old; persist(); render(); }); }
+  else if (a === 'addrow') { readRows(); ED.ings.push({ing:'', name:'', amount:0, unit:'g'}); drawRows(); }
+  else if (a === 'delrow') { readRows(); ED.ings.splice(+d.i, 1); drawRows(); liveMac(); }
+  else if (a === 'send') sendChat();
+  else if (a === 'rmimg') { PENDING_IMG = null; render(); }
+  else if (a === 'clearchat') { const old = CHAT; CHAT = []; persistChat(); render(); toast('Chat geleert', 'Rückgängig', () => { CHAT = old; persistChat(); render(); }); }
+  else if (a === 'scan') { if (VIEW === 'start') { const z = ($('#mkin') || {}).value || ''; MKPEND = `Hier ist ein Foto meiner Zutaten${z ? ' (dazu habe ich: ' + z + ')' : ''}. Erkenne alles und entwickle mir daraus ein ${SN.CATS[MKCAT].long}-Eis.`; } $('#fileImg').click(); }
+  else if (a === 'mkgo') { const z = $('#mkin').value.trim(); if (!z) { $('#mkin').focus(); toast('Erst Zutaten eingeben 🙂'); return; } ask(`Entwickle mir ein ${SN.CATS[MKCAT].long}-Eis (Kategorie ${MKCAT}) aus: ${z}. Nutze sonst meinen Vorrat und meine Regeln.`); }
+});
+document.addEventListener('click', e => { if (e.target.id === 'mic') { const d = CAP.dict; if (!d) return; const b = e.target; if (b.classList.contains('on')) d.stop().catch(() => {}); else d.start().catch(err => { if (err && err.code === 'not_granted') { b.remove(); } }); } });
+document.addEventListener('input', e => {
+  if (e.target.id === 'q') { S.prefs.q = e.target.value; clearTimeout(window._qt); window._qt = setTimeout(() => { const pos = e.target.selectionStart; persist(); render(); const q = $('#q'); if (q) { q.focus(); q.setSelectionRange(pos, pos); } }, 250); }
+  if (e.target.id === 'pq') { PQ = e.target.value; clearTimeout(window._pt); window._pt = setTimeout(() => { render(); const q = $('#pq'); if (q) { q.focus(); q.setSelectionRange(PQ.length, PQ.length); } }, 250); }
+});
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && SHEET !== null) closeSheet(); if (e.key === 'Enter' && e.target.id === 'mkin') { e.preventDefault(); $('[data-act=mkgo]').click(); } });
+$('#scrim').addEventListener('click', closeSheet);
+let logoTaps = 0; $('#logo').innerHTML = SN.logo();
+$('#logo').addEventListener('click', () => { logoTaps++; clearTimeout(window._lt); window._lt = setTimeout(() => logoTaps = 0, 1500); if (logoTaps >= 5) { logoTaps = 0; confetti(true); toast('🥶 BRAIN FREEZE!'); } else if (VIEW !== 'start') location.hash = 'start'; });
+window.addEventListener('scroll', () => $('#hdr').classList.toggle('scrolled', scrollY > 4), {passive:true});
+new ResizeObserver(() => { if (VIEW === 'rezepte' && S.prefs.view === 'matrix') layoutMatrix(); }).observe(document.body);
+setInterval(() => { if (VIEW === 'start' && !SHEET) { const tr = $('.truhe'); if (tr) tr.outerHTML = vTruhe(); } }, 60000);
+
+$('#subttl').textContent = 'created by munkolas · v' + VERSION;
+if (PWA && 'serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
+route(); if (!$('#main').innerHTML) render();
+initCaps();
+}
+
+</script>
+
+</body>
+</html>
