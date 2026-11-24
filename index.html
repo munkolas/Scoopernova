@@ -414,6 +414,14 @@ details.acc li::before{content:"";position:absolute;left:2px;top:.62em;width:7px
 .rate button[aria-pressed=false] path:first-child{opacity:.35}
 .hero .herobtn svg{width:18px;height:18px;position:static}
 .rate button svg{width:36px!important;height:36px!important}
+/* v1.5.1 Chat-Grafiken */
+.arow{display:flex;gap:8px;align-items:flex-end;align-self:flex-start;max-width:min(92%,660px)}
+.arow .m.a{max-width:none}
+.ava{width:34px;height:34px;flex:none;border-radius:50%;background:var(--berrybg);display:grid;place-items:center;padding:3px}
+.ava svg{width:100%;height:100%}
+.ava .orbit{animation:none}
+.tip .ava.lg2{width:44px;height:44px;font-size:0}
+.cbar .iconbtn svg,.maker .iconbtn svg{display:block}
 
 </style>
 </head>
@@ -421,7 +429,7 @@ details.acc li::before{content:"";position:absolute;left:2px;top:.62em;width:7px
 <div class="drip" aria-hidden="true"></div>
 <div class="app" id="app">
   <header class="hdr" id="hdr"><div class="hdr-in">
-    <div class="brand"><button class="lg" id="logo" aria-label="Scoopernova"></button><div><h1 id="ttl">Scoopernova</h1><small id="subttl">created by munkolas · v1.5</small></div></div>
+    <div class="brand"><button class="lg" id="logo" aria-label="Scoopernova"></button><div><h1 id="ttl">Scoopernova</h1><small id="subttl">created by munkolas · v1.5.1</small></div></div>
     <div id="hdrbtns" class="row"></div>
   </div></header>
   <main id="main"></main>
@@ -1087,7 +1095,7 @@ async function initCaps() {
 
 
 /* ================= PWA-MODUS: SUPABASE (Konto wie FPV Cockpit) ================= */
-const VERSION = '1.5';
+const VERSION = '1.5.1';
 const PWA = !!window.SN_PWA;
 const AI = !PWA; /* KI-Funktionen nur in der Claude-Version – die iPhone-App bleibt kostenlos */
 const CLAUDE_URL = 'https://claude.ai/artifact/8mz7qbXNxS4notwaJyptjo';
@@ -1146,8 +1154,8 @@ function openSettings() {
    <div class="card" style="padding:14px;margin-top:16px"><b>${PWA ? 'Konto' : 'Speicher'}</b><p class="muted" style="margin:4px 0 10px;font-size:15px">${esc(SYNC.label())}</p>
    ${PWA ? (AU.s ? `<div class="row"><button class="btn" data-act="syncnow" style="flex:1">↻ Jetzt synchronisieren</button><button class="btn danger" data-act="logout" style="flex:1">Abmelden</button></div>`
      : `<form class="ed" id="lgf"><p class="muted" style="margin:0;font-size:14px">Gleiches Konto wie FPV Cockpit.</p><input class="field" name="e" type="email" autocomplete="email" placeholder="E-Mail" required><input class="field" name="p" type="password" autocomplete="current-password" placeholder="Passwort (mind. 6 Zeichen)" required minlength="6"><div class="row"><button class="btn pri" style="flex:2">Anmelden</button><button type="button" class="btn" data-act="signup" style="flex:1">Neu</button></div><p class="muted" id="lgerr" style="margin:0;font-size:14px"></p></form>`) : ''}</div>
-   <div class="card" style="padding:14px;margin-top:12px"><b>Neu in ${VERSION}</b><ul class="bul" style="margin-top:8px"><li>Rezepte als eigener Tab, Start aufgeräumt</li><li>v1.5: Gefriertruhe kennt halbe Pints (¾ · ½ · ¼ übrig)</li><li>v1.4.1: heißt jetzt Flavour-Matrix</li><li>v1.4: neue Grafiken, Bewerten mit Kugeln, Bild ändern direkt im Rezept, Matrix öffnet Rezepte</li><li>v1.3: Rezepte aufgeräumt, „Neu“ als eigene Seite, Gemacht → landet automatisch in der Truhe</li><li>iPhone-App über GitHub & Supabase</li><li>v1.2: iPhone-App ohne KI &amp; kostenlos – Scoopy bleibt in der Claude-Version</li></ul></div>`, true);
-  const f = $('#lgf'); if (f) f.addEventListener('submit', async e => { e.preventDefault(); const fd = new FormData(f); try { await AU.login(fd.get('e'), fd.get('p')); closeSheet(); toast('Angemeldet 🍨'); await SYNC.pull(); } catch (err) { $('#lgerr').textContent = err.message; } });
+   <div class="card" style="padding:14px;margin-top:12px"><b>Neu in ${VERSION}</b><ul class="bul" style="margin-top:8px"><li>Rezepte als eigener Tab, Start aufgeräumt</li><li>v1.5.1: Chat mit Grafiken statt Emojis</li><li>v1.5: Gefriertruhe kennt halbe Pints (¾ · ½ · ¼ übrig)</li><li>v1.4.1: heißt jetzt Flavour-Matrix</li><li>v1.4: neue Grafiken, Bewerten mit Kugeln, Bild ändern direkt im Rezept, Matrix öffnet Rezepte</li><li>v1.3: Rezepte aufgeräumt, „Neu“ als eigene Seite, Gemacht → landet automatisch in der Truhe</li><li>iPhone-App über GitHub & Supabase</li><li>v1.2: iPhone-App ohne KI &amp; kostenlos – Scoopy bleibt in der Claude-Version</li></ul></div>`, true);
+  const f = $('#lgf'); if (f) f.addEventListener('submit', async e => { e.preventDefault(); const fd = new FormData(f); try { await AU.login(fd.get('e'), fd.get('p')); closeSheet(); toast('Angemeldet'); await SYNC.pull(); } catch (err) { $('#lgerr').textContent = err.message; } });
 }
 
 /* ================= UI HELPERS ================= */
@@ -1261,10 +1269,10 @@ function vStart() {
   const all = allRecipes();
   const hof = all.filter(r => r.rank).sort((a, b) => a.rank - b.rank).concat(all.filter(r => r.champ));
   return `<div class="view">
-  ${pageTitle(hello() + ' 🍨', 'Was landet heute im Becher?')}
+  ${pageTitle(hello(), 'Was landet heute im Becher?')}
   ${vTruhe()}
-  ${AI ? '' : `<section class="sec card tip"><span class="ti">✨</span><p><b>Scoopy & Eis-Entwickeln</b> gibt’s in der Claude-Version – ohne Zusatzkosten. <a class="lnk" href="${CLAUDE_URL}" target="_blank" rel="noopener">In Claude öffnen ›</a></p></section><template>`}<section class="sec card maker"><div class="row" style="justify-content:space-between"><h3>✨ Eis entwickeln</h3><div class="seg mini" id="mkcat" role="group" aria-label="Kategorie">${['protein','natur','deluxe'].map(c => `<button aria-pressed="${MKCAT === c}" data-mk="${c}" aria-label="${SN.CATS[c].label}">${SN.CATS[c].icon}</button>`).join('')}</div></div>
-   <div class="cbar" style="box-shadow:none"><input class="field" id="mkin" placeholder="Zutaten, z. B. Mango, Skyr …" enterkeyhint="go" style="border:0;background:transparent;min-height:44px"><button class="iconbtn" data-act="scan" aria-label="Zutaten fotografieren">📷</button><button class="iconbtn send" data-act="mkgo" aria-label="Entwickeln">↑</button></div>
+  ${AI ? '' : `<section class="sec card tip"><span class="ti ava lg2">${SN.logo()}</span><p><b>Scoopy & Eis-Entwickeln</b> gibt’s in der Claude-Version – ohne Zusatzkosten. <a class="lnk" href="${CLAUDE_URL}" target="_blank" rel="noopener">In Claude öffnen ›</a></p></section><template>`}<section class="sec card maker"><div class="row" style="justify-content:space-between"><h3>Eis entwickeln</h3><div class="seg mini" id="mkcat" role="group" aria-label="Kategorie">${['protein','natur','deluxe'].map(c => `<button aria-pressed="${MKCAT === c}" data-mk="${c}" >${SN.CATS[c].label}</button>`).join('')}</div></div>
+   <div class="cbar" style="box-shadow:none"><input class="field" id="mkin" placeholder="Zutaten, z. B. Mango, Skyr …" enterkeyhint="go" style="border:0;background:transparent;min-height:44px"><button class="iconbtn" data-act="scan" aria-label="Zutaten fotografieren">${IC.cam}</button><button class="iconbtn send" data-act="mkgo" aria-label="Entwickeln">${IC.send}</button></div>
   </section>
   ${AI ? '' : '</template>'}<section class="sec"><div class="sec-h"><h2>Deine Top 5</h2><a class="lnk" href="#rezepte">Alle Rezepte ›</a></div>
    <div class="hof">${hof.map(r => { const m = macros(r); return `<button class="card hcard" data-open="${esc(r.id)}"><div class="im">${img(r)}</div>
@@ -1303,7 +1311,7 @@ const FILLTXT = {1:'voll', 0.75:'¾', 0.5:'½', 0.25:'¼'};
 const slotReady = t => t.at + (t.rest ? 12 : 24) * 36e5 - Date.now();
 function vTruhe() {
   const used = S.truhe.filter(Boolean).length;
-  return `<section class="sec card truhe"><div class="truhe-top"><div><b>🧊 Gefriertruhe</b> <span class="muted" style="font-size:14px;font-weight:600">${used}/6</span></div>${AI && used < 6 && used > 0 ? `<button class="btn sm" data-ask="In meiner Truhe sind: ${S.truhe.filter(Boolean).map(t => (getR(t.rid) || {}).name).filter(Boolean).join(', ')}. Was mache ich als nächste Sorte? Gib mir 3 Vorschläge, die sich davon abheben.">Was als Nächstes? ✨</button>` : ''}</div>
+  return `<section class="sec card truhe"><div class="truhe-top"><div><b>Gefriertruhe</b> <span class="muted" style="font-size:14px;font-weight:600">${used}/6</span></div>${AI && used < 6 && used > 0 ? `<button class="btn sm" data-ask="In meiner Truhe sind: ${S.truhe.filter(Boolean).map(t => (getR(t.rid) || {}).name).filter(Boolean).join(', ')}. Was mache ich als nächste Sorte? Gib mir 3 Vorschläge, die sich davon abheben.">Was als Nächstes? ✨</button>` : ''}</div>
   <div class="slots">${S.truhe.map((t, i) => { const r = t && getR(t.rid); if (!r) return `<button class="slot empty" data-slot="${i}" aria-label="Becher ${i + 1} leer"><span class="plus">＋</span><small>frei</small></button>`;
     const left = slotReady(t), ready = left <= 0; const h = Math.ceil(left / 36e5); const f = t.fill || 1;
     return `<button class="slot ${ready ? 'ready' : ''}" data-slot="${i}" aria-label="${esc(r.name)}">${ready ? '' : '<span class="frost"></span>'}<span class="em">${esc((r.emoji || '').split(/(?=[\uD800-\uDBFF])/)[0] || '🍨')}</span>${SN.pintIcon((r.a.c || [])[0], .82 * f, ready)}<small>${f < 1 ? FILLTXT[f] + ' · ' : ''}${ready ? 'bereit' : h + ' h'}</small></button>`; }).join('')}</div></section>`;
@@ -1453,7 +1461,7 @@ function submitEditor(id) {
   const before = id ? clone(getR(id)) : null;
   delete r._from;
   saveR(r, VIEW === 'neu'); if (SHEET) closeSheet();
-  if (VIEW === 'neu') { ED = null; location.hash = 'rezepte'; setTimeout(() => openDetail(r.id), 120); confetti(); toast('Neues Rezept angelegt 🍨'); return; }
+  if (VIEW === 'neu') { ED = null; location.hash = 'rezepte'; setTimeout(() => openDetail(r.id), 120); confetti(); toast('Neues Rezept angelegt'); return; }
   toast(id ? 'Gespeichert' : 'Neues Rezept angelegt', before ? 'Rückgängig' : 'Öffnen', () => { if (before) saveR(before); else openDetail(r.id); });
 }
 
@@ -1572,10 +1580,18 @@ $('#filePhoto').addEventListener('change', async e => {
 });
 
 /* ================= SCOOPY (KI-CHAT) ================= */
+const IC = {
+  cam:'<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>',
+  mic:'<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>',
+  send:'<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6"/></svg>',
+  stop:'<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><rect x="5" y="5" width="14" height="14" rx="3" fill="currentColor"/></svg>',
+};
+const avatar = () => `<span class="ava" aria-hidden="true">${SN.logo()}</span>`;
+const noEmoji = t => String(t || '').replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}]\uFE0F?/gu, '').replace(/[ \t]{2,}/g, ' ');
 let PENDING_IMG = null, BUSY = false, ABORT = null, UNDO = {};
 function sysPrompt() {
   const P = Object.values(pantry());
-  return `Du bist „Scoopy“, der Ninja-Creami-Coach in Nicos App „Scoopernova“. Antworte auf Deutsch, locker, mit Emojis sparsam. Rezepte & Antworten kurz und knackig, kein Gelaber.
+  return `Du bist „Scoopy“, der Ninja-Creami-Coach in Nicos App „Scoopernova“. Antworte auf Deutsch, locker. Benutze KEINE Emojis (die App zeigt eigene Grafiken). Rezepte & Antworten kurz und knackig, kein Gelaber.
 
 GERÄT: Ninja Creami Basismodell (Modi: ICE CREAM, LITE ICE CREAM, SORBET, GELATO, MILKSHAKE, SMOOTHIE BOWL, MIX-IN, RE-SPIN; KEIN Frozen-Yogurt-Knopf → LITE ICE CREAM). 6 Becher. Max-Linie ≈ 460 ml – Rezepte immer nach Volumen prüfen.
 
@@ -1662,9 +1678,9 @@ function md(t) {
   return h + (ul ? '</ul>' : '');
 }
 function msgHtml(m, i) {
-  let h = m.role === 'user' ? `<div class="m u">${m.img ? `<img src="${esc(m.img)}" alt="Foto">` : ''}${md(m.text || '')}</div>` : (m.text ? `<div class="m a">${md(m.text)}</div>` : '');
+  let h = m.role === 'user' ? `<div class="m u">${m.img ? `<img src="${esc(m.img)}" alt="Foto">` : ''}${md(m.text || '')}</div>` : (m.text ? `<div class="arow">${avatar()}<div class="m a">${md(noEmoji(m.text))}</div></div>` : '');
   (m.cards || []).forEach((c, j) => {
-    if (c.type === 'proposal') { const r = c.recipe, mc = macros(r); h += `<div class="card prop"><div class="im">${SN.art(r)}</div><div class="tx"><b>${esc(r.name)} ${esc(r.emoji || '')}</b><span class="muted" style="font-size:14px">${esc(r.sub || '')}</span><div class="mac"><span class="pill">${Math.round(mc.k)} kcal</span><span class="pill p">${Math.round(mc.p)} g P</span><span class="pill">${r.ings.length} Zutaten</span></div>
+    if (c.type === 'proposal') { const r = c.recipe, mc = macros(r); h += `<div class="card prop"><div class="im">${SN.art(r)}</div><div class="tx"><b>${esc(r.name)}</b><span class="muted" style="font-size:14px">${esc(r.sub || '')}</span><div class="mac"><span class="pill">${Math.round(mc.k)} kcal</span><span class="pill p">${Math.round(mc.p)} g P</span><span class="pill">${r.ings.length} Zutaten</span></div>
       ${c.saved ? `<button class="btn" data-open="${esc(c.saved)}">✓ Gespeichert – öffnen</button>` : `<div class="row"><button class="btn pri" data-save="${i}:${j}" style="flex:1">Speichern</button><button class="btn" data-peek="${i}:${j}">Ansehen</button></div>`}</div></div>`; }
     if (c.type === 'update') h += `<div class="upd">✓ ${esc(c.name)} aktualisiert <button class="btn sm" data-open="${esc(c.id)}">Öffnen</button>${c.undo && UNDO[c.undo] ? `<button class="btn sm" data-undo="${esc(c.undo)}:${esc(c.id)}">Rückgängig</button>` : ''}</div>`;
   });
@@ -1674,13 +1690,13 @@ const SUGG = ['Was mache ich als nächste Sorte?','Lemon Cheesecake 10 % süßer
 function vChat() {
   const off = PWA ? !AU.s : !CAP.sample;
   return `<div class="view chatv"><div class="msgs" id="msgs">
-   ${!CHAT.length ? `<div class="m a"><p><b>Hey Nico, ich bin Scoopy 🍨</b></p><p>Ich kenne alle deine Rezepte, Regeln und Learnings. Frag mich nach Techniken, lass Rezepte anpassen („Tiramisu 5 g mehr Erythrit“), nenn mir Zutaten – oder schick ein Foto vom Kühlschrank, dann bau ich dir ein Eis.</p></div>` : CHAT.map(msgHtml).join('')}
-   ${off ? (PWA ? `<div class="m a"><p>Melde dich kurz an (gleiches Konto wie FPV Cockpit), dann bin ich da. 🔑</p><p><button class="btn sm pri" data-act="settings">Anmelden</button></p></div>` : `<div class="m a"><p>Scoopy wacht gerade nicht auf 😴 – der Chat braucht die Claude-Verbindung. Öffne Scoopernova auf claude.ai und erlaube „Claude fragen“.</p></div>`) : ''}
+   ${!CHAT.length ? `<div class="arow">${avatar()}<div class="m a"><p><b>Hey Nico, ich bin Scoopy.</b></p><p>Ich kenne alle deine Rezepte, Regeln und Learnings. Frag mich nach Techniken, lass Rezepte anpassen („Tiramisu 5 g mehr Erythrit“), nenn mir Zutaten – oder schick ein Foto vom Kühlschrank, dann bau ich dir ein Eis.</p></div></div>` : CHAT.map(msgHtml).join('')}
+   ${off ? (PWA ? `<div class="m a"><p>Melde dich kurz an (gleiches Konto wie FPV Cockpit), dann bin ich da.</p><p><button class="btn sm pri" data-act="settings">Anmelden</button></p></div>` : `<div class="arow">${avatar()}<div class="m a"><p>Scoopy wacht gerade nicht auf – der Chat braucht die Claude-Verbindung. Öffne Scoopernova auf claude.ai und erlaube „Claude fragen“.</p></div></div>`) : ''}
   </div>
   <div class="composer">${CHAT.length ? `<button class="btn sm ghost" data-act="clearchat" style="justify-self:start">Chat leeren</button>` : ''}
    ${!CHAT.length ? `<div class="sugg">${SUGG.map(s => `<button data-ask="${esc(s)}">${esc(s)}</button>`).join('')}</div>` : ''}
    ${PENDING_IMG ? `<div class="thumb"><img src="${esc(PENDING_IMG.url)}" alt="Foto"><span class="muted" style="font-size:14px">Foto angehängt</span><button class="btn sm" data-act="rmimg">Entfernen</button></div>` : ''}
-   <div class="cbar"><button class="iconbtn" data-act="scan" aria-label="Foto">📷</button><textarea id="cin" rows="1" placeholder="Frag Scoopy …" aria-label="Nachricht"></textarea>${CAP.dict ? `<button class="iconbtn mic" id="mic" aria-label="Diktieren">🎤</button>` : ''}<button class="iconbtn send" data-act="send" aria-label="${BUSY ? 'Stopp' : 'Senden'}">${BUSY ? '■' : '↑'}</button></div>
+   <div class="cbar"><button class="iconbtn" data-act="scan" aria-label="Foto">${IC.cam}</button><textarea id="cin" rows="1" placeholder="Frag Scoopy …" aria-label="Nachricht"></textarea>${CAP.dict ? `<button class="iconbtn mic" id="mic" aria-label="Diktieren">${IC.mic}</button>` : ''}<button class="iconbtn send" data-act="send" aria-label="${BUSY ? 'Stopp' : 'Senden'}">${BUSY ? IC.stop : IC.send}</button></div>
   </div></div>`;
 }
 function bindChat() {
@@ -1697,13 +1713,13 @@ async function sendChat(text) {
   const imgp = PENDING_IMG; PENDING_IMG = null; DRAFT = '';
   CHAT.push({role:'user', text:text || 'Was kann ich daraus machen?', img:imgp ? imgp.thumb : null});
   CUR = {role:'assistant', text:'', cards:[]}; CHAT.push(CUR); BUSY = true; render();
-  const box = $('#msgs'); box.insertAdjacentHTML('beforeend', '<div class="m a" id="live"><span class="typing"><i></i><i></i><i></i></span></div>'); window.scrollTo(0, document.body.scrollHeight);
+  const box = $('#msgs'); box.insertAdjacentHTML('beforeend', `<div class="arow">${avatar()}<div class="m a" id="live"><span class="typing"><i></i><i></i><i></i></span></div></div>`); window.scrollTo(0, document.body.scrollHeight);
   const hist = []; for (const m of CHAT.slice(-17, -1)) { const c = (m.text || '') + ((m.cards || []).length ? '\n[' + m.cards.map(x => x.type === 'proposal' ? 'Vorschlag: ' + x.recipe.name : 'aktualisiert: ' + x.name).join(', ') + ']' : ''); if (!c.trim()) continue; const last = hist[hist.length - 1]; if (last && last.role === m.role) last.content += '\n' + c; else hist.push({role:m.role, content:c}); }
   while (hist.length && hist[0].role !== 'user') hist.shift();
-  const input = [{role:'user', content:sysPrompt() + '\n\nVerstanden?'}, {role:'assistant', content:'Alles klar, ich bin Scoopy. 🍨'}].concat(hist);
+  const input = [{role:'user', content:sysPrompt() + '\n\nVerstanden?'}, {role:'assistant', content:'Alles klar, ich bin Scoopy.'}].concat(hist);
   if (input[input.length - 1].role !== 'user') input.push({role:'user', content:text});
   ABORT = new AbortController();
-  const opts = {tools:tools(), signal:ABORT.signal, cache:false, modelTier:'default', onText:({text:t}) => { CUR.text = t; const l = $('#live'); if (l) l.innerHTML = md(t) || '<span class="typing"><i></i><i></i><i></i></span>'; }};
+  const opts = {tools:tools(), signal:ABORT.signal, cache:false, modelTier:'default', onText:({text:t}) => { CUR.text = t; const l = $('#live'); if (l) l.innerHTML = md(noEmoji(t)) || '<span class="typing"><i></i><i></i><i></i></span>'; }};
   try {
     if (PWA) { const res = await remoteChat(sysPrompt(), hist.concat(hist.length && hist[hist.length - 1].role === 'user' ? [] : [{role:'user', content:text}]), opts.tools, imgp ? await imgp.blob : null, opts.onText, ABORT.signal); CUR.text = res.text || CUR.text; } else {
     if (imgp) { let ok = true; try { ok = !!(await CAP.sample.limits()).images; } catch (e) {} if (ok) opts.images = [await imgp.blob]; else toast('Bilder gehen gerade nicht – ich antworte ohne Foto'); }
@@ -1770,7 +1786,7 @@ document.addEventListener('click', e => {
   else if (a === 'settings') openSettings();
   else if (a === 'logout') { AU.logout(); closeSheet(); render(); toast('Abgemeldet'); }
   else if (a === 'syncnow') { SYNC.pull().then(() => toast('Synchronisiert ✓')); closeSheet(); }
-  else if (a === 'signup') { const f = $('#lgf'), fd = new FormData(f); AU.signup(fd.get('e'), fd.get('p')).then(() => { closeSheet(); toast('Konto angelegt 🍨'); SYNC.pull(); }, err => { $('#lgerr').textContent = err.message; }); }
+  else if (a === 'signup') { const f = $('#lgf'), fd = new FormData(f); AU.signup(fd.get('e'), fd.get('p')).then(() => { closeSheet(); toast('Konto angelegt'); SYNC.pull(); }, err => { $('#lgerr').textContent = err.message; }); }
   else if (a === 'newing') openIng(null);
   else if (a === 'sortmenu') openSheet(`<h2 class="d-title" style="font-size:26px">Sortieren</h2><div class="list-pick">${SORTS.map(([k, l]) => `<button data-act="setsort" data-k="${k}"><span style="width:28px;text-align:center">${S.prefs.sort === k ? '✓' : ''}</span><b>${l}</b></button>`).join('')}</div><p class="muted" style="font-size:14px">„Meine Reihenfolge“ blendet ↑↓-Knöpfe an jeder Karte ein.</p>`, true);
   else if (a === 'setsort') { S.prefs.sort = d.k; if (d.k === 'mine' && !S.order.length) S.order = sorted(allRecipes()).map(r => r.id); persist(); render(); if (d.keep) openFilter(); else if (SHEET) closeSheet(); }
