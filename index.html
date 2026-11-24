@@ -65,15 +65,15 @@ input,select,textarea{font-size:16px}
 .tab{display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px 0;min-height:50px;color:var(--mute);font-size:11px;font-weight:600;letter-spacing:.01em}
 .tab svg{width:26px;height:26px}
 .tab[aria-current=page]{color:var(--berryd)}
-.tab.chat .bub{width:54px;height:54px;margin-top:-22px;border-radius:50%;background:linear-gradient(145deg,#FF7DA0,#FF4D7E);display:grid;place-items:center;box-shadow:0 8px 20px rgba(255,77,126,.38);color:#fff;transition:transform .25s cubic-bezier(.3,1.6,.5,1)}
-.tab.chat .bub svg{width:28px;height:28px}
-.tab.chat:active .bub{transform:scale(.9) rotate(-8deg)}
+.tab.hl .bub{width:54px;height:54px;margin-top:-22px;border-radius:50%;background:linear-gradient(145deg,#FF7DA0,#FF4D7E);display:grid;place-items:center;box-shadow:0 8px 20px rgba(255,77,126,.38);color:#fff;transition:transform .25s cubic-bezier(.3,1.6,.5,1)}
+.tab.hl .bub svg{width:28px;height:28px}
+.tab.hl:active .bub{transform:scale(.9) rotate(-8deg)}
 @media(min-width:900px){
  .tabs{top:0;bottom:0;right:auto;width:96px;flex-direction:column;justify-content:center;border-top:0;border-right:1px solid var(--line);padding:20px 6px}
  .tabs-in{grid-template-columns:1fr;gap:14px}
  .app{padding-left:96px;padding-bottom:40px}
  .hdr{padding-left:calc(96px + 4vw)} .hdr{margin-left:-96px}
- .tab.chat .bub{margin-top:0}
+ .tab.hl .bub{margin-top:0}
 }
 
 /* Sections */
@@ -375,6 +375,30 @@ details.acc li::before{content:"";position:absolute;left:2px;top:.62em;width:7px
  .hdr{padding-top:calc(env(safe-area-inset-top) + 16px)}
  .tools{top:calc(env(safe-area-inset-top) + 64px)}
 }
+/* v1.3 – aufgeräumte Rezepte & Neu-Seite */
+.newbtn{min-height:42px;padding:0 16px;border-radius:21px;font-size:15px;white-space:nowrap}
+.iconbtn{position:relative}
+.iconbtn.act{background:var(--berrybg);color:var(--berryd)}
+.badge{position:absolute;top:2px;right:2px;min-width:17px;height:17px;border-radius:9px;background:var(--berry);color:#fff;font:700 11px/17px system-ui;font-style:normal;padding:0 4px}
+.chip.on{background:var(--berrybg);color:var(--berryd)}
+.chips.wrap{flex-wrap:wrap;overflow:visible}
+.fsec{margin:14px 0}.fsec>b{display:block;margin-bottom:8px;font:800 16px var(--title)}
+.grp{margin:22px 0 6px}
+.grp-h{display:flex;align-items:baseline;gap:10px;margin:0 0 10px}
+.grp-h h3{margin:0;font:800 22px/1.2 var(--title)}
+.grp-h span{color:var(--mute);font-size:14px;font-weight:600}
+.heart{width:36px;height:36px;color:#fff;background:rgba(40,20,10,.22);backdrop-filter:blur(6px)}
+.heart[aria-pressed=true]{background:rgba(255,255,255,.85)}
+.bases{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px}
+@media(min-width:640px){.bases{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.base{background:var(--card);border-radius:18px;box-shadow:var(--sh);padding:8px;display:grid;gap:6px;text-align:left;border:2px solid transparent}
+.base .mini{aspect-ratio:4/3;border-radius:12px;overflow:hidden;display:block}
+.base .mini svg{width:100%;height:100%;display:block}
+.base b{font:800 15px/1.2 var(--title);padding:0 4px 4px}
+.base.on{border-color:var(--berry)}
+.lnk2{color:var(--berryd);font-weight:700;min-height:44px}
+.livemac.pg{position:static;border-top:1px solid var(--line);background:transparent}
+.tab.hl .bub svg{width:28px;height:28px}
 
 </style>
 </head>
@@ -382,7 +406,7 @@ details.acc li::before{content:"";position:absolute;left:2px;top:.62em;width:7px
 <div class="drip" aria-hidden="true"></div>
 <div class="app" id="app">
   <header class="hdr" id="hdr"><div class="hdr-in">
-    <div class="brand"><button class="lg" id="logo" aria-label="Scoopernova"></button><div><h1 id="ttl">Scoopernova</h1><small id="subttl">created by munkolas · v1.2</small></div></div>
+    <div class="brand"><button class="lg" id="logo" aria-label="Scoopernova"></button><div><h1 id="ttl">Scoopernova</h1><small id="subttl">created by munkolas · v1.3</small></div></div>
     <div id="hdrbtns" class="row"></div>
   </div></header>
   <main id="main"></main>
@@ -1041,7 +1065,7 @@ async function initCaps() {
 
 
 /* ================= PWA-MODUS: SUPABASE (Konto wie FPV Cockpit) ================= */
-const VERSION = '1.2';
+const VERSION = '1.3';
 const PWA = !!window.SN_PWA;
 const AI = !PWA; /* KI-Funktionen nur in der Claude-Version – die iPhone-App bleibt kostenlos */
 const CLAUDE_URL = 'https://claude.ai/artifact/8mz7qbXNxS4notwaJyptjo';
@@ -1100,7 +1124,7 @@ function openSettings() {
    <div class="card" style="padding:14px;margin-top:16px"><b>${PWA ? 'Konto' : 'Speicher'}</b><p class="muted" style="margin:4px 0 10px;font-size:15px">${esc(SYNC.label())}</p>
    ${PWA ? (AU.s ? `<div class="row"><button class="btn" data-act="syncnow" style="flex:1">↻ Jetzt synchronisieren</button><button class="btn danger" data-act="logout" style="flex:1">Abmelden</button></div>`
      : `<form class="ed" id="lgf"><p class="muted" style="margin:0;font-size:14px">Gleiches Konto wie FPV Cockpit.</p><input class="field" name="e" type="email" autocomplete="email" placeholder="E-Mail" required><input class="field" name="p" type="password" autocomplete="current-password" placeholder="Passwort (mind. 6 Zeichen)" required minlength="6"><div class="row"><button class="btn pri" style="flex:2">Anmelden</button><button type="button" class="btn" data-act="signup" style="flex:1">Neu</button></div><p class="muted" id="lgerr" style="margin:0;font-size:14px"></p></form>`) : ''}</div>
-   <div class="card" style="padding:14px;margin-top:12px"><b>Neu in ${VERSION}</b><ul class="bul" style="margin-top:8px"><li>Rezepte als eigener Tab, Start aufgeräumt</li><li>Lust-Matrix jetzt in den Rezepten (Umschalter oben)</li><li>iPhone-App über GitHub & Supabase</li><li>v1.2: iPhone-App ohne KI &amp; kostenlos – Scoopy bleibt in der Claude-Version</li></ul></div>`, true);
+   <div class="card" style="padding:14px;margin-top:12px"><b>Neu in ${VERSION}</b><ul class="bul" style="margin-top:8px"><li>Rezepte als eigener Tab, Start aufgeräumt</li><li>v1.3: Rezepte aufgeräumt, „Neu“ als eigene Seite, Gemacht → landet automatisch in der Truhe</li><li>iPhone-App über GitHub & Supabase</li><li>v1.2: iPhone-App ohne KI &amp; kostenlos – Scoopy bleibt in der Claude-Version</li></ul></div>`, true);
   const f = $('#lgf'); if (f) f.addEventListener('submit', async e => { e.preventDefault(); const fd = new FormData(f); try { await AU.login(fd.get('e'), fd.get('p')); closeSheet(); toast('Angemeldet 🍨'); await SYNC.pull(); } catch (err) { $('#lgerr').textContent = err.message; } });
 }
 
@@ -1137,6 +1161,7 @@ function statusTag(r) { const s = SN.STATUS[r.status] || SN.STATUS.idee; return 
 
 /* ================= TABS / ROUTER ================= */
 const ICONS = {
+  neu:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>',
   start:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11 12 4l9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-5h4v5"/></svg>',
   rezepte:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 11a5 5 0 0 1 10 0"/><path d="M6 11h12l-6 11z"/></svg>',
   matrix:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3v18M3 12h18"/><circle cx="7.5" cy="7.5" r="1.6" fill="currentColor"/><circle cx="16" cy="15.5" r="1.6" fill="currentColor"/><circle cx="16.5" cy="7" r="1.6" fill="currentColor"/></svg>',
@@ -1144,11 +1169,14 @@ const ICONS = {
   wissen:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 21V5M9 8h6"/></svg>',
   vorrat:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3h8v4l2 3v11H6V10l2-3z"/><path d="M6 13h12"/></svg>',
 };
-const TABS = [['start','Start'],['rezepte','Rezepte'],['chat','Scoopy'],['wissen','Wissen'],['vorrat','Vorrat']];
+const TABS_AI = [['start','Start'],['rezepte','Rezepte'],['chat','Scoopy',1],['wissen','Wissen'],['vorrat','Vorrat']];
+const TABS_APP = [['start','Start'],['neu','Neu'],['rezepte','Rezepte',1],['wissen','Wissen'],['vorrat','Vorrat']];
+const TABS = TABS_AI.concat([['neu','Neu']]);
 let VIEW = 'start';
 function renderTabs() {
-  $('#tabs').style.gridTemplateColumns = `repeat(${AI ? 5 : 4},minmax(0,1fr))`; $('#tabs').innerHTML = TABS.filter(t => AI || t[0] !== 'chat').map(([k, l]) => k === 'chat'
-    ? `<button class="tab chat" data-tab="chat" ${VIEW === k ? 'aria-current="page"' : ''}><span class="bub">${ICONS.chat}</span>${l}</button>`
+  const T = AI ? TABS_AI : TABS_APP;
+  $('#tabs').innerHTML = T.map(([k, l, hl]) => hl
+    ? `<button class="tab hl" data-tab="${k}" ${VIEW === k ? 'aria-current="page"' : ''}><span class="bub">${ICONS[k]}</span>${l}</button>`
     : `<button class="tab" data-tab="${k}" ${VIEW === k ? 'aria-current="page"' : ''}>${ICONS[k]}${l}</button>`).join('');
 }
 function route() {
@@ -1163,11 +1191,12 @@ window.addEventListener('hashchange', route);
 /* ================= RENDER ================= */
 function render() {
   renderTabs();
-  $('#hdrbtns').innerHTML = (VIEW === 'rezepte' ? `<button class="iconbtn" data-act="new" aria-label="Neues Rezept">＋</button>` : VIEW === 'chat' ? `<button class="iconbtn" data-act="clearchat" aria-label="Chat leeren">🧹</button>` : VIEW === 'vorrat' ? `<button class="iconbtn" data-act="newing" aria-label="Neue Zutat">＋</button>` : '') + `<button class="iconbtn" data-act="settings" aria-label="Konto & Info">${SYNC.icon()}</button>`;
+  $('#hdrbtns').innerHTML = `<button class="iconbtn acct" data-act="settings" aria-label="Konto & Info">${SYNC.icon()}</button>`;
   const m = $('#main');
   if (VIEW === 'start') m.innerHTML = vStart();
   else if (VIEW === 'rezepte') { m.innerHTML = vRezepte(); if (S.prefs.view === 'matrix') layoutMatrix(); }
   else if (VIEW === 'chat') { m.innerHTML = vChat(); bindChat(); }
+  else if (VIEW === 'neu') { m.innerHTML = vNeu(); bindEditor(null); }
   else if (VIEW === 'wissen') m.innerHTML = vWissen();
   else m.innerHTML = vVorrat();
 }
@@ -1197,10 +1226,10 @@ function filtered() {
 function card(r, i, n) {
   const m = macros(r);
   return `<article class="card rc"><button data-open="${esc(r.id)}" style="text-align:left;display:flex;flex-direction:column" aria-label="${esc(r.name)} öffnen">
-    <div class="im">${img(r)}${statusTag(r)}<span class="emo">${esc(r.emoji || '')}</span></div>
+    <div class="im">${img(r)}${r.status !== 'final' ? statusTag(r) : ''}</div>
     <div class="tx"><b>${esc(r.name)}</b><span class="sub">${esc(r.sub || '')}</span>
     <div class="mac"><span class="pill">${Math.round(m.k)} kcal</span>${m.p >= 10 ? `<span class="pill p">${Math.round(m.p)} g P</span>` : ''}</div></div></button>
-    <button class="heart ${r.fav ? 'on' : ''}" data-fav="${esc(r.id)}" aria-label="Favorit">${r.fav ? '❤️' : '🤍'}</button>
+    <button class="heart ${r.fav ? 'on' : ''}" data-fav="${esc(r.id)}" aria-label="Favorit" aria-pressed="${!!r.fav}"><svg viewBox="0 0 24 24" width="20" height="20"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z" fill="${r.fav ? '#FF4D7E' : 'none'}" stroke="${r.fav ? '#FF4D7E' : 'currentColor'}" stroke-width="2"/></svg></button>
     ${S.prefs.sort === 'mine' ? `<div class="sorthandle"><button class="btn sm" data-mv="${esc(r.id)}:-1" ${i === 0 ? 'disabled' : ''} aria-label="nach oben">↑</button><button class="btn sm" data-mv="${esc(r.id)}:1" ${i === n - 1 ? 'disabled' : ''} aria-label="nach unten">↓</button></div>` : ''}
   </article>`;
 }
@@ -1220,19 +1249,32 @@ function vStart() {
      <div class="tx"><b>${esc(r.name)}</b><span class="muted" style="font-size:14px">${Math.round(m.k)} kcal${m.p >= 10 ? ' · ' + Math.round(m.p) + ' g P' : ''}</span></div></button>`; }).join('')}</div></section>
   </div>`;
 }
+const FAMTXT = {schoko:'Schoko', vanille:'Vanille & Creme', cheesecake:'Cheesecake', frucht:'Fruchtig', nuss:'Nussig', floral:'Floral', kaffee:'Kaffee'};
 function vRezepte() {
   const list = sorted(filtered()); const p = S.prefs; const mx = p.view === 'matrix';
+  const grouped = !mx && p.cat === 'all' && p.sort === 'fav' && !p.q && !p.fam;
+  const nFilt = (p.fam ? 1 : 0) + (p.sort !== 'fav' ? 1 : 0);
+  const grid = arr => `<div class="grid">${arr.map((r, i) => card(r, i, arr.length)).join('')}</div>`;
   return `<div class="view">
-  ${pageTitle('Rezepte', `${allRecipes().length} Sorten · ${allRecipes().filter(r => r.status === 'final').length} final`)}
+  <div class="ptitle row" style="justify-content:space-between;align-items:flex-end"><div><h2>Rezepte</h2><p>${allRecipes().length} Sorten</p></div><button class="btn pri newbtn" data-tab="neu">＋ Neues Rezept</button></div>
   <div class="tools">
-   <div class="search"><input class="field" id="q" type="search" placeholder="Sorte oder Zutat suchen" value="${esc(p.q)}"><button class="iconbtn" data-act="sortmenu" aria-label="Sortieren">⇅</button><div class="seg vt" role="group" aria-label="Ansicht"><button aria-pressed="${!mx}" data-view="grid" aria-label="Kacheln"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/></svg></button><button aria-pressed="${mx}" data-view="matrix" aria-label="Lust-Matrix">${ICONS.matrix.replace('<svg ', '<svg width="20" height="20" ')}</button></div></div>
-   <div class="seg" role="group" aria-label="Kategorie">${[['all','Alle']].concat(Object.entries(SN.CATS).map(([k, c]) => [k, c.icon + ' ' + c.label])).map(([k, l]) => `<button aria-pressed="${p.cat === k}" data-cat="${k}">${l}</button>`).join('')}</div>
-   ${mx ? '' : `<div class="chips" role="group" aria-label="Geschmack">${[['', 'Alle'], ['fav', '❤️ Favoriten']].concat(Object.entries(SN.FAMS)).map(([k, l]) => `<button class="chip" aria-pressed="${p.fam === k}" data-fam="${k}">${l}</button>`).join('')}</div>`}
+   <div class="search"><input class="field" id="q" type="search" placeholder="Suchen" value="${esc(p.q)}"><button class="iconbtn ${nFilt ? 'act' : ''}" data-act="filter" aria-label="Filter & Sortierung"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M7 12h10M10 18h4"/></svg>${nFilt ? `<i class="badge">${nFilt}</i>` : ''}</button><div class="seg vt" role="group" aria-label="Ansicht"><button aria-pressed="${!mx}" data-view="grid" aria-label="Kacheln"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/></svg></button><button aria-pressed="${mx}" data-view="matrix" aria-label="Lust-Matrix">${ICONS.matrix.replace('<svg ', '<svg width="18" height="18" ')}</button></div></div>
+   <div class="seg" role="group" aria-label="Kategorie">${[['all','Alle'],['protein','Protein'],['natur','Frucht'],['deluxe','Deluxe']].map(([k, l]) => `<button aria-pressed="${p.cat === k}" data-cat="${k}">${l}</button>`).join('')}</div>
+   ${nFilt ? `<div class="chips">${p.fam ? `<button class="chip on" data-fam="">${esc(p.fam === 'fav' ? 'Favoriten' : FAMTXT[p.fam])} ✕</button>` : ''}${p.sort !== 'fav' ? `<button class="chip on" data-act="setsort" data-k="fav">${esc((SORTS.find(x => x[0] === p.sort) || SORTS[0])[1])} ✕</button>` : ''}</div>` : ''}
   </div>
-  ${mx ? vMatrix() : `<p class="cnt">${list.length} Sorte${list.length === 1 ? '' : 'n'} · sortiert nach ${esc((SORTS.find(x => x[0] === p.sort) || SORTS[0])[1])}</p>
-   ${list.length ? `<div class="grid">${list.map((r, i) => card(r, i, list.length)).join('')}</div>` : `<div class="empty"><span class="melt">🍦</span><p>Nix gefunden – schmilzt dahin.</p>${AI ? `<button class="btn pri" data-ask="Entwickle mir ein Eis: ${esc(p.q)}">Scoopy fragen</button>` : ''}</div>`}
-   <details class="acc" style="margin-top:22px"><summary><span style="font-size:22px">💡</span>Ideen-Pool <span class="muted" style="font:600 14px system-ui;margin-left:6px">${SN.IDEAS.length} Ideen</span></summary><div style="padding:0 16px 16px"><p class="muted" style="margin:0 0 10px;font-size:14px">Aus dem FDL-Buch, von FitFoodAE und unseren Gesprächen. ${AI ? 'Antippen – Scoopy arbeitet es aus.' : 'Ausarbeiten lassen kannst du sie in der Claude-Version.'}</p><div class="ideas">${SN.IDEAS.map(([n, s2]) => AI ? `<button data-ask="Entwickle mir ein finales Rezept für „${esc(n)}“ – passend zu meinem Vorrat und meinen Regeln.">${esc(n)}${s2 ? `<small>${s2}</small>` : ''}</button>` : `<button disabled style="cursor:default">${esc(n)}${s2 ? `<small>${s2}</small>` : ''}</button>`).join('')}</div></div></details>`}
+  ${mx ? vMatrix() : !list.length ? `<div class="empty"><span class="melt">🍦</span><p>Nix gefunden.</p>${AI ? `<button class="btn pri" data-ask="Entwickle mir ein Eis: ${esc(p.q)}">Scoopy fragen</button>` : ''}</div>`
+   : grouped ? ['protein','natur','deluxe'].map(c => { const arr = list.filter(r => r.cat === c); return arr.length ? `<section class="grp"><div class="grp-h"><h3>${SN.CATS[c].label}</h3><span>${esc(SN.CATS[c].long.split('·')[1] || '')} · ${arr.length}</span></div>${grid(arr)}</section>` : ''; }).join('')
+   : `<p class="cnt">${list.length} Treffer</p>${grid(list)}`}
+  ${mx ? '' : `<details class="acc" style="margin-top:28px"><summary>Ideen-Pool <span class="muted" style="font:600 14px system-ui;margin-left:6px">${SN.IDEAS.length}</span></summary><div style="padding:0 16px 16px"><p class="muted" style="margin:0 0 10px;font-size:14px">Aus dem FDL-Buch, von FitFoodAE und unseren Gesprächen. ${AI ? 'Antippen – Scoopy arbeitet es aus.' : 'Ausarbeiten lassen kannst du sie in der Claude-Version.'}</p><div class="ideas">${SN.IDEAS.map(([n, s2]) => AI ? `<button data-ask="Entwickle mir ein finales Rezept für „${esc(n)}“ – passend zu meinem Vorrat und meinen Regeln.">${esc(n)}${s2 ? `<small>${s2}</small>` : ''}</button>` : `<button disabled style="cursor:default">${esc(n)}${s2 ? `<small>${s2}</small>` : ''}</button>`).join('')}</div></div></details>`}
   </div>`;
+}
+function openFilter() {
+  const p = S.prefs;
+  openSheet(`<h2 class="d-title" style="font-size:26px">Filter & Sortierung</h2>
+   <div class="fsec"><b>Geschmack</b><div class="chips wrap">${[['', 'Alle'], ['fav', 'Favoriten']].concat(Object.entries(FAMTXT)).map(([k, l]) => `<button class="chip" aria-pressed="${p.fam === k}" data-fam="${k}" data-keep="1">${l}</button>`).join('')}</div></div>
+   <div class="fsec"><b>Sortieren nach</b><div class="list-pick">${SORTS.map(([k, l]) => `<button data-act="setsort" data-k="${k}" data-keep="1"><span style="width:24px;text-align:center;color:var(--berryd)">${p.sort === k ? '✓' : ''}</span>${l}</button>`).join('')}</div></div>
+   <p class="muted" style="font-size:14px">„Meine Reihenfolge“ blendet ↑↓ an jeder Karte ein.</p>
+   <button class="btn pri full" data-act="close">Fertig</button>`, true);
 }
 function vTruhe() {
   const used = S.truhe.filter(Boolean).length;
@@ -1250,12 +1292,12 @@ function openDetail(id, fromHash) {
   const made = S.made[id];
   const per = v => m.g ? (v / m.g * 100) : 0;
   const html = `<div class="hero">${img(r)}</div>
-  <h2 class="d-title">${esc(r.name)} <span style="font-size:.7em">${esc(r.emoji || '')}</span></h2>
+  <h2 class="d-title">${esc(r.name)}</h2>
   <div class="muted" style="font-size:17px">${esc(r.sub || '')}</div>
-  <div class="d-meta"><span class="tag" style="color:${c.color}">${c.icon || ''} ${esc(c.label || '')}</span><span class="tag">${esc(SN.FAMS[r.fam] || '')}</span><span class="tag"><i style="width:8px;height:8px;border-radius:50%;background:${(SN.STATUS[r.status] || {}).dot}"></i>${esc((SN.STATUS[r.status] || {}).label || '')} · ${esc(r.ver || '')}</span>${r.rank ? `<span class="tag">🏆 Platz ${r.rank}</span>` : ''}${r.champ ? '<span class="tag">👑 Bestes Eis ever</span>' : ''}${r.sig ? '<span class="tag">✍️ Eigenkreation</span>' : ''}${r.src ? `<span class="tag">nach ${esc(r.src)}</span>` : ''}${made ? `<span class="tag">✓ ${made.count}× gemacht</span>` : ''}</div>
+  <div class="d-meta"><span class="tag" style="color:${c.color}">${esc(c.label || '')}</span><span class="tag">${esc(FAMTXT[r.fam] || '')}</span><span class="tag"><i style="width:8px;height:8px;border-radius:50%;background:${(SN.STATUS[r.status] || {}).dot}"></i>${esc((SN.STATUS[r.status] || {}).label || '')}${r.ver && r.ver !== 'Final' ? ' · ' + esc(r.ver) : ''}</span>${r.rank ? `<span class="tag">Platz ${r.rank}</span>` : ''}${r.champ ? '<span class="tag">Bestes Eis ever</span>' : ''}${r.sig ? '<span class="tag">Eigenkreation</span>' : ''}${r.src ? `<span class="tag">nach ${esc(r.src)}</span>` : ''}${made ? `<span class="tag">✓ ${made.count}× gemacht</span>` : ''}</div>
   <div class="macros"><div class="mbox k"><b>${Math.round(m.k)}</b><span>kcal</span></div><div class="mbox p"><b>${Math.round(m.p)}</b><span>g Protein</span></div><div class="mbox"><b>${Math.round(m.c)}</b><span>g KH</span></div><div class="mbox"><b>${Math.round(m.f)}</b><span>g Fett</span></div></div>
   <p class="muted" style="font-size:14px;margin:-4px 0 0">Ganzer Pint ≈ ${Math.round(m.g)} g · exakt berechnet aus deinem Vorrat${m.dens >= 5 ? ` · ${fnum(Math.round(m.dens * 10) / 10)} g Protein pro 100 kcal` : ''}${m.unknown.length ? ` · ohne: ${esc(m.unknown.join(', '))}` : ''}</p>
-  <div class="actions"><button class="btn ${r.fav ? 'pri' : ''}" data-fav="${esc(id)}">${r.fav ? '❤️ Favorit' : '🤍 Favorit'}</button><button class="btn" data-act="truhe" data-id="${esc(id)}">🧊 In die Truhe</button><button class="btn" data-edit="${esc(id)}">✏️ Bearbeiten</button>${AI ? `<button class="btn" data-ask="Ich will „${esc(r.name)}“ (id: ${esc(id)}) anpassen: " data-prefill="1">💬 Mit Scoopy</button>` : ''}</div>
+  <div class="actions"><button class="btn ${r.fav ? 'pri' : ''}" data-fav="${esc(id)}">${r.fav ? 'Favorit ✓' : 'Favorit'}</button><button class="btn" data-act="made" data-id="${esc(id)}">Gemacht ✓</button><button class="btn" data-edit="${esc(id)}">Bearbeiten</button>${AI ? `<button class="btn" data-ask="Ich will „${esc(r.name)}“ (id: ${esc(id)}) anpassen: " data-prefill="1">💬 Mit Scoopy</button>` : ''}</div>
   <div class="d-sec"><h3>Creami-Programm</h3><div class="flow">${(r.flow || []).map((f, i) => `${i ? '<span class="farr">→</span>' : ''}<span class="fstep ${/abkratzen|EL|Mandel|Flüss/i.test(f) ? 'soft' : ''}">${esc(f)}</span>`).join('')}</div><p class="muted" style="font-size:14px;margin:6px 0 0">Ohne Deckel einfrieren · vor jedem Re-Spin/Mix-In Ränder abkratzen.</p></div>
   <div class="d-sec"><h3>Zutaten <span class="muted" style="font-size:14px;font-weight:600">· 1 Pint · antippen zum Abhaken</span></h3><ul class="ing">${(r.ings || []).map((l, i) => { const p = P[l.ing]; return `<li data-ck="${i}"><span class="ck">✓</span><span class="nm">${esc(iname(l))}${l.opt ? '<span class="opt">optional</span>' : ''}${p && p.have === false ? '<span class="miss">fehlt</span>' : ''}${l.note ? `<span class="nt">${esc(l.note)}</span>` : ''}</span><span class="amt">${esc(famt(l))}</span></li>`; }).join('')}</ul></div>
   <div class="d-sec"><h3>Zubereitung</h3><ol class="steps">${(r.steps || []).map(s => `<li><span>${esc(s)}</span></li>`).join('')}</ol></div>
@@ -1263,7 +1305,7 @@ function openDetail(id, fromHash) {
   <div class="d-sec"><h3>Learnings & Versionen</h3>${(r.notes || []).length ? `<div class="timeline">${r.notes.map(n => `<div>${esc(n)}</div>`).join('')}</div>` : '<p class="muted">Noch keine Notizen.</p>'}
    <div class="row" style="margin-top:10px;flex-wrap:nowrap"><input class="field" id="fb" placeholder="Feedback: z. B. „zu wenig süß“"><button class="btn pri" data-act="fb" data-id="${esc(id)}">Merken</button></div></div>
   <div class="d-sec"><h3>Für Yazio · pro 100 g</h3><div class="yz"><table><tr><td>Kalorien</td><td>${fnum(Math.round(per(m.k) * 10) / 10)} kcal</td></tr><tr><td>Protein</td><td>${fnum(Math.round(per(m.p) * 10) / 10)} g</td></tr><tr><td>Kohlenhydrate</td><td>${fnum(Math.round(per(m.c) * 10) / 10)} g</td></tr><tr><td>Fett</td><td>${fnum(Math.round(per(m.f) * 10) / 10)} g</td></tr><tr><td>Portion „1 Pint“</td><td>${Math.round(m.g)} g</td></tr></table><span class="muted" style="font-size:13px">Erythrit zählt 0 kcal und ist nicht in den KH. Erst Portion wählen, dann Stern drücken.</span><button class="btn sm" data-act="copyyz" data-id="${esc(id)}">Werte kopieren</button></div></div>
-  <div class="actions"><button class="btn" data-act="copywa" data-id="${esc(id)}">📋 WhatsApp-Text</button><button class="btn" data-act="made" data-id="${esc(id)}">🎉 Gemacht!</button><button class="btn" data-act="photo" data-id="${esc(id)}">📸 Eigenes Foto</button><button class="btn" data-act="dup" data-id="${esc(id)}">⧉ Duplizieren</button></div>
+  <div class="actions"><button class="btn" data-act="copywa" data-id="${esc(id)}">WhatsApp-Text</button><button class="btn" data-act="photo" data-id="${esc(id)}">Eigenes Foto</button><button class="btn" data-act="dup" data-id="${esc(id)}">Duplizieren</button></div>
   <div class="row" style="justify-content:center;margin-top:14px">${SEEDMAP[id] && S.recipes[id] ? `<button class="btn ghost" data-act="reset" data-id="${esc(id)}">Original wiederherstellen</button>` : ''}<button class="btn ghost danger" data-act="del" data-id="${esc(id)}">Löschen</button></div>`;
   openSheet(html);
 }
@@ -1277,12 +1319,18 @@ async function copy(t, ok) { try { await navigator.clipboard.writeText(t); toast
 
 /* ---------- EDITOR ---------- */
 let ED = null;
-function openEditor(id, preset) {
-  const r = preset ? normRecipe(preset) : id ? clone(getR(id)) : normRecipe({id:'', name:'', sub:'', cat:'protein', fam:'vanille', emoji:'🍦💪', status:'neu', ver:'V1', x:0, y:0, i:[['mandel',200,'ml'],['hafer',50,'ml'],['whey',30,'g'],['erythrit',45,'g'],['pud_v',5,'g'],['jbkm',.25,'TL'],['salz',1,'Prise']], steps:[...SN.RECIPES[0].steps], flow:'lite', a:{c:['#FFF2C4'], t:[]}});
-  ED = r; const P = pantry();
+const NEWBASE = {
+  protein:{label:'Protein-Milch-Base', r:{cat:'protein', fam:'vanille', emoji:'🍦💪', i:[['mandel',200,'ml'],['hafer',50,'ml'],['whey',30,'g'],['erythrit',45,'g'],['pud_v',5,'g'],['jbkm',.25,'TL'],['salz',1,'Prise']], flow:'lite', a:{c:['#FFF2C4'], t:[]}}},
+  cheesecake:{label:'Cheesecake-Base', r:{cat:'protein', fam:'cheesecake', emoji:'🍰💪', i:[['fk',170,'g'],['hafer',180,'ml'],['whey',30,'g'],['erythrit',50,'g'],['pud_v',5,'g'],['jbkm',.25,'TL']], notes:['Kein Salz – körniger Frischkäse ist salzig genug.'], flow:'lite', a:{c:['#FFF7E4'], t:['cookie']}}},
+  frucht:{label:'Frucht / Sorbet', r:{cat:'natur', fam:'frucht', emoji:'🍓❄️', i:[['',300,'g',{name:'Frucht (TK)'}],['wasser',60,'ml'],['mandel',60,'ml'],['erythrit',45,'g'],['jbkm',.25,'TL'],['salz',1,'Prise']], flow:'sorbet', a:{c:['#FF7B9A'], v:'bowl', t:['berries']}}},
+  deluxe:{label:'Deluxe / Gönnung', r:{cat:'deluxe', fam:'vanille', emoji:'🍦✨', i:[['vollmilch',200,'ml'],['sahne',100,'ml'],['zucker',60,'g'],['eigelb',1,'Stk',{opt:true}],['jbkm',.25,'TL'],['salz',1,'Prise']], flow:'ice', a:{c:['#F5E2B8'], v:'cone', t:['star']}}},
+};
+let NEWKEY = 'protein';
+function blankRecipe(k) { const b = NEWBASE[k || 'protein'].r; return normRecipe(Object.assign({id:'', name:'', sub:'', status:'neu', ver:'V1', x:0, y:0, steps:[...SN.RECIPES[0].steps]}, clone(b))); }
+function edForm(r, id, page) {
+  const P = pantry();
   const flowKey = Object.entries(SN.FLOWS).find(([, f]) => f.join() === (r.flow || []).join());
-  const html = `<h2 class="d-title" style="font-size:28px">${id ? 'Rezept bearbeiten' : 'Neues Rezept'}</h2>
-  <form class="ed" id="edf" autocomplete="off">
+  return `<form class="ed" id="edf" autocomplete="off">
    <datalist id="pl">${Object.values(P).map(p => `<option value="${esc(p.n)}">`).join('')}</datalist>
    <label>Name<input class="field" name="name" value="${esc(r.name)}" required></label>
    <label>Untertitel<input class="field" name="sub" value="${esc(r.sub || '')}"></label>
@@ -1302,12 +1350,26 @@ function openEditor(id, preset) {
    <div class="two"><label>Kugelfarbe<input type="color" class="field" name="c1" value="${esc((r.a.c || [])[0] || '#FFF2C4')}"></label><label>Hintergrund<input type="color" class="field" name="bg" value="${esc(r.a.bg || '#FFF7EE')}"></label></div>
    <label>Gefäß<select class="field" name="v"><option value="">automatisch</option>${[['pint','Creami-Pint'],['cone','Waffel'],['bowl','Schale']].map(([k, l]) => `<option value="${k}" ${r.a.v === k ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
    <div><div style="font-size:14px;font-weight:700;color:var(--mute);margin-bottom:6px">Toppings in der Grafik</div><div class="tpick">${TOPS.map(t => `<button type="button" class="chip" data-top="${t}" aria-pressed="${(r.a.t || []).includes(t)}">${t}</button>`).join('')}</div></div>
-   <div class="livemac" id="livemac"></div>
-   <div class="row"><button type="button" class="btn" data-act="close" style="flex:1">Abbrechen</button><button class="btn pri" style="flex:2">Speichern</button></div>
+   <div class="livemac ${page ? 'pg' : ''}" id="livemac"></div>
+   <div class="row"><button type="button" class="btn" data-act="${page ? 'edcancel' : 'close'}" style="flex:1">Abbrechen</button><button class="btn pri" style="flex:2">Speichern</button></div>
   </form>`;
-  openSheet(html); SHEET = 'edit'; drawRows(); liveMac();
+}
+function bindEditor(id) {
+  drawRows(); liveMac();
   $('#edf').addEventListener('input', e => { if (e.target.closest('.irow')) readRows(); liveMac(); });
   $('#edf').addEventListener('submit', e => { e.preventDefault(); submitEditor(id); });
+}
+function openEditor(id, preset) {
+  if (!id && !preset) { location.hash = 'neu'; return; }
+  ED = preset ? normRecipe(preset) : clone(getR(id));
+  openSheet(`<h2 class="d-title" style="font-size:28px">${id ? 'Rezept bearbeiten' : 'Neues Rezept'}</h2>` + edForm(ED, id, false)); SHEET = 'edit'; bindEditor(id);
+}
+function vNeu() {
+  if (!ED || ED.id || ED._from !== 'neu') { ED = blankRecipe(NEWKEY); ED._from = 'neu'; }
+  return `<div class="view">${pageTitle('Neues Rezept', 'Wähl einen Startpunkt – Zutaten, Mengen und Programm sind schon vorbefüllt.')}
+   <div class="bases">${Object.entries(NEWBASE).map(([k, b]) => `<button class="base ${NEWKEY === k ? 'on' : ''}" data-base="${k}"><span class="mini">${SN.art(blankRecipe(k), {plain:true, face:false})}</span><b>${esc(b.label)}</b></button>`).join('')}</div>
+   ${AI ? `<p class="muted" style="font-size:15px;margin:10px 0 0">Lieber entwickeln lassen? <button class="lnk2" data-ask="Entwickle mir ein neues Eis: " data-prefill="1">Mit Scoopy ›</button></p>` : ''}
+   <div class="card" style="padding:16px;margin:16px 0 24px">${edForm(ED, null, true)}</div></div>`;
 }
 function drawRows() {
   const P = pantry();
@@ -1339,7 +1401,9 @@ function submitEditor(id) {
   if (r.rank) for (const o of allRecipes()) if (o.id !== r.id && o.rank === r.rank) { const c = clone(o); delete c.rank; saveR(c, true); }
   if (!r.id) { r.id = slug(r.name); while (getR(r.id) || SEEDMAP[r.id]) r.id += '-' + Math.floor(Math.random() * 90 + 10); }
   const before = id ? clone(getR(id)) : null;
-  saveR(r); closeSheet();
+  delete r._from;
+  saveR(r, VIEW === 'neu'); if (SHEET) closeSheet();
+  if (VIEW === 'neu') { ED = null; location.hash = 'rezepte'; setTimeout(() => openDetail(r.id), 120); confetti(); toast('Neues Rezept angelegt 🍨'); return; }
   toast(id ? 'Gespeichert' : 'Neues Rezept angelegt', before ? 'Rückgängig' : 'Öffnen', () => { if (before) saveR(before); else openDetail(r.id); });
 }
 
@@ -1399,7 +1463,7 @@ function vVorrat() {
   const P = Object.values(pantry()); const groups = [...new Set(P.map(p => p.g || 'Sonstiges'))];
   const Q = PQ.toLowerCase(); const vis = p => (!Q || p.n.toLowerCase().includes(Q)) && (!PMISS || p.have === false);
   return `<div class="view">
-  <section class="sec card tip"><span class="ti">🥣</span><p><b>Deine Standard-Base:</b> 200 ml Mandelmilch + 50 ml Barista-Hafer · 30 g Better Whey neutral · 40–50 g Erythrit · 5 g Puddingpulver · ¼ TL JBKM · Prise Salz. Scoopy rechnet alles mit diesen Werten – exakt, nicht geschätzt.</p></section>
+  <div class="ptitle row" style="justify-content:space-between;align-items:flex-end"><div><h2>Vorrat</h2><p>Zutaten & Nährwerte</p></div><button class="btn pri newbtn" data-act="newing">＋ Zutat</button></div><section class="sec card tip"><span class="ti">🥣</span><p><b>Deine Standard-Base:</b> 200 ml Mandelmilch + 50 ml Barista-Hafer · 30 g Better Whey neutral · 40–50 g Erythrit · 5 g Puddingpulver · ¼ TL JBKM · Prise Salz. Scoopy rechnet alles mit diesen Werten – exakt, nicht geschätzt.</p></section>
   <div class="tools"><div class="search"><input class="field" id="pq" type="search" placeholder="Zutat suchen" value="${esc(PQ)}"></div>
   <div class="chips"><button class="chip" aria-pressed="${!PMISS}" data-pm="0">Alle</button><button class="chip" aria-pressed="${PMISS}" data-pm="1">🛒 Fehlt / Einkaufsliste</button></div></div>
   ${groups.map(g => { const items = P.filter(p => (p.g || 'Sonstiges') === g && vis(p)); if (!items.length) return '';
@@ -1430,14 +1494,14 @@ function slotAction(i) {
   }
   const r = getR(t.rid), left = t.at + 864e5 - Date.now();
   openSheet(`<div style="display:grid;grid-template-columns:88px minmax(0,1fr);gap:14px;align-items:center"><div class="hero" style="aspect-ratio:1">${img(r, {plain:true})}</div><div><h2 class="d-title" style="font-size:24px;margin:0">${esc(r.name)}</h2><p class="muted" style="margin:4px 0 0">Eingefroren ${new Date(t.at).toLocaleString('de-DE', {weekday:'short', hour:'2-digit', minute:'2-digit'})} · ${left <= 0 ? 'bereit ✓' : 'noch ' + Math.ceil(left / 36e5) + ' h'}</p></div></div>
-   <div class="actions" style="grid-template-columns:1fr"><button class="btn pri" data-act="eaten" data-i="${i}">🎉 Gegessen – Becher frei</button><button class="btn" data-open="${esc(r.id)}">Rezept & Programm öffnen</button><button class="btn" data-act="unfreeze" data-i="${i}">Rausnehmen</button></div>`, true);
+   <div class="actions" style="grid-template-columns:1fr"><button class="btn pri" data-act="eaten" data-i="${i}">Gegessen – Becher frei</button><button class="btn" data-open="${esc(r.id)}">Rezept & Programm öffnen</button><button class="btn" data-act="unfreeze" data-i="${i}">Rausnehmen</button></div>`, true);
 }
 let SLOT = null;
 function pickRowT(r) { return pickRow(r).replace('data-open=', 'data-put='); }
 function putTruhe(rid, i) {
   if (i == null) i = S.truhe.findIndex(x => !x || !getR(x.rid));
-  if (i < 0) { toast('Truhe ist voll – erst was essen 😋'); return; }
-  S.truhe[i] = {rid, at:Date.now()}; persist(); closeSheet(); if (VIEW === 'start') render(); toast(`${getR(rid).name} friert – in 24 h bereit 🧊`);
+  if (i < 0) { toast('Truhe ist voll (6/6) – erst einen Becher leer essen'); return; }
+  S.truhe[i] = {rid, at:Date.now()}; const m = S.made[rid] || {count:0}; m.count++; m.last = Date.now(); S.made[rid] = m; persist(); closeSheet(); render(); confetti(); toast(`${getR(rid).name} ist in der Truhe – in 24 h bereit`);
 }
 function markMade(id) { const m = S.made[id] || {count:0}; m.count++; m.last = Date.now(); S.made[id] = m; persist(); confetti(); }
 
@@ -1560,7 +1624,7 @@ function vChat() {
    ${!CHAT.length ? `<div class="m a"><p><b>Hey Nico, ich bin Scoopy 🍨</b></p><p>Ich kenne alle deine Rezepte, Regeln und Learnings. Frag mich nach Techniken, lass Rezepte anpassen („Tiramisu 5 g mehr Erythrit“), nenn mir Zutaten – oder schick ein Foto vom Kühlschrank, dann bau ich dir ein Eis.</p></div>` : CHAT.map(msgHtml).join('')}
    ${off ? (PWA ? `<div class="m a"><p>Melde dich kurz an (gleiches Konto wie FPV Cockpit), dann bin ich da. 🔑</p><p><button class="btn sm pri" data-act="settings">Anmelden</button></p></div>` : `<div class="m a"><p>Scoopy wacht gerade nicht auf 😴 – der Chat braucht die Claude-Verbindung. Öffne Scoopernova auf claude.ai und erlaube „Claude fragen“.</p></div>`) : ''}
   </div>
-  <div class="composer">
+  <div class="composer">${CHAT.length ? `<button class="btn sm ghost" data-act="clearchat" style="justify-self:start">Chat leeren</button>` : ''}
    ${!CHAT.length ? `<div class="sugg">${SUGG.map(s => `<button data-ask="${esc(s)}">${esc(s)}</button>`).join('')}</div>` : ''}
    ${PENDING_IMG ? `<div class="thumb"><img src="${esc(PENDING_IMG.url)}" alt="Foto"><span class="muted" style="font-size:14px">Foto angehängt</span><button class="btn sm" data-act="rmimg">Entfernen</button></div>` : ''}
    <div class="cbar"><button class="iconbtn" data-act="scan" aria-label="Foto">📷</button><textarea id="cin" rows="1" placeholder="Frag Scoopy …" aria-label="Nachricht"></textarea>${CAP.dict ? `<button class="iconbtn mic" id="mic" aria-label="Diktieren">🎤</button>` : ''}<button class="iconbtn send" data-act="send" aria-label="${BUSY ? 'Stopp' : 'Senden'}">${BUSY ? '■' : '↑'}</button></div>
@@ -1621,12 +1685,12 @@ function setupDict() {
 document.addEventListener('click', e => {
   const t = e.target.closest('button,[data-ck],a'); if (!t) { if (e.target.id === 'scrim') closeSheet(); return; }
   const d = t.dataset;
-  if (d.tab) { if (SHEET) closeSheet(); location.hash = d.tab; if (VIEW === d.tab) window.scrollTo({top:0, behavior:'smooth'}); return; }
+  if (d.tab) { if (SHEET) closeSheet(); if (d.tab === 'neu' && VIEW !== 'neu') ED = null; location.hash = d.tab; if (VIEW === d.tab) window.scrollTo({top:0, behavior:'smooth'}); return; }
   if (d.open) { openDetail(d.open); return; }
   if (d.put) { putTruhe(d.put, SLOT); return; }
   if (d.fav) { const r = clone(getR(d.fav)); r.fav = !r.fav; saveR(r, true); if (r.fav) confetti(); if (SHEET === d.fav) openDetail(d.fav); render(); return; }
   if (d.cat) { S.prefs.cat = d.cat; persist(); render(); return; }
-  if (d.fam !== undefined && t.classList.contains('chip')) { S.prefs.fam = d.fam; persist(); render(); return; }
+  if (d.fam !== undefined && t.classList.contains('chip')) { S.prefs.fam = d.fam; persist(); render(); if (d.keep) openFilter(); return; }
   if (d.mv) { const [id, dir] = d.mv.split(':'); const ids = sorted(filtered()).map(r => r.id); if (!S.order.length) S.order = sorted(allRecipes()).map(r => r.id);
     let ord = S.order.filter(x => getR(x)); for (const x of ids) if (!ord.includes(x)) ord.push(x); const i = ord.indexOf(id), j = i + (+dir);
     if (j >= 0 && j < ord.length) { [ord[i], ord[j]] = [ord[j], ord[i]]; } S.order = ord; persist(); render(); return; }
@@ -1634,6 +1698,7 @@ document.addEventListener('click', e => {
   if (d.ck !== undefined) { t.classList.toggle('done'); return; }
   if (d.edit) { openEditor(d.edit); return; }
   if (d.ask !== undefined) { ask(d.ask, d.prefill); return; }
+  if (d.base) { NEWKEY = d.base; ED = null; render(); return; }
   if (d.view) { S.prefs.view = d.view; persist(); render(); return; }
   if (d.mx) { MXSEL = d.mx; $$('.dot').forEach(x => x.classList.toggle('sel', x.dataset.mx === d.mx)); $('#mxtip').innerHTML = `<div class="card" style="padding:12px"><div class="list-pick">${pickRow(getR(d.mx))}</div></div>`; return; }
   if (d.mf) { const [k, v] = d.mf.split(':'); MF[k] = v; $('#mf').innerHTML = modeFinder(); return; }
@@ -1654,11 +1719,13 @@ document.addEventListener('click', e => {
   else if (a === 'signup') { const f = $('#lgf'), fd = new FormData(f); AU.signup(fd.get('e'), fd.get('p')).then(() => { closeSheet(); toast('Konto angelegt 🍨'); SYNC.pull(); }, err => { $('#lgerr').textContent = err.message; }); }
   else if (a === 'newing') openIng(null);
   else if (a === 'sortmenu') openSheet(`<h2 class="d-title" style="font-size:26px">Sortieren</h2><div class="list-pick">${SORTS.map(([k, l]) => `<button data-act="setsort" data-k="${k}"><span style="width:28px;text-align:center">${S.prefs.sort === k ? '✓' : ''}</span><b>${l}</b></button>`).join('')}</div><p class="muted" style="font-size:14px">„Meine Reihenfolge“ blendet ↑↓-Knöpfe an jeder Karte ein.</p>`, true);
-  else if (a === 'setsort') { S.prefs.sort = d.k; if (d.k === 'mine' && !S.order.length) S.order = sorted(allRecipes()).map(r => r.id); persist(); closeSheet(); render(); }
+  else if (a === 'setsort') { S.prefs.sort = d.k; if (d.k === 'mine' && !S.order.length) S.order = sorted(allRecipes()).map(r => r.id); persist(); render(); if (d.keep) openFilter(); else if (SHEET) closeSheet(); }
+  else if (a === 'filter') openFilter();
+  else if (a === 'edcancel') { ED = null; location.hash = 'rezepte'; }
   else if (a === 'truhe') putTruhe(d.id);
-  else if (a === 'eaten') { const t2 = S.truhe[+d.i]; if (t2) markMade(t2.rid); S.truhe[+d.i] = null; persist(); closeSheet(); render(); toast('Lass es dir schmecken 😋'); }
+  else if (a === 'eaten') { S.truhe[+d.i] = null; persist(); closeSheet(); render(); toast('Lass es dir schmecken 😋'); }
   else if (a === 'unfreeze') { S.truhe[+d.i] = null; persist(); closeSheet(); render(); }
-  else if (a === 'made') { markMade(d.id); openDetail(d.id); toast('Eingetragen 🎉'); }
+  else if (a === 'made') putTruhe(d.id);
   else if (a === 'fb') { const v = $('#fb').value.trim(); if (!v) return; const r = clone(getR(d.id)); r.notes.push(new Date().toLocaleDateString('de-DE') + ': ' + v); saveR(r, true); openDetail(d.id); if (!AI) { toast('Learning gemerkt ✓'); return; } toast('Learning gemerkt', 'Scoopy anpassen lassen', () => ask(`Feedback zu „${r.name}“ (id ${r.id}): ${v}. Pass das Rezept entsprechend an.`)); }
   else if (a === 'copywa') copy(waText(getR(d.id)), 'WhatsApp-Text kopiert');
   else if (a === 'copyyz') { const r = getR(d.id), m = macros(r), p = v => (Math.round(v / m.g * 1000) / 10).toString().replace('.', ','); copy(`${r.name} – pro 100 g: ${p(m.k)} kcal, ${p(m.p)} g Protein, ${p(m.c)} g KH, ${p(m.f)} g Fett. Portion 1 Pint = ${Math.round(m.g)} g`, 'Yazio-Werte kopiert'); }
