@@ -421,7 +421,7 @@ details.acc li::before{content:"";position:absolute;left:2px;top:.62em;width:7px
 <div class="drip" aria-hidden="true"></div>
 <div class="app" id="app">
   <header class="hdr" id="hdr"><div class="hdr-in">
-    <div class="brand"><button class="lg" id="logo" aria-label="Scoopernova"></button><div><h1 id="ttl">Scoopernova</h1><small id="subttl">created by munkolas · v1.4.1</small></div></div>
+    <div class="brand"><button class="lg" id="logo" aria-label="Scoopernova"></button><div><h1 id="ttl">Scoopernova</h1><small id="subttl">created by munkolas · v1.5</small></div></div>
     <div id="hdrbtns" class="row"></div>
   </div></header>
   <main id="main"></main>
@@ -1087,7 +1087,7 @@ async function initCaps() {
 
 
 /* ================= PWA-MODUS: SUPABASE (Konto wie FPV Cockpit) ================= */
-const VERSION = '1.4.1';
+const VERSION = '1.5';
 const PWA = !!window.SN_PWA;
 const AI = !PWA; /* KI-Funktionen nur in der Claude-Version – die iPhone-App bleibt kostenlos */
 const CLAUDE_URL = 'https://claude.ai/artifact/8mz7qbXNxS4notwaJyptjo';
@@ -1146,7 +1146,7 @@ function openSettings() {
    <div class="card" style="padding:14px;margin-top:16px"><b>${PWA ? 'Konto' : 'Speicher'}</b><p class="muted" style="margin:4px 0 10px;font-size:15px">${esc(SYNC.label())}</p>
    ${PWA ? (AU.s ? `<div class="row"><button class="btn" data-act="syncnow" style="flex:1">↻ Jetzt synchronisieren</button><button class="btn danger" data-act="logout" style="flex:1">Abmelden</button></div>`
      : `<form class="ed" id="lgf"><p class="muted" style="margin:0;font-size:14px">Gleiches Konto wie FPV Cockpit.</p><input class="field" name="e" type="email" autocomplete="email" placeholder="E-Mail" required><input class="field" name="p" type="password" autocomplete="current-password" placeholder="Passwort (mind. 6 Zeichen)" required minlength="6"><div class="row"><button class="btn pri" style="flex:2">Anmelden</button><button type="button" class="btn" data-act="signup" style="flex:1">Neu</button></div><p class="muted" id="lgerr" style="margin:0;font-size:14px"></p></form>`) : ''}</div>
-   <div class="card" style="padding:14px;margin-top:12px"><b>Neu in ${VERSION}</b><ul class="bul" style="margin-top:8px"><li>Rezepte als eigener Tab, Start aufgeräumt</li><li>v1.4.1: heißt jetzt Flavour-Matrix</li><li>v1.4: neue Grafiken, Bewerten mit Kugeln, Bild ändern direkt im Rezept, Matrix öffnet Rezepte</li><li>v1.3: Rezepte aufgeräumt, „Neu“ als eigene Seite, Gemacht → landet automatisch in der Truhe</li><li>iPhone-App über GitHub & Supabase</li><li>v1.2: iPhone-App ohne KI &amp; kostenlos – Scoopy bleibt in der Claude-Version</li></ul></div>`, true);
+   <div class="card" style="padding:14px;margin-top:12px"><b>Neu in ${VERSION}</b><ul class="bul" style="margin-top:8px"><li>Rezepte als eigener Tab, Start aufgeräumt</li><li>v1.5: Gefriertruhe kennt halbe Pints (¾ · ½ · ¼ übrig)</li><li>v1.4.1: heißt jetzt Flavour-Matrix</li><li>v1.4: neue Grafiken, Bewerten mit Kugeln, Bild ändern direkt im Rezept, Matrix öffnet Rezepte</li><li>v1.3: Rezepte aufgeräumt, „Neu“ als eigene Seite, Gemacht → landet automatisch in der Truhe</li><li>iPhone-App über GitHub & Supabase</li><li>v1.2: iPhone-App ohne KI &amp; kostenlos – Scoopy bleibt in der Claude-Version</li></ul></div>`, true);
   const f = $('#lgf'); if (f) f.addEventListener('submit', async e => { e.preventDefault(); const fd = new FormData(f); try { await AU.login(fd.get('e'), fd.get('p')); closeSheet(); toast('Angemeldet 🍨'); await SYNC.pull(); } catch (err) { $('#lgerr').textContent = err.message; } });
 }
 
@@ -1299,12 +1299,14 @@ function openFilter() {
    <p class="muted" style="font-size:14px">„Meine Reihenfolge“ blendet ↑↓ an jeder Karte ein.</p>
    <button class="btn pri full" data-act="close">Fertig</button>`, true);
 }
+const FILLTXT = {1:'voll', 0.75:'¾', 0.5:'½', 0.25:'¼'};
+const slotReady = t => t.at + (t.rest ? 12 : 24) * 36e5 - Date.now();
 function vTruhe() {
   const used = S.truhe.filter(Boolean).length;
   return `<section class="sec card truhe"><div class="truhe-top"><div><b>🧊 Gefriertruhe</b> <span class="muted" style="font-size:14px;font-weight:600">${used}/6</span></div>${AI && used < 6 && used > 0 ? `<button class="btn sm" data-ask="In meiner Truhe sind: ${S.truhe.filter(Boolean).map(t => (getR(t.rid) || {}).name).filter(Boolean).join(', ')}. Was mache ich als nächste Sorte? Gib mir 3 Vorschläge, die sich davon abheben.">Was als Nächstes? ✨</button>` : ''}</div>
   <div class="slots">${S.truhe.map((t, i) => { const r = t && getR(t.rid); if (!r) return `<button class="slot empty" data-slot="${i}" aria-label="Becher ${i + 1} leer"><span class="plus">＋</span><small>frei</small></button>`;
-    const left = t.at + 864e5 - Date.now(), ready = left <= 0; const h = Math.ceil(left / 36e5);
-    return `<button class="slot ${ready ? 'ready' : ''}" data-slot="${i}" aria-label="${esc(r.name)}">${ready ? '' : '<span class="frost"></span>'}<span class="em">${esc((r.emoji || '').split(/(?=[\uD800-\uDBFF])/)[0] || '🍨')}</span>${SN.pintIcon((r.a.c || [])[0], ready ? .82 : .6, ready)}<small>${ready ? 'bereit' : 'noch ' + h + ' h'}</small></button>`; }).join('')}</div></section>`;
+    const left = slotReady(t), ready = left <= 0; const h = Math.ceil(left / 36e5); const f = t.fill || 1;
+    return `<button class="slot ${ready ? 'ready' : ''}" data-slot="${i}" aria-label="${esc(r.name)}">${ready ? '' : '<span class="frost"></span>'}<span class="em">${esc((r.emoji || '').split(/(?=[\uD800-\uDBFF])/)[0] || '🍨')}</span>${SN.pintIcon((r.a.c || [])[0], .82 * f, ready)}<small>${f < 1 ? FILLTXT[f] + ' · ' : ''}${ready ? 'bereit' : h + ' h'}</small></button>`; }).join('')}</div></section>`;
 }
 
 /* ---------- DETAIL ---------- */
@@ -1540,9 +1542,12 @@ function slotAction(i) {
     $('#tq').addEventListener('input', e => { const q = e.target.value.toLowerCase(); $('#tl').innerHTML = sorted(allRecipes()).filter(r => r.name.toLowerCase().includes(q)).map(pickRowT).join(''); });
     SLOT = i; return;
   }
-  const r = getR(t.rid), left = t.at + 864e5 - Date.now();
-  openSheet(`<div style="display:grid;grid-template-columns:88px minmax(0,1fr);gap:14px;align-items:center"><div class="hero" style="aspect-ratio:1">${img(r, {plain:true})}</div><div><h2 class="d-title" style="font-size:24px;margin:0">${esc(r.name)}</h2><p class="muted" style="margin:4px 0 0">Eingefroren ${new Date(t.at).toLocaleString('de-DE', {weekday:'short', hour:'2-digit', minute:'2-digit'})} · ${left <= 0 ? 'bereit ✓' : 'noch ' + Math.ceil(left / 36e5) + ' h'}</p></div></div>
-   <div class="actions" style="grid-template-columns:1fr"><button class="btn pri" data-act="eaten" data-i="${i}">Gegessen – Becher frei</button><button class="btn" data-open="${esc(r.id)}">Rezept & Programm öffnen</button><button class="btn" data-act="unfreeze" data-i="${i}">Rausnehmen</button></div>`, true);
+  const r = getR(t.rid), left = slotReady(t), f = t.fill || 1;
+  openSheet(`<div style="display:grid;grid-template-columns:88px minmax(0,1fr);gap:14px;align-items:center"><div class="hero" style="aspect-ratio:1">${img(r, {plain:true})}</div><div><h2 class="d-title" style="font-size:24px;margin:0">${esc(r.name)}</h2><p class="muted" style="margin:4px 0 0">${f < 1 ? 'Noch ' + FILLTXT[f] + ' Pint · ' : ''}${t.rest ? 'wieder eingefroren' : 'eingefroren'} ${new Date(t.at).toLocaleString('de-DE', {weekday:'short', hour:'2-digit', minute:'2-digit'})} · ${left <= 0 ? 'bereit' : 'noch ' + Math.ceil(left / 36e5) + ' h'}</p></div></div>
+   <div class="fsec"><b>Nur einen Teil gegessen?</b><p class="muted" style="margin:-4px 0 8px;font-size:14px">Wie viel ist noch drin? Der Becher kommt zurück in die Truhe.</p>
+    <div class="seg" role="group">${[0.75, 0.5, 0.25].filter(x => x < f).map(x => `<button data-act="partial" data-i="${i}" data-f="${x}">${FILLTXT[x]} übrig</button>`).join('') || '<button disabled>—</button>'}</div>
+    <p class="muted" style="margin:8px 0 0;font-size:13px">Tipp: Oberfläche glatt streichen, ohne Deckel zurück – vor dem nächsten Mal Ränder abkratzen und RE-SPIN.</p></div>
+   <div class="actions" style="grid-template-columns:1fr"><button class="btn pri" data-act="eaten" data-i="${i}">Ganz aufgegessen – Becher frei</button><button class="btn" data-open="${esc(r.id)}">Rezept & Programm öffnen</button><button class="btn" data-act="unfreeze" data-i="${i}">Rausnehmen</button></div>`, true);
 }
 let SLOT = null;
 function pickRowT(r) { return pickRow(r).replace('data-open=', 'data-put='); }
@@ -1773,6 +1778,7 @@ document.addEventListener('click', e => {
   else if (a === 'edcancel') { ED = null; location.hash = 'rezepte'; }
   else if (a === 'truhe') putTruhe(d.id);
   else if (a === 'eaten') { const rid = S.truhe[+d.i] && S.truhe[+d.i].rid; S.truhe[+d.i] = null; persist(); render(); if (rid && getR(rid)) openRate(rid); else closeSheet(); }
+  else if (a === 'partial') { const t2 = S.truhe[+d.i]; if (t2) { t2.fill = +d.f; t2.rest = true; t2.at = Date.now(); persist(); closeSheet(); render(); toast(`Rest (${FILLTXT[+d.f]}) wieder in der Truhe – vor dem Essen RE-SPIN`); } }
   else if (a === 'unfreeze') { S.truhe[+d.i] = null; persist(); closeSheet(); render(); }
   else if (a === 'made') putTruhe(d.id);
   else if (a === 'fb') { const v = $('#fb').value.trim(); if (!v) return; const r = clone(getR(d.id)); r.notes.push(new Date().toLocaleDateString('de-DE') + ': ' + v); saveR(r, true); openDetail(d.id); if (!AI) { toast('Learning gemerkt ✓'); return; } toast('Learning gemerkt', 'Scoopy anpassen lassen', () => ask(`Feedback zu „${r.name}“ (id ${r.id}): ${v}. Pass das Rezept entsprechend an.`)); }
