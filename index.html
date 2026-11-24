@@ -19,7 +19,7 @@
 /*
 VOICE: verspielte Eisdiele im Apple-Gewand – klar, freundlich, ein Augenzwinkern
 IDEA: die Eistheke – jede Sorte ein Becher mit Gesicht, Vitrinen-Karten, Kühltruhe mit 6 Pints
-PICTURE: generierte Kugel-Illustrationen je Rezept, Truhe, Lust-Matrix
+PICTURE: generierte Kugel-Illustrationen je Rezept, Truhe, Flavour-Matrix
 COLOUR: Vanille-Tag / Schoko-Nacht, Himbeere als Akzent, Mango & Pistazie als Support
 TYPE: SF Rounded (ui-rounded) / Nunito für Titel, System-Font für Text
 */
@@ -421,7 +421,7 @@ details.acc li::before{content:"";position:absolute;left:2px;top:.62em;width:7px
 <div class="drip" aria-hidden="true"></div>
 <div class="app" id="app">
   <header class="hdr" id="hdr"><div class="hdr-in">
-    <div class="brand"><button class="lg" id="logo" aria-label="Scoopernova"></button><div><h1 id="ttl">Scoopernova</h1><small id="subttl">created by munkolas · v1.4</small></div></div>
+    <div class="brand"><button class="lg" id="logo" aria-label="Scoopernova"></button><div><h1 id="ttl">Scoopernova</h1><small id="subttl">created by munkolas · v1.4.1</small></div></div>
     <div id="hdrbtns" class="row"></div>
   </div></header>
   <main id="main"></main>
@@ -1087,7 +1087,7 @@ async function initCaps() {
 
 
 /* ================= PWA-MODUS: SUPABASE (Konto wie FPV Cockpit) ================= */
-const VERSION = '1.4';
+const VERSION = '1.4.1';
 const PWA = !!window.SN_PWA;
 const AI = !PWA; /* KI-Funktionen nur in der Claude-Version – die iPhone-App bleibt kostenlos */
 const CLAUDE_URL = 'https://claude.ai/artifact/8mz7qbXNxS4notwaJyptjo';
@@ -1146,7 +1146,7 @@ function openSettings() {
    <div class="card" style="padding:14px;margin-top:16px"><b>${PWA ? 'Konto' : 'Speicher'}</b><p class="muted" style="margin:4px 0 10px;font-size:15px">${esc(SYNC.label())}</p>
    ${PWA ? (AU.s ? `<div class="row"><button class="btn" data-act="syncnow" style="flex:1">↻ Jetzt synchronisieren</button><button class="btn danger" data-act="logout" style="flex:1">Abmelden</button></div>`
      : `<form class="ed" id="lgf"><p class="muted" style="margin:0;font-size:14px">Gleiches Konto wie FPV Cockpit.</p><input class="field" name="e" type="email" autocomplete="email" placeholder="E-Mail" required><input class="field" name="p" type="password" autocomplete="current-password" placeholder="Passwort (mind. 6 Zeichen)" required minlength="6"><div class="row"><button class="btn pri" style="flex:2">Anmelden</button><button type="button" class="btn" data-act="signup" style="flex:1">Neu</button></div><p class="muted" id="lgerr" style="margin:0;font-size:14px"></p></form>`) : ''}</div>
-   <div class="card" style="padding:14px;margin-top:12px"><b>Neu in ${VERSION}</b><ul class="bul" style="margin-top:8px"><li>Rezepte als eigener Tab, Start aufgeräumt</li><li>v1.4: neue Grafiken, Bewerten mit Kugeln, Bild ändern direkt im Rezept, Matrix öffnet Rezepte</li><li>v1.3: Rezepte aufgeräumt, „Neu“ als eigene Seite, Gemacht → landet automatisch in der Truhe</li><li>iPhone-App über GitHub & Supabase</li><li>v1.2: iPhone-App ohne KI &amp; kostenlos – Scoopy bleibt in der Claude-Version</li></ul></div>`, true);
+   <div class="card" style="padding:14px;margin-top:12px"><b>Neu in ${VERSION}</b><ul class="bul" style="margin-top:8px"><li>Rezepte als eigener Tab, Start aufgeräumt</li><li>v1.4.1: heißt jetzt Flavour-Matrix</li><li>v1.4: neue Grafiken, Bewerten mit Kugeln, Bild ändern direkt im Rezept, Matrix öffnet Rezepte</li><li>v1.3: Rezepte aufgeräumt, „Neu“ als eigene Seite, Gemacht → landet automatisch in der Truhe</li><li>iPhone-App über GitHub & Supabase</li><li>v1.2: iPhone-App ohne KI &amp; kostenlos – Scoopy bleibt in der Claude-Version</li></ul></div>`, true);
   const f = $('#lgf'); if (f) f.addEventListener('submit', async e => { e.preventDefault(); const fd = new FormData(f); try { await AU.login(fd.get('e'), fd.get('p')); closeSheet(); toast('Angemeldet 🍨'); await SYNC.pull(); } catch (err) { $('#lgerr').textContent = err.message; } });
 }
 
@@ -1281,7 +1281,7 @@ function vRezepte() {
   return `<div class="view">
   <div class="ptitle row" style="justify-content:space-between;align-items:flex-end"><div><h2>Rezepte</h2><p>${allRecipes().length} Sorten</p></div><button class="btn pri newbtn" data-tab="neu">＋ Neues Rezept</button></div>
   <div class="tools">
-   <div class="search"><input class="field" id="q" type="search" placeholder="Suchen" value="${esc(p.q)}"><button class="iconbtn ${nFilt ? 'act' : ''}" data-act="filter" aria-label="Filter & Sortierung"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M7 12h10M10 18h4"/></svg>${nFilt ? `<i class="badge">${nFilt}</i>` : ''}</button><div class="seg vt" role="group" aria-label="Ansicht"><button aria-pressed="${!mx}" data-view="grid" aria-label="Kacheln"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/></svg></button><button aria-pressed="${mx}" data-view="matrix" aria-label="Lust-Matrix">${ICONS.matrix.replace('<svg ', '<svg width="18" height="18" ')}</button></div></div>
+   <div class="search"><input class="field" id="q" type="search" placeholder="Suchen" value="${esc(p.q)}"><button class="iconbtn ${nFilt ? 'act' : ''}" data-act="filter" aria-label="Filter & Sortierung"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M7 12h10M10 18h4"/></svg>${nFilt ? `<i class="badge">${nFilt}</i>` : ''}</button><div class="seg vt" role="group" aria-label="Ansicht"><button aria-pressed="${!mx}" data-view="grid" aria-label="Kacheln"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/></svg></button><button aria-pressed="${mx}" data-view="matrix" aria-label="Flavour-Matrix">${ICONS.matrix.replace('<svg ', '<svg width="18" height="18" ')}</button></div></div>
    <div class="seg" role="group" aria-label="Kategorie">${[['all','Alle'],['protein','Protein'],['natur','Frucht'],['deluxe','Deluxe']].map(([k, l]) => `<button aria-pressed="${p.cat === k}" data-cat="${k}">${l}</button>`).join('')}</div>
    ${nFilt ? `<div class="chips">${p.fam ? `<button class="chip on" data-fam="">${esc(p.fam === 'fav' ? 'Favoriten' : FAMTXT[p.fam])} ✕</button>` : ''}${p.sort !== 'fav' ? `<button class="chip on" data-act="setsort" data-k="fav">${esc((SORTS.find(x => x[0] === p.sort) || SORTS[0])[1])} ✕</button>` : ''}</div>` : ''}
   </div>
@@ -1393,8 +1393,8 @@ function edForm(r, id, page) {
    <label>Eigenes Programm (eine Station pro Zeile)<textarea class="field" name="flow" rows="3">${esc((r.flow || []).join('\n'))}</textarea></label>
    <label>Mix-Ins & Finish (eine pro Zeile)<textarea class="field" name="mix" rows="3">${esc((r.mix || []).join('\n'))}</textarea></label>
    <label>Learnings (eine pro Zeile)<textarea class="field" name="notes" rows="4">${esc((r.notes || []).join('\n'))}</textarea></label>
-   <label>Lust-Matrix: fruchtig ↔ sahnig<input type="range" name="x" min="-1" max="1" step=".05" value="${r.x || 0}"></label>
-   <label>Lust-Matrix: schwer ↔ leicht<input type="range" name="y" min="-1" max="1" step=".05" value="${r.y || 0}"></label>
+   <label>Flavour-Matrix: fruchtig ↔ sahnig<input type="range" name="x" min="-1" max="1" step=".05" value="${r.x || 0}"></label>
+   <label>Flavour-Matrix: schwer ↔ leicht<input type="range" name="y" min="-1" max="1" step=".05" value="${r.y || 0}"></label>
    <div class="two"><label>Kugelfarbe<input type="color" class="field" name="c1" value="${esc((r.a.c || [])[0] || '#FFF2C4')}"></label><label>Hintergrund<input type="color" class="field" name="bg" value="${esc(r.a.bg || '#FFF7EE')}"></label></div>
    <label>Gefäß<select class="field" name="v"><option value="">automatisch</option>${[['pint','Creami-Pint'],['cone','Waffel'],['bowl','Schale']].map(([k, l]) => `<option value="${k}" ${r.a.v === k ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
    <div><div style="font-size:14px;font-weight:700;color:var(--mute);margin-bottom:6px">Toppings in der Grafik</div><div class="tpick">${TOPS.map(t => `<button type="button" class="chip" data-top="${t}" aria-pressed="${(r.a.t || []).includes(t)}">${t}</button>`).join('')}</div></div>
