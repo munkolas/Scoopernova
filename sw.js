@@ -1,5 +1,5 @@
 /* Scoopernova – Service Worker: App zuerst aus dem Netz (Updates sofort), offline aus dem Speicher. Supabase immer direkt. */
-var V = 'scoopernova-1.3', C = 'scoopernova-app';
+var V = 'scoopernova-1.4', C = 'scoopernova-app';
 self.addEventListener('install', function (e) { self.skipWaiting(); e.waitUntil(caches.open(C).then(function (c) { return c.addAll(['./', 'icon-180.png', 'manifest.webmanifest']).catch(function () {}); })); });
 self.addEventListener('activate', function (e) { e.waitUntil(self.clients.claim()); });
 self.addEventListener('fetch', function (e) {
