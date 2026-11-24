@@ -366,13 +366,14 @@ details.acc li::before{content:"";position:absolute;left:2px;top:.62em;width:7px
 .maker .cbar{background:var(--bg2);padding:4px 4px 4px 6px}
 .lnk{text-decoration:none}
 .seg.vt button{display:grid;place-items:center}
+.tip .lnk{color:var(--berryd);font-weight:700}
 
 </style>
 </head>
 <body>
 <div class="app" id="app">
   <header class="hdr" id="hdr"><div class="hdr-in">
-    <div class="brand"><button class="lg" id="logo" aria-label="Scoopernova"></button><div><h1 id="ttl">Scoopernova</h1><small id="subttl">created by munkolas · v1.1</small></div></div>
+    <div class="brand"><button class="lg" id="logo" aria-label="Scoopernova"></button><div><h1 id="ttl">Scoopernova</h1><small id="subttl">created by munkolas · v1.2</small></div></div>
     <div id="hdrbtns" class="row"></div>
   </div></header>
   <main id="main"></main>
@@ -1031,8 +1032,10 @@ async function initCaps() {
 
 
 /* ================= PWA-MODUS: SUPABASE (Konto wie FPV Cockpit) ================= */
-const VERSION = '1.1';
+const VERSION = '1.2';
 const PWA = !!window.SN_PWA;
+const AI = !PWA; /* KI-Funktionen nur in der Claude-Version – die iPhone-App bleibt kostenlos */
+const CLAUDE_URL = 'https://claude.ai/artifact/8mz7qbXNxS4notwaJyptjo';
 const SB = {url:'https://esdcasflulavhtuumuhm.supabase.co', key:'sb_publishable_2sNRKSgMxkNa-ngjs4h4Sg_hDUBWS1K'};
 const AU = {
   s: (() => { try { return JSON.parse(localStorage.getItem('scoopernova.auth') || 'null'); } catch (e) { return null; } })(),
@@ -1052,7 +1055,7 @@ async function sbq(method, path, body, prefer) {
 const SYNC = {
   state:'', last:0, t:null,
   icon() { if (!PWA) return '☁️'; return AU.s ? (this.state === 'err' ? '⚠️' : '👤') : '🔑'; },
-  label() { if (!PWA) return 'Läuft in Claude – Daten & Scoopy über dein Claude-Konto.'; if (!AU.s) return 'Nicht angemeldet – Daten nur auf diesem Gerät, Scoopy aus.'; return this.state === 'err' ? 'Sync-Fehler – Tabelle in Supabase angelegt?' : 'Angemeldet als ' + (AU.s.email || '') + (this.last ? ' · zuletzt ' + new Date(this.last).toLocaleTimeString('de-DE', {hour:'2-digit', minute:'2-digit'}) : ''); },
+  label() { if (!PWA) return 'Läuft in Claude – Daten & Scoopy über dein Claude-Konto.'; if (!AU.s) return 'Nicht angemeldet – Daten nur auf diesem Gerät.'; return this.state === 'err' ? 'Sync-Fehler – Tabelle in Supabase angelegt?' : 'Angemeldet als ' + (AU.s.email || '') + (this.last ? ' · zuletzt ' + new Date(this.last).toLocaleTimeString('de-DE', {hour:'2-digit', minute:'2-digit'}) : ''); },
   schedule() { if (!PWA || !AU.s) return; clearTimeout(this.t); this.t = setTimeout(() => this.push(), 1200); },
   async push() { try { await sbq('POST', 'scoopernova_state?on_conflict=user_id', {user_id:AU.s.id, data:{state:S, chat:CHAT.slice(-60)}, updated_at:new Date().toISOString()}, 'resolution=merge-duplicates,return=minimal'); this.state = 'ok'; this.last = Date.now(); } catch (e) { this.state = 'err'; } },
   async pull() {
@@ -1088,7 +1091,7 @@ function openSettings() {
    <div class="card" style="padding:14px;margin-top:16px"><b>${PWA ? 'Konto' : 'Speicher'}</b><p class="muted" style="margin:4px 0 10px;font-size:15px">${esc(SYNC.label())}</p>
    ${PWA ? (AU.s ? `<div class="row"><button class="btn" data-act="syncnow" style="flex:1">↻ Jetzt synchronisieren</button><button class="btn danger" data-act="logout" style="flex:1">Abmelden</button></div>`
      : `<form class="ed" id="lgf"><p class="muted" style="margin:0;font-size:14px">Gleiches Konto wie FPV Cockpit.</p><input class="field" name="e" type="email" autocomplete="email" placeholder="E-Mail" required><input class="field" name="p" type="password" autocomplete="current-password" placeholder="Passwort (mind. 6 Zeichen)" required minlength="6"><div class="row"><button class="btn pri" style="flex:2">Anmelden</button><button type="button" class="btn" data-act="signup" style="flex:1">Neu</button></div><p class="muted" id="lgerr" style="margin:0;font-size:14px"></p></form>`) : ''}</div>
-   <div class="card" style="padding:14px;margin-top:12px"><b>Neu in ${VERSION}</b><ul class="bul" style="margin-top:8px"><li>Rezepte als eigener Tab, Start aufgeräumt</li><li>Lust-Matrix jetzt in den Rezepten (Umschalter oben)</li><li>iPhone-App über GitHub & Supabase</li></ul></div>`, true);
+   <div class="card" style="padding:14px;margin-top:12px"><b>Neu in ${VERSION}</b><ul class="bul" style="margin-top:8px"><li>Rezepte als eigener Tab, Start aufgeräumt</li><li>Lust-Matrix jetzt in den Rezepten (Umschalter oben)</li><li>iPhone-App über GitHub & Supabase</li><li>v1.2: iPhone-App ohne KI &amp; kostenlos – Scoopy bleibt in der Claude-Version</li></ul></div>`, true);
   const f = $('#lgf'); if (f) f.addEventListener('submit', async e => { e.preventDefault(); const fd = new FormData(f); try { await AU.login(fd.get('e'), fd.get('p')); closeSheet(); toast('Angemeldet 🍨'); await SYNC.pull(); } catch (err) { $('#lgerr').textContent = err.message; } });
 }
 
@@ -1135,7 +1138,7 @@ const ICONS = {
 const TABS = [['start','Start'],['rezepte','Rezepte'],['chat','Scoopy'],['wissen','Wissen'],['vorrat','Vorrat']];
 let VIEW = 'start';
 function renderTabs() {
-  $('#tabs').innerHTML = TABS.map(([k, l]) => k === 'chat'
+  $('#tabs').style.gridTemplateColumns = `repeat(${AI ? 5 : 4},minmax(0,1fr))`; $('#tabs').innerHTML = TABS.filter(t => AI || t[0] !== 'chat').map(([k, l]) => k === 'chat'
     ? `<button class="tab chat" data-tab="chat" ${VIEW === k ? 'aria-current="page"' : ''}><span class="bub">${ICONS.chat}</span>${l}</button>`
     : `<button class="tab" data-tab="${k}" ${VIEW === k ? 'aria-current="page"' : ''}>${ICONS[k]}${l}</button>`).join('');
 }
@@ -1143,7 +1146,7 @@ function route() {
   const h = location.hash.slice(1);
   if (h.startsWith('r-')) { const id = h.slice(2); if (getR(id)) { if (!SHEET || SHEET !== id) openDetail(id, true); return; } }
   if (SHEET) closeSheet();
-  const v = TABS.find(t => t[0] === h) ? h : (h === 'eis' ? 'start' : h === 'matrix' ? (S.prefs.view = 'matrix', 'rezepte') : 'start');
+  const v = TABS.find(t => t[0] === h) && (AI || h !== 'chat') ? h : (h === 'eis' ? 'start' : h === 'matrix' ? (S.prefs.view = 'matrix', 'rezepte') : 'start');
   if (v !== VIEW || !$('#main').innerHTML) { VIEW = v; render(); window.scrollTo(0, 0); }
 }
 window.addEventListener('hashchange', route);
@@ -1199,10 +1202,10 @@ function vStart() {
   return `<div class="view">
   ${pageTitle(hello() + ' 🍨', 'Was landet heute im Becher?')}
   ${vTruhe()}
-  <section class="sec card maker"><div class="row" style="justify-content:space-between"><h3>✨ Eis entwickeln</h3><div class="seg mini" id="mkcat" role="group" aria-label="Kategorie">${['protein','natur','deluxe'].map(c => `<button aria-pressed="${MKCAT === c}" data-mk="${c}" aria-label="${SN.CATS[c].label}">${SN.CATS[c].icon}</button>`).join('')}</div></div>
+  ${AI ? '' : `<section class="sec card tip"><span class="ti">✨</span><p><b>Scoopy & Eis-Entwickeln</b> gibt’s in der Claude-Version – ohne Zusatzkosten. <a class="lnk" href="${CLAUDE_URL}" target="_blank" rel="noopener">In Claude öffnen ›</a></p></section><template>`}<section class="sec card maker"><div class="row" style="justify-content:space-between"><h3>✨ Eis entwickeln</h3><div class="seg mini" id="mkcat" role="group" aria-label="Kategorie">${['protein','natur','deluxe'].map(c => `<button aria-pressed="${MKCAT === c}" data-mk="${c}" aria-label="${SN.CATS[c].label}">${SN.CATS[c].icon}</button>`).join('')}</div></div>
    <div class="cbar" style="box-shadow:none"><input class="field" id="mkin" placeholder="Zutaten, z. B. Mango, Skyr …" enterkeyhint="go" style="border:0;background:transparent;min-height:44px"><button class="iconbtn" data-act="scan" aria-label="Zutaten fotografieren">📷</button><button class="iconbtn send" data-act="mkgo" aria-label="Entwickeln">↑</button></div>
   </section>
-  <section class="sec"><div class="sec-h"><h2>Deine Top 5</h2><a class="lnk" href="#rezepte">Alle Rezepte ›</a></div>
+  ${AI ? '' : '</template>'}<section class="sec"><div class="sec-h"><h2>Deine Top 5</h2><a class="lnk" href="#rezepte">Alle Rezepte ›</a></div>
    <div class="hof">${hof.map(r => { const m = macros(r); return `<button class="card hcard" data-open="${esc(r.id)}"><div class="im">${img(r)}</div>
      ${r.champ ? '<span class="rank champ">👑 Bestes Eis ever</span>' : `<span class="rank r${r.rank}">${r.rank}</span>`}
      <div class="tx"><b>${esc(r.name)}</b><span class="muted" style="font-size:14px">${Math.round(m.k)} kcal${m.p >= 10 ? ' · ' + Math.round(m.p) + ' g P' : ''}</span></div></button>`; }).join('')}</div></section>
@@ -1218,13 +1221,13 @@ function vRezepte() {
    ${mx ? '' : `<div class="chips" role="group" aria-label="Geschmack">${[['', 'Alle'], ['fav', '❤️ Favoriten']].concat(Object.entries(SN.FAMS)).map(([k, l]) => `<button class="chip" aria-pressed="${p.fam === k}" data-fam="${k}">${l}</button>`).join('')}</div>`}
   </div>
   ${mx ? vMatrix() : `<p class="cnt">${list.length} Sorte${list.length === 1 ? '' : 'n'} · sortiert nach ${esc((SORTS.find(x => x[0] === p.sort) || SORTS[0])[1])}</p>
-   ${list.length ? `<div class="grid">${list.map((r, i) => card(r, i, list.length)).join('')}</div>` : `<div class="empty"><span class="melt">🍦</span><p>Nix gefunden – schmilzt dahin.</p><button class="btn pri" data-ask="Entwickle mir ein Eis: ${esc(p.q)}">Scoopy fragen</button></div>`}
-   <details class="acc" style="margin-top:22px"><summary><span style="font-size:22px">💡</span>Ideen-Pool <span class="muted" style="font:600 14px system-ui;margin-left:6px">${SN.IDEAS.length} Ideen</span></summary><div style="padding:0 16px 16px"><p class="muted" style="margin:0 0 10px;font-size:14px">Aus dem FDL-Buch, von FitFoodAE und unseren Gesprächen. Antippen – Scoopy arbeitet es aus.</p><div class="ideas">${SN.IDEAS.map(([n, s2]) => `<button data-ask="Entwickle mir ein finales Rezept für „${esc(n)}“ – passend zu meinem Vorrat und meinen Regeln.">${esc(n)}${s2 ? `<small>${s2}</small>` : ''}</button>`).join('')}</div></div></details>`}
+   ${list.length ? `<div class="grid">${list.map((r, i) => card(r, i, list.length)).join('')}</div>` : `<div class="empty"><span class="melt">🍦</span><p>Nix gefunden – schmilzt dahin.</p>${AI ? `<button class="btn pri" data-ask="Entwickle mir ein Eis: ${esc(p.q)}">Scoopy fragen</button>` : ''}</div>`}
+   <details class="acc" style="margin-top:22px"><summary><span style="font-size:22px">💡</span>Ideen-Pool <span class="muted" style="font:600 14px system-ui;margin-left:6px">${SN.IDEAS.length} Ideen</span></summary><div style="padding:0 16px 16px"><p class="muted" style="margin:0 0 10px;font-size:14px">Aus dem FDL-Buch, von FitFoodAE und unseren Gesprächen. ${AI ? 'Antippen – Scoopy arbeitet es aus.' : 'Ausarbeiten lassen kannst du sie in der Claude-Version.'}</p><div class="ideas">${SN.IDEAS.map(([n, s2]) => AI ? `<button data-ask="Entwickle mir ein finales Rezept für „${esc(n)}“ – passend zu meinem Vorrat und meinen Regeln.">${esc(n)}${s2 ? `<small>${s2}</small>` : ''}</button>` : `<button disabled style="cursor:default">${esc(n)}${s2 ? `<small>${s2}</small>` : ''}</button>`).join('')}</div></div></details>`}
   </div>`;
 }
 function vTruhe() {
   const used = S.truhe.filter(Boolean).length;
-  return `<section class="sec card truhe"><div class="truhe-top"><div><b>🧊 Gefriertruhe</b> <span class="muted" style="font-size:14px;font-weight:600">${used}/6</span></div>${used < 6 && used > 0 ? `<button class="btn sm" data-ask="In meiner Truhe sind: ${S.truhe.filter(Boolean).map(t => (getR(t.rid) || {}).name).filter(Boolean).join(', ')}. Was mache ich als nächste Sorte? Gib mir 3 Vorschläge, die sich davon abheben.">Was als Nächstes? ✨</button>` : ''}</div>
+  return `<section class="sec card truhe"><div class="truhe-top"><div><b>🧊 Gefriertruhe</b> <span class="muted" style="font-size:14px;font-weight:600">${used}/6</span></div>${AI && used < 6 && used > 0 ? `<button class="btn sm" data-ask="In meiner Truhe sind: ${S.truhe.filter(Boolean).map(t => (getR(t.rid) || {}).name).filter(Boolean).join(', ')}. Was mache ich als nächste Sorte? Gib mir 3 Vorschläge, die sich davon abheben.">Was als Nächstes? ✨</button>` : ''}</div>
   <div class="slots">${S.truhe.map((t, i) => { const r = t && getR(t.rid); if (!r) return `<button class="slot empty" data-slot="${i}" aria-label="Becher ${i + 1} leer"><span class="plus">＋</span><small>frei</small></button>`;
     const left = t.at + 864e5 - Date.now(), ready = left <= 0; const h = Math.ceil(left / 36e5);
     return `<button class="slot ${ready ? 'ready' : ''}" data-slot="${i}" aria-label="${esc(r.name)}">${ready ? '' : '<span class="frost"></span>'}<span class="em">${esc((r.emoji || '').split(/(?=[\uD800-\uDBFF])/)[0] || '🍨')}</span>${SN.pintIcon((r.a.c || [])[0], ready ? .82 : .6, ready)}<small>${ready ? 'bereit' : 'noch ' + h + ' h'}</small></button>`; }).join('')}</div></section>`;
@@ -1243,7 +1246,7 @@ function openDetail(id, fromHash) {
   <div class="d-meta"><span class="tag" style="color:${c.color}">${c.icon || ''} ${esc(c.label || '')}</span><span class="tag">${esc(SN.FAMS[r.fam] || '')}</span><span class="tag"><i style="width:8px;height:8px;border-radius:50%;background:${(SN.STATUS[r.status] || {}).dot}"></i>${esc((SN.STATUS[r.status] || {}).label || '')} · ${esc(r.ver || '')}</span>${r.rank ? `<span class="tag">🏆 Platz ${r.rank}</span>` : ''}${r.champ ? '<span class="tag">👑 Bestes Eis ever</span>' : ''}${r.sig ? '<span class="tag">✍️ Eigenkreation</span>' : ''}${r.src ? `<span class="tag">nach ${esc(r.src)}</span>` : ''}${made ? `<span class="tag">✓ ${made.count}× gemacht</span>` : ''}</div>
   <div class="macros"><div class="mbox k"><b>${Math.round(m.k)}</b><span>kcal</span></div><div class="mbox p"><b>${Math.round(m.p)}</b><span>g Protein</span></div><div class="mbox"><b>${Math.round(m.c)}</b><span>g KH</span></div><div class="mbox"><b>${Math.round(m.f)}</b><span>g Fett</span></div></div>
   <p class="muted" style="font-size:14px;margin:-4px 0 0">Ganzer Pint ≈ ${Math.round(m.g)} g · exakt berechnet aus deinem Vorrat${m.dens >= 5 ? ` · ${fnum(Math.round(m.dens * 10) / 10)} g Protein pro 100 kcal` : ''}${m.unknown.length ? ` · ohne: ${esc(m.unknown.join(', '))}` : ''}</p>
-  <div class="actions"><button class="btn ${r.fav ? 'pri' : ''}" data-fav="${esc(id)}">${r.fav ? '❤️ Favorit' : '🤍 Favorit'}</button><button class="btn" data-act="truhe" data-id="${esc(id)}">🧊 In die Truhe</button><button class="btn" data-edit="${esc(id)}">✏️ Bearbeiten</button><button class="btn" data-ask="Ich will „${esc(r.name)}“ (id: ${esc(id)}) anpassen: " data-prefill="1">💬 Mit Scoopy</button></div>
+  <div class="actions"><button class="btn ${r.fav ? 'pri' : ''}" data-fav="${esc(id)}">${r.fav ? '❤️ Favorit' : '🤍 Favorit'}</button><button class="btn" data-act="truhe" data-id="${esc(id)}">🧊 In die Truhe</button><button class="btn" data-edit="${esc(id)}">✏️ Bearbeiten</button>${AI ? `<button class="btn" data-ask="Ich will „${esc(r.name)}“ (id: ${esc(id)}) anpassen: " data-prefill="1">💬 Mit Scoopy</button>` : ''}</div>
   <div class="d-sec"><h3>Creami-Programm</h3><div class="flow">${(r.flow || []).map((f, i) => `${i ? '<span class="farr">→</span>' : ''}<span class="fstep ${/abkratzen|EL|Mandel|Flüss/i.test(f) ? 'soft' : ''}">${esc(f)}</span>`).join('')}</div><p class="muted" style="font-size:14px;margin:6px 0 0">Ohne Deckel einfrieren · vor jedem Re-Spin/Mix-In Ränder abkratzen.</p></div>
   <div class="d-sec"><h3>Zutaten <span class="muted" style="font-size:14px;font-weight:600">· 1 Pint · antippen zum Abhaken</span></h3><ul class="ing">${(r.ings || []).map((l, i) => { const p = P[l.ing]; return `<li data-ck="${i}"><span class="ck">✓</span><span class="nm">${esc(iname(l))}${l.opt ? '<span class="opt">optional</span>' : ''}${p && p.have === false ? '<span class="miss">fehlt</span>' : ''}${l.note ? `<span class="nt">${esc(l.note)}</span>` : ''}</span><span class="amt">${esc(famt(l))}</span></li>`; }).join('')}</ul></div>
   <div class="d-sec"><h3>Zubereitung</h3><ol class="steps">${(r.steps || []).map(s => `<li><span>${esc(s)}</span></li>`).join('')}</ol></div>
@@ -1378,7 +1381,7 @@ function vWissen() {
   <section class="sec" id="mf">${modeFinder()}</section>
   <section class="sec"><div class="sec-h"><h2>Die Modi</h2><span class="muted" style="font-size:14px">dein Basis-Creami</span></div><div class="modes">${SN.MODES.map(m => `<div class="card mode"><b>${esc(m[0])}</b><em>${esc(m[1])}</em><p>${esc(m[2])}</p></div>`).join('')}</div></section>
   <section class="sec"><div class="sec-h"><h2>Deep Dive</h2></div>${SN.KNOW.map((k, i) => `<details class="acc" ${i === 0 ? 'open' : ''}><summary><span style="font-size:24px">${k.i}</span>${esc(k.t)}</summary><ul>${k.b.map(x => `<li>${esc(x)}</li>`).join('')}</ul></details>`).join('')}</section>
-  <section class="sec card tip"><span class="ti">🤔</span><p>Frage, die hier nicht steht? <button class="btn sm pri" data-ask="" data-prefill="1" style="margin-left:6px">Scoopy fragen</button></p></section></div>`;
+  ${AI ? '' : '<template>'}<section class="sec card tip"><span class="ti">🤔</span><p>Frage, die hier nicht steht? <button class="btn sm pri" data-ask="" data-prefill="1" style="margin-left:6px">Scoopy fragen</button></p></section>${AI ? '' : '</template>'}</div>`;
 }
 
 /* ---------- VORRAT ---------- */
@@ -1586,6 +1589,7 @@ async function sendChat(text) {
   CUR = null;
 }
 function ask(text, prefill) {
+  if (!AI) return;
   if (SHEET) closeSheet();
   if (prefill) { DRAFT = text; location.hash = 'chat'; if (VIEW === 'chat') render(); setTimeout(() => { const t = $('#cin'); if (t) { t.focus(); t.setSelectionRange(t.value.length, t.value.length); } }, 80); return; }
   if (location.hash !== '#chat') location.hash = 'chat'; setTimeout(() => sendChat(text), 60);
@@ -1646,7 +1650,7 @@ document.addEventListener('click', e => {
   else if (a === 'eaten') { const t2 = S.truhe[+d.i]; if (t2) markMade(t2.rid); S.truhe[+d.i] = null; persist(); closeSheet(); render(); toast('Lass es dir schmecken 😋'); }
   else if (a === 'unfreeze') { S.truhe[+d.i] = null; persist(); closeSheet(); render(); }
   else if (a === 'made') { markMade(d.id); openDetail(d.id); toast('Eingetragen 🎉'); }
-  else if (a === 'fb') { const v = $('#fb').value.trim(); if (!v) return; const r = clone(getR(d.id)); r.notes.push(new Date().toLocaleDateString('de-DE') + ': ' + v); saveR(r, true); openDetail(d.id); toast('Learning gemerkt', 'Scoopy anpassen lassen', () => ask(`Feedback zu „${r.name}“ (id ${r.id}): ${v}. Pass das Rezept entsprechend an.`)); }
+  else if (a === 'fb') { const v = $('#fb').value.trim(); if (!v) return; const r = clone(getR(d.id)); r.notes.push(new Date().toLocaleDateString('de-DE') + ': ' + v); saveR(r, true); openDetail(d.id); if (!AI) { toast('Learning gemerkt ✓'); return; } toast('Learning gemerkt', 'Scoopy anpassen lassen', () => ask(`Feedback zu „${r.name}“ (id ${r.id}): ${v}. Pass das Rezept entsprechend an.`)); }
   else if (a === 'copywa') copy(waText(getR(d.id)), 'WhatsApp-Text kopiert');
   else if (a === 'copyyz') { const r = getR(d.id), m = macros(r), p = v => (Math.round(v / m.g * 1000) / 10).toString().replace('.', ','); copy(`${r.name} – pro 100 g: ${p(m.k)} kcal, ${p(m.p)} g Protein, ${p(m.c)} g KH, ${p(m.f)} g Fett. Portion 1 Pint = ${Math.round(m.g)} g`, 'Yazio-Werte kopiert'); }
   else if (a === 'dup') { const r = clone(getR(d.id)); r.id = ''; r.name += ' (Kopie)'; delete r.rank; delete r.champ; r.status = 'neu'; openEditor(null, Object.assign(r, {i:undefined})); }
@@ -1658,8 +1662,8 @@ document.addEventListener('click', e => {
   else if (a === 'send') sendChat();
   else if (a === 'rmimg') { PENDING_IMG = null; render(); }
   else if (a === 'clearchat') { const old = CHAT; CHAT = []; persistChat(); render(); toast('Chat geleert', 'Rückgängig', () => { CHAT = old; persistChat(); render(); }); }
-  else if (a === 'scan') { if (VIEW === 'start') { const z = ($('#mkin') || {}).value || ''; MKPEND = `Hier ist ein Foto meiner Zutaten${z ? ' (dazu habe ich: ' + z + ')' : ''}. Erkenne alles und entwickle mir daraus ein ${SN.CATS[MKCAT].long}-Eis.`; } $('#fileImg').click(); }
-  else if (a === 'mkgo') { const z = $('#mkin').value.trim(); if (!z) { $('#mkin').focus(); toast('Erst Zutaten eingeben 🙂'); return; } ask(`Entwickle mir ein ${SN.CATS[MKCAT].long}-Eis (Kategorie ${MKCAT}) aus: ${z}. Nutze sonst meinen Vorrat und meine Regeln.`); }
+  else if (a === 'scan' && AI) { if (VIEW === 'start') { const z = ($('#mkin') || {}).value || ''; MKPEND = `Hier ist ein Foto meiner Zutaten${z ? ' (dazu habe ich: ' + z + ')' : ''}. Erkenne alles und entwickle mir daraus ein ${SN.CATS[MKCAT].long}-Eis.`; } $('#fileImg').click(); }
+  else if (a === 'mkgo' && AI) { const z = $('#mkin').value.trim(); if (!z) { $('#mkin').focus(); toast('Erst Zutaten eingeben 🙂'); return; } ask(`Entwickle mir ein ${SN.CATS[MKCAT].long}-Eis (Kategorie ${MKCAT}) aus: ${z}. Nutze sonst meinen Vorrat und meine Regeln.`); }
 });
 document.addEventListener('click', e => { if (e.target.id === 'mic') { const d = CAP.dict; if (!d) return; const b = e.target; if (b.classList.contains('on')) d.stop().catch(() => {}); else d.start().catch(err => { if (err && err.code === 'not_granted') { b.remove(); } }); } });
 document.addEventListener('input', e => {
