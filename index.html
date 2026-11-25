@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#3B2418">
 <title>Scoopernova</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -433,6 +433,14 @@ details.acc li::before{content:"";position:absolute;left:2px;top:.62em;width:7px
 .chk input{width:20px;height:20px;accent-color:var(--pink,#FF5C86)}
 .artbox .hint{font-size:12px;color:var(--mute);margin-top:4px;line-height:1.35}
 
+
+/* 1.8.1: kein Doppeltipp-Zoom, kein seitliches Scrollen */
+html,body{touch-action:manipulation;overflow-x:hidden;max-width:100%}
+button,a,input,select,textarea,label,[data-act],[data-ask]{touch-action:manipulation}
+.sheet{overflow-x:hidden;overflow-y:auto;touch-action:pan-y}
+.sheet *{min-width:0}
+.sheet img,.sheet svg,.sheet video,.sheet canvas,.sheet table,.sheet pre{max-width:100%}
+.sheet p,.sheet li,.sheet td,.sheet h1,.sheet h2,.sheet h3,.sheet b{overflow-wrap:anywhere}
 </style>
 </head>
 <body>
@@ -1406,7 +1414,7 @@ async function initCaps() {
 
 
 /* ================= PWA-MODUS: SUPABASE (Konto wie FPV Cockpit) ================= */
-const VERSION = '1.8.0';
+const VERSION = '1.8.1';
 const PWA = !!window.SN_PWA;
 const AI = true; /* Scoopy läuft jetzt überall: in Claude über Claude, in der iPhone-App kostenlos über Gemini (Supabase-Funktion scoopy) */
 const CLAUDE_URL = 'https://claude.ai/artifact/8mz7qbXNxS4notwaJyptjo';
