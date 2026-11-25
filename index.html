@@ -88,7 +88,7 @@ input,select,textarea{font-size:16px}
 .hof{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding:4px max(4vw,16px) 14px;margin:0 calc(-1*max(4vw,16px));scrollbar-width:none}
 .hof::-webkit-scrollbar{display:none}
 .hcard{flex:none;width:min(62vw,230px);scroll-snap-align:start;position:relative;text-align:left;overflow:hidden}
-.hcard .im{aspect-ratio:4/3.3;border-radius:var(--r) var(--r) 0 0;overflow:hidden}
+.hcard .im{aspect-ratio:4/3;border-radius:var(--r) var(--r) 0 0;overflow:hidden}
 .hcard .im svg{width:100%;height:100%;display:block}
 .hcard .tx{padding:10px 14px 14px}
 .hcard b{display:block;font:800 17px/1.2 var(--title)}
@@ -145,7 +145,7 @@ textarea.field{min-height:84px;resize:vertical;line-height:1.45}
 @media(min-width:1040px){.grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
 .rc{text-align:left;overflow:hidden;position:relative;display:flex;flex-direction:column;transition:transform .2s cubic-bezier(.3,1.4,.5,1)}
 .rc:active{transform:scale(.97)}
-.rc .im{aspect-ratio:4/3.2;overflow:hidden;position:relative}
+.rc .im{aspect-ratio:4/3;overflow:hidden;position:relative}
 .rc .im svg,.rc .im img,.hcard .im img{width:100%;height:100%;display:block;object-fit:cover}
 .rc .tx{padding:10px 12px 12px;display:grid;gap:4px}
 .rc b{font:800 16px/1.2 var(--title)}
@@ -439,7 +439,7 @@ details.acc li::before{content:"";position:absolute;left:2px;top:.62em;width:7px
 <div class="drip" aria-hidden="true"></div>
 <div class="app" id="app">
   <header class="hdr" id="hdr"><div class="hdr-in">
-    <div class="brand"><button class="lg" id="logo" aria-label="Scoopernova"></button><div><h1 id="ttl">Scoopernova</h1><small id="subttl">created by munkolas · v1.7.0</small></div></div>
+    <div class="brand"><button class="lg" id="logo" aria-label="Scoopernova"></button><div><h1 id="ttl">Scoopernova</h1><small id="subttl">created by munkolas · v1.7.1</small></div></div>
     <div id="hdrbtns" class="row"></div>
   </div></header>
   <main id="main"></main>
@@ -1241,7 +1241,7 @@ SN.art2 = function (r, opt = {}) {
   const a = r.a || {}, R = rng(hash(r.id || r.name)), c1 = (a.c || ['#F7E7C6'])[0], c2 = (a.c || [])[1] || mix(c1, '#fff', .25);
   const bg = a.bg || mix(c1, '#fff', .7), dark = lum(bg) < .35, t = a.t || [];
   const v = r.cat === 'protein' ? pint : r.cat === 'natur' ? bowl : sundae;
-  return `<svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${String(r.name || '').replace(/[<>&"]/g, '')}"><defs><linearGradient id="gloss" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".45"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/></linearGradient></defs>` + background(bg, t, R, dark, r.cat, opt.plain) + v(c1, c2, t, R, bg, dark) + `</svg>`;
+  return `<svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${String(r.name || '').replace(/[<>&"]/g, '')}"><defs><linearGradient id="gloss" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".45"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/></linearGradient></defs>` + background(bg, t, R, dark, r.cat, opt.plain) + v(c1, c2, t, R, bg, dark) + `</svg>`;
 };
 })();
 
@@ -1360,7 +1360,7 @@ async function initCaps() {
 
 
 /* ================= PWA-MODUS: SUPABASE (Konto wie FPV Cockpit) ================= */
-const VERSION = '1.7.0';
+const VERSION = '1.7.1';
 const PWA = !!window.SN_PWA;
 const AI = !PWA; /* KI-Funktionen nur in der Claude-Version – die iPhone-App bleibt kostenlos */
 const CLAUDE_URL = 'https://claude.ai/artifact/8mz7qbXNxS4notwaJyptjo';
