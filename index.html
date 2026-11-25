@@ -431,7 +431,7 @@ details.acc li::before{content:"";position:absolute;left:2px;top:.62em;width:7px
 <div class="drip" aria-hidden="true"></div>
 <div class="app" id="app">
   <header class="hdr" id="hdr"><div class="hdr-in">
-    <div class="brand"><button class="lg" id="logo" aria-label="Scoopernova"></button><div><h1 id="ttl">Scoopernova</h1><small id="subttl">created by munkolas · v1.5.2</small></div></div>
+    <div class="brand"><button class="lg" id="logo" aria-label="Scoopernova"></button><div><h1 id="ttl">Scoopernova</h1><small id="subttl">created by munkolas · v1.6</small></div></div>
     <div id="hdrbtns" class="row"></div>
   </div></header>
   <main id="main"></main>
@@ -1008,7 +1008,7 @@ let CHAT = [];
 try { const j = JSON.parse(localStorage.getItem(LS) || 'null'); if (j) S = Object.assign(S, j); } catch (e) {}
 try { CHAT = JSON.parse(localStorage.getItem(LSC) || '[]') || []; } catch (e) {}
 S.prefs = Object.assign({cat:'all', fam:'', sort:'fav', q:''}, S.prefs || {});
-while (S.truhe.length < 6) S.truhe.push(null);
+S = migrate(S);
 
 function normRecipe(r) {
   const n = clone(r);
@@ -1028,7 +1028,7 @@ function allRecipes() {
   return out;
 }
 const getR = id => S.deleted.includes(id) ? null : (S.recipes[id] || SEEDMAP[id] || null);
-function saveR(r, quiet) { r.updatedAt = Date.now(); S.recipes[r.id] = clone(r); if (S.deleted.includes(r.id)) S.deleted = S.deleted.filter(x => x !== r.id); persist(); if (!quiet) render(); }
+function saveR(r, quiet) { r.updatedAt = Date.now(); S.recipes[r.id] = clone(r); if (S.deletedAt) delete S.deletedAt[r.id]; if (S.deleted.includes(r.id)) S.deleted = S.deleted.filter(x => x !== r.id); persist(); if (!quiet) render(); }
 function pantry() { const m = {}; for (const p of SN.PANTRY) m[p.id] = Object.assign({}, p, S.pantry[p.id] || {}); for (const id in S.pantry) if (!m[id]) m[id] = S.pantry[id]; return m; }
 
 /* ================= MAKROS ================= */
@@ -1056,8 +1056,9 @@ function iname(l) { const p = pantry()[l.ing]; return l.name || (p ? p.n : l.ing
 
 /* ================= PERSIST + DB ================= */
 let DB = null, DBDOC = null, CHATDOC = null, saveT = null, chatT = null;
-function persist() {
-  S.updatedAt = Date.now();
+function persist(keepTime) {
+  if (!keepTime) S.updatedAt = Date.now();
+  if (typeof BRIDGE !== 'undefined') BRIDGE.schedule();
   try { localStorage.setItem(LS, JSON.stringify(S)); } catch (e) {}
   SYNC.schedule();
   clearTimeout(saveT); saveT = setTimeout(() => { if (DBDOC) DBDOC.set({json: JSON.stringify(S), at: S.updatedAt}).catch(() => {}); }, 900);
@@ -1090,18 +1091,20 @@ async function initCaps() {
     const got = await Promise.race([readDoc(DBDOC), timer]);
     if (got && got !== 'timeout' && got.json) {
       const remote = JSON.parse(got.json);
-      if ((remote.updatedAt || 0) > (S.updatedAt || 0)) { S = Object.assign(S, remote); try { localStorage.setItem(LS, JSON.stringify(S)); } catch (e) {} render(); }
-      else if ((S.updatedAt || 0) > (remote.updatedAt || 0)) DBDOC.set({json: JSON.stringify(S), at: S.updatedAt}).catch(() => {});
+      const m = mergeStates(S, remote); const ch = !sameState(m, S); adopt(m); if (ch) render();
+      if (!sameState(m, migrate(remote))) DBDOC.set({json: JSON.stringify(S), at: S.updatedAt}).catch(() => {});
     } else if (got !== 'timeout' && S.updatedAt) DBDOC.set({json: JSON.stringify(S), at: S.updatedAt}).catch(() => {});
     const gc = await Promise.race([readDoc(CHATDOC), new Promise(r => setTimeout(() => r(null), 10000))]);
     if (gc && gc.json) { const rc = JSON.parse(gc.json); if (rc.length > CHAT.length) { CHAT = rc; if (VIEW === 'chat') render(); } }
     DB = db;
   } catch (e) {}
+  try { const mcp = await claude.use('mcp'); if (mcp) { BRIDGE.mcp = mcp; BRIDGE.pull(); setInterval(() => { if (!document.hidden) BRIDGE.pull(); }, 60000); document.addEventListener('visibilitychange', () => { if (!document.hidden) BRIDGE.pull(); }); } else BRIDGE.state = 'none';
+  } catch (e) {}
 }
 
 
 /* ================= PWA-MODUS: SUPABASE (Konto wie FPV Cockpit) ================= */
-const VERSION = '1.5.2';
+const VERSION = '1.6';
 const PWA = !!window.SN_PWA;
 const AI = !PWA; /* KI-Funktionen nur in der Claude-Version – die iPhone-App bleibt kostenlos */
 const CLAUDE_URL = 'https://claude.ai/artifact/8mz7qbXNxS4notwaJyptjo';
@@ -1125,16 +1128,16 @@ const SYNC = {
   state:'', last:0, t:null,
   icon() { if (!PWA) return '☁️'; return AU.s ? (this.state === 'err' ? '⚠️' : '👤') : '🔑'; },
   label() { if (!PWA) return 'Läuft in Claude – Daten & Scoopy über dein Claude-Konto.'; if (!AU.s) return 'Nicht angemeldet – Daten nur auf diesem Gerät.'; return this.state === 'err' ? 'Sync-Fehler – Tabelle in Supabase angelegt?' : 'Angemeldet als ' + (AU.s.email || '') + (this.last ? ' · zuletzt ' + new Date(this.last).toLocaleTimeString('de-DE', {hour:'2-digit', minute:'2-digit'}) : ''); },
-  schedule() { if (!PWA || !AU.s) return; clearTimeout(this.t); this.t = setTimeout(() => this.push(), 1200); },
-  async push() { try { await sbq('POST', 'scoopernova_state?on_conflict=user_id', {user_id:AU.s.id, data:{state:S, chat:CHAT.slice(-60)}, updated_at:new Date().toISOString()}, 'resolution=merge-duplicates,return=minimal'); this.state = 'ok'; this.last = Date.now(); } catch (e) { this.state = 'err'; } },
+  schedule() { if (!PWA || !AU.s) return; clearTimeout(this.t); this.t = setTimeout(() => this.pull(), 1500); },
+  async push() { try { await sbq('POST', 'scoopernova_state?on_conflict=user_id', {user_id:AU.s.id, data:{state:S}, updated_at:new Date().toISOString()}, 'resolution=merge-duplicates,return=minimal'); this.state = 'ok'; this.last = Date.now(); } catch (e) { this.state = 'err'; } },
   async pull() {
     if (!PWA || !AU.s) return;
+    if (this.busy) return; this.busy = true; setTimeout(() => this.busy = false, 8000);
     try { const rows = await sbq('GET', 'scoopernova_state?select=data,updated_at&user_id=eq.' + AU.s.id); const d = rows && rows[0] && rows[0].data;
-      if (d && d.state && (d.state.updatedAt || 0) > (S.updatedAt || 0)) { S = Object.assign(S, d.state); try { localStorage.setItem(LS, JSON.stringify(S)); } catch (e) {} }
+      let ch = false; if (d && d.state) { const m = mergeStates(S, d.state); ch = !sameState(m, S); adopt(m); if (!sameState(m, migrate(clone(d.state)))) await this.push(); }
       else if (S.updatedAt) await this.push();
-      if (d && d.chat && d.chat.length > CHAT.length) { CHAT = d.chat; try { localStorage.setItem(LSC, JSON.stringify(CHAT)); } catch (e) {} }
-      this.state = 'ok'; this.last = Date.now(); render();
-    } catch (e) { this.state = 'err'; render(); }
+      this.state = 'ok'; this.last = Date.now(); this.busy = false; if (ch || SHEET === 'settings') render();
+    } catch (e) { this.state = 'err'; this.busy = false; render(); }
   },
 };
 /* Scoopy im PWA-Modus: Supabase Edge Function „scoopy“ → Claude API, Tool-Loop hier im Browser */
@@ -1155,13 +1158,108 @@ async function remoteChat(sys, hist, tl, image, onText, signal) {
   }
   return {text};
 }
+function syncCard() {
+  if (PWA) return '';
+  const st = BRIDGE.state, t = BRIDGE.last ? new Date(BRIDGE.last).toLocaleTimeString('de-DE', {hour:'2-digit', minute:'2-digit'}) : '';
+  const URL = 'https://mcp.supabase.com/mcp?project_ref=esdcasflulavhtuumuhm&features=database';
+  const txt = st === 'ok' ? `Synchron mit der iPhone-App · zuletzt ${t}` : st === 'nouser' ? `Kein Supabase-Konto mit ${OWNER_EMAIL} gefunden – in der iPhone-App einmal mit dieser Adresse anmelden.` : st === 'err' ? 'Sync-Fehler: ' + (BRIDGE.err || 'unbekannt') : st === 'none' || !BRIDGE.mcp ? 'Noch nicht verbunden. Dafür braucht diese Claude-Version den Supabase-Connector:' : 'Verbinde …';
+  return `<div class="card" style="padding:14px;margin-top:12px"><b>Sync mit der iPhone-App</b><p class="muted" style="margin:4px 0 10px;font-size:15px">${esc(txt)}</p>
+   ${!BRIDGE.mcp ? `<ol class="muted" style="margin:0 0 10px;padding-left:20px;font-size:14px;line-height:1.5"><li>claude.ai → Einstellungen → Konnektoren → „Benutzerdefinierten Connector hinzufügen“</li><li>Name: <b>Supabase</b> · URL: <code style="user-select:all">${URL}</code></li><li>Verbinden, bei Supabase anmelden, diese Seite neu laden und „Supabase“ erlauben</li></ol><button class="btn sm" data-act="copyurl" data-u="${URL}">URL kopieren</button>` : `<button class="btn" data-act="bridgenow">↻ Jetzt synchronisieren</button>`}</div>`;
+}
 function openSettings() {
   openSheet(`<div style="text-align:center;padding:6px 0 4px"><div style="width:72px;height:72px;margin:0 auto">${SN.logo()}</div><h2 class="d-title" style="margin:8px 0 0">Scoopernova</h2><p class="muted" style="margin:2px 0 0">created by munkolas · Version ${VERSION}</p></div><h3 style="font:800 20px var(--title);margin:18px 0 0">Einstellungen</h3>
    <div class="card" style="padding:14px;margin-top:16px"><b>${PWA ? 'Konto' : 'Speicher'}</b><p class="muted" style="margin:4px 0 10px;font-size:15px">${esc(SYNC.label())}</p>
    ${PWA ? (AU.s ? `<div class="row"><button class="btn" data-act="syncnow" style="flex:1">↻ Jetzt synchronisieren</button><button class="btn danger" data-act="logout" style="flex:1">Abmelden</button></div>`
      : `<form class="ed" id="lgf"><p class="muted" style="margin:0;font-size:14px">Gleiches Konto wie FPV Cockpit.</p><input class="field" name="e" type="email" autocomplete="email" placeholder="E-Mail" required><input class="field" name="p" type="password" autocomplete="current-password" placeholder="Passwort (mind. 6 Zeichen)" required minlength="6"><div class="row"><button class="btn pri" style="flex:2">Anmelden</button><button type="button" class="btn" data-act="signup" style="flex:1">Neu</button></div><p class="muted" id="lgerr" style="margin:0;font-size:14px"></p></form>`) : ''}</div>
-   <div class="card" style="padding:14px;margin-top:12px"><b>Neu in ${VERSION}</b><ul class="bul" style="margin-top:8px"><li>Rezepte als eigener Tab, Start aufgeräumt</li><li>v1.5.2: Scoopy hat ein Gesicht</li><li>v1.5.1: Chat mit Grafiken statt Emojis</li><li>v1.5: Gefriertruhe kennt halbe Pints (¾ · ½ · ¼ übrig)</li><li>v1.4.1: heißt jetzt Flavour-Matrix</li><li>v1.4: neue Grafiken, Bewerten mit Kugeln, Bild ändern direkt im Rezept, Matrix öffnet Rezepte</li><li>v1.3: Rezepte aufgeräumt, „Neu“ als eigene Seite, Gemacht → landet automatisch in der Truhe</li><li>iPhone-App über GitHub & Supabase</li><li>v1.2: iPhone-App ohne KI &amp; kostenlos – Scoopy bleibt in der Claude-Version</li></ul></div>`, true);
+   ${syncCard()}
+   <div class="card" style="padding:14px;margin-top:12px"><b>Daten von Hand übertragen</b><p class="muted" style="margin:4px 0 10px;font-size:14px">Notlösung ohne Sync: Code kopieren, auf dem anderen Gerät einfügen. Es wird zusammengeführt – nichts wird überschrieben.</p>
+    <div class="row"><button class="btn" data-act="exportcode" style="flex:1">Code kopieren</button><button class="btn" data-act="importshow" style="flex:1">Code einfügen</button></div>
+    <div id="impbox" class="hide" style="margin-top:10px"><textarea class="field" id="impcode" rows="4" placeholder="Code hier einfügen"></textarea><button class="btn pri full" data-act="importdo" style="margin-top:8px">Zusammenführen</button></div></div>
+   <div class="card" style="padding:14px;margin-top:12px"><b>Neu in ${VERSION}</b><ul class="bul" style="margin-top:8px"><li>Rezepte als eigener Tab, Start aufgeräumt</li><li>v1.6: Claude-Version und iPhone-App synchronisieren sich – alles wird zusammengeführt, nichts geht verloren</li><li>v1.5.2: Scoopy hat ein Gesicht</li><li>v1.5.1: Chat mit Grafiken statt Emojis</li><li>v1.5: Gefriertruhe kennt halbe Pints (¾ · ½ · ¼ übrig)</li><li>v1.4.1: heißt jetzt Flavour-Matrix</li><li>v1.4: neue Grafiken, Bewerten mit Kugeln, Bild ändern direkt im Rezept, Matrix öffnet Rezepte</li><li>v1.3: Rezepte aufgeräumt, „Neu“ als eigene Seite, Gemacht → landet automatisch in der Truhe</li><li>iPhone-App über GitHub & Supabase</li><li>v1.2: iPhone-App ohne KI &amp; kostenlos – Scoopy bleibt in der Claude-Version</li></ul></div>`, true);
+  SHEET = 'settings';
   const f = $('#lgf'); if (f) f.addEventListener('submit', async e => { e.preventDefault(); const fd = new FormData(f); try { await AU.login(fd.get('e'), fd.get('p')); closeSheet(); toast('Angemeldet'); await SYNC.pull(); } catch (err) { $('#lgerr').textContent = err.message; } });
+}
+
+
+/* ================= ZUSAMMENFÜHREN (keine Info geht verloren) ================= */
+const OWNER_EMAIL = 'nicolas.munk@gmail.com';
+function tkey(e) { return e.uid || (e.rid + '@' + e.at); }
+function migrate(st) {
+  st.truhe = (st.truhe || []).map(e => e && Object.assign({}, e, {uid:tkey(e)}));
+  while (st.truhe.length < 6) st.truhe.push(null);
+  st.gone = st.gone || {}; st.deletedAt = st.deletedAt || {};
+  for (const id of st.deleted || []) if (!st.deletedAt[id]) st.deletedAt[id] = 1;
+  st.made = st.made || {}; st.pantry = st.pantry || {}; st.recipes = st.recipes || {};
+  return st;
+}
+function mergeStates(A, B) {
+  const a = migrate(clone(A || {})), b = migrate(clone(B || {}));
+  const newer = (b.updatedAt || 0) > (a.updatedAt || 0) ? b : a, older = newer === a ? b : a;
+  const o = clone(newer);
+  // Rezepte: Vereinigung, pro Rezept gewinnt die jüngere Änderung
+  o.recipes = Object.assign({}, a.recipes);
+  for (const [id, r] of Object.entries(b.recipes)) if (!o.recipes[id] || (r.updatedAt || 0) > (o.recipes[id].updatedAt || 0)) o.recipes[id] = r;
+  // Löschungen: nur, wenn danach nicht mehr bearbeitet
+  o.deletedAt = Object.assign({}, a.deletedAt); for (const [id, t] of Object.entries(b.deletedAt)) o.deletedAt[id] = Math.max(o.deletedAt[id] || 0, t);
+  for (const id of Object.keys(o.deletedAt)) { const r = o.recipes[id]; if (r && (r.updatedAt || 0) > o.deletedAt[id]) delete o.deletedAt[id]; }
+  o.deleted = Object.keys(o.deletedAt);
+  // Vorrat: pro Zutat jüngere Änderung
+  o.pantry = Object.assign({}, a.pantry); for (const [id, p] of Object.entries(b.pantry)) if (!o.pantry[id] || (p._t || 0) >= (o.pantry[id]._t || 0)) o.pantry[id] = p;
+  // Gemacht-Zähler: Maximum
+  o.made = Object.assign({}, a.made); for (const [id, m] of Object.entries(b.made)) { const x = o.made[id] || {count:0, last:0}; o.made[id] = {count:Math.max(x.count || 0, m.count || 0), last:Math.max(x.last || 0, m.last || 0)}; }
+  // Gefriertruhe: alle Becher beider Seiten, entfernte (gegessen) bleiben weg
+  o.gone = Object.assign({}, a.gone); for (const [k, t] of Object.entries(b.gone)) o.gone[k] = Math.max(o.gone[k] || 0, t);
+  const all = new Map();
+  for (const e of [...older.truhe, ...newer.truhe]) if (e) { const k = tkey(e), p = all.get(k); if (!p || (e.mod || e.at) >= (p.mod || p.at)) all.set(k, e); }
+  const live = [...all.values()].filter(e => !(o.gone[tkey(e)] >= (e.mod || e.at)));
+  const slots = Array(Math.max(6, live.length)).fill(null), rest = [];
+  for (const e of live) { const k = tkey(e); let i = newer.truhe.findIndex(x => x && tkey(x) === k); if (i < 0) i = older.truhe.findIndex(x => x && tkey(x) === k); if (i >= 0 && !slots[i]) slots[i] = e; else rest.push(e); }
+  for (const e of rest) slots[slots.indexOf(null)] = e;
+  o.truhe = slots;
+  o.updatedAt = Math.max(a.updatedAt || 0, b.updatedAt || 0);
+  return o;
+}
+function sameState(a, b) { const f = x => JSON.stringify({r:x.recipes, d:x.deleted, p:x.pantry, m:x.made, t:x.truhe, g:x.gone}); return f(a) === f(b); }
+function adopt(merged) { S = Object.assign(S, merged); try { localStorage.setItem(LS, JSON.stringify(S)); } catch (e) {} }
+
+/* Claude-Version ↔ Supabase über den Supabase-Connector (execute_sql) */
+const BRIDGE = {mcp:null, state:'', last:0, t:null,
+  async sql(q) {
+    let r; try { r = await this.mcp.callTool('Supabase', 'execute_sql', {query:q}); }
+    catch (e) { if (/project_id/i.test(String(e && (e.message || e.code) || ''))) r = await this.mcp.callTool('Supabase', 'execute_sql', {project_id:'esdcasflulavhtuumuhm', query:q}); else throw e; }
+    const p = r && 'payload' in r ? r.payload : r;
+    let txt = typeof p === 'string' ? p : p && Array.isArray(p.content) ? p.content.map(c => c.text || '').join('\n') : JSON.stringify(p);
+    if (typeof p === 'object' && Array.isArray(p)) return p;
+    const i = txt.indexOf('['), j = txt.lastIndexOf(']'); if (i < 0 || j < i) return [];
+    let rows = JSON.parse(txt.slice(i, j + 1)); if (typeof rows === 'string') rows = JSON.parse(rows); return rows;
+  },
+  async pull() {
+    if (!this.mcp) return;
+    try {
+      const rows = await this.sql(`select data::text as d from public.scoopernova_state s join auth.users u on u.id = s.user_id where lower(u.email) = lower('${OWNER_EMAIL}') limit 1;`);
+      const d = rows && rows[0] && rows[0].d ? JSON.parse(rows[0].d) : null;
+      if (d && d.state) { const m = mergeStates(S, d.state); const changed = !sameState(m, S); adopt(m); if (changed) { persist(true); render(); } if (!sameState(m, d.state)) await this.push(); }
+      else await this.push();
+      this.state = 'ok'; this.last = Date.now();
+    } catch (e) { this.state = 'err'; this.err = String(e && (e.message || e.code) || e); }
+    if (SHEET === 'settings') openSettings();
+  },
+  async push() {
+    if (!this.mcp) return;
+    try {
+      const json = JSON.stringify({state:S}).split('$sn$').join('$ sn$');
+      const rows = await this.sql(`insert into public.scoopernova_state (user_id, data, updated_at) select u.id, $sn$${json}$sn$::jsonb, now() from auth.users u where lower(u.email) = lower('${OWNER_EMAIL}') on conflict (user_id) do update set data = excluded.data, updated_at = now() returning 1 as ok;`);
+      this.state = rows && rows.length ? 'ok' : 'nouser'; this.last = Date.now();
+    } catch (e) { this.state = 'err'; this.err = String(e && (e.message || e.code) || e); }
+  },
+  schedule() { if (!this.mcp) return; clearTimeout(this.t); this.t = setTimeout(() => this.pull(), 2500); },
+};
+function exportCode() { return 'SCOOPERNOVA1:' + JSON.stringify({state:S}); }
+function importCode(txt) {
+  const i = txt.indexOf('{'); if (i < 0) throw new Error('Kein gültiger Code');
+  const d = JSON.parse(txt.slice(i)); if (!d.state) throw new Error('Kein gültiger Code');
+  const before = Object.keys(allRecipes()).length; adopt(mergeStates(S, d.state)); persist(); render();
+  return allRecipes().length;
 }
 
 /* ================= UI HELPERS ================= */
@@ -1346,7 +1444,7 @@ function openDetail(id, fromHash) {
    <div class="row" style="margin-top:10px;flex-wrap:nowrap"><input class="field" id="fb" placeholder="Feedback: z. B. „zu wenig süß“"><button class="btn pri" data-act="fb" data-id="${esc(id)}">Merken</button></div></div>
   <div class="d-sec"><h3>Für Yazio · pro 100 g</h3><div class="yz"><table><tr><td>Kalorien</td><td>${fnum(Math.round(per(m.k) * 10) / 10)} kcal</td></tr><tr><td>Protein</td><td>${fnum(Math.round(per(m.p) * 10) / 10)} g</td></tr><tr><td>Kohlenhydrate</td><td>${fnum(Math.round(per(m.c) * 10) / 10)} g</td></tr><tr><td>Fett</td><td>${fnum(Math.round(per(m.f) * 10) / 10)} g</td></tr><tr><td>Portion „1 Pint“</td><td>${Math.round(m.g)} g</td></tr></table><span class="muted" style="font-size:13px">Erythrit zählt 0 kcal und ist nicht in den KH. Erst Portion wählen, dann Stern drücken.</span><button class="btn sm" data-act="copyyz" data-id="${esc(id)}">Werte kopieren</button></div></div>
   <div class="actions"><button class="btn" data-act="copywa" data-id="${esc(id)}">WhatsApp-Text</button><button class="btn" data-act="photo" data-id="${esc(id)}">Eigenes Foto</button><button class="btn" data-act="dup" data-id="${esc(id)}">Duplizieren</button></div>
-  <div class="row" style="justify-content:center;margin-top:14px">${SEEDMAP[id] && S.recipes[id] ? `<button class="btn ghost" data-act="reset" data-id="${esc(id)}">Original wiederherstellen</button>` : ''}<button class="btn ghost danger" data-act="del" data-id="${esc(id)}">Löschen</button></div>`;
+  <div class="row" style="justify-content:center;margin-top:14px">${SEEDMAP[id] && S.recipes[id] && JSON.stringify(Object.assign({}, S.recipes[id], {updatedAt:0})) !== JSON.stringify(Object.assign({}, SEEDMAP[id], {updatedAt:0})) ? `<button class="btn ghost" data-act="reset" data-id="${esc(id)}">Original wiederherstellen</button>` : ''}<button class="btn ghost danger" data-act="del" data-id="${esc(id)}">Löschen</button></div>`;
   openSheet(html);
 }
 let RATE = 0;
@@ -1545,7 +1643,7 @@ function openIng(id) {
   $('#ingf').addEventListener('submit', e => { e.preventDefault(); const f = new FormData(e.target); const n = v => +String(v || '0').replace(',', '.') || 0;
     const o = Object.assign({}, p, {n:f.get('n').trim(), u:f.get('u'), g:f.get('g').trim() || 'Sonstiges', k:n(f.get('k')), p:n(f.get('p')), c:n(f.get('c')), f:n(f.get('f'))});
     if (f.get('tl')) o.tl = n(f.get('tl')); if (f.get('pc')) o.pc = n(f.get('pc'));
-    if (!o.id) { o.id = 'x-' + slug(o.n); } S.pantry[o.id] = o; persist(); closeSheet(); render(); toast('Zutat gespeichert'); });
+    if (!o.id) { o.id = 'x-' + slug(o.n); } o._t = Date.now(); S.pantry[o.id] = o; persist(); closeSheet(); render(); toast('Zutat gespeichert'); });
 }
 
 /* ================= TRUHE ================= */
@@ -1568,7 +1666,7 @@ function pickRowT(r) { return pickRow(r).replace('data-open=', 'data-put='); }
 function putTruhe(rid, i) {
   if (i == null) i = S.truhe.findIndex(x => !x || !getR(x.rid));
   if (i < 0) { toast('Truhe ist voll (6/6) – erst einen Becher leer essen'); return; }
-  S.truhe[i] = {rid, at:Date.now()}; const m = S.made[rid] || {count:0}; m.count++; m.last = Date.now(); S.made[rid] = m; persist(); closeSheet(); render(); confetti(); toast(`${getR(rid).name} ist in der Truhe – in 24 h bereit`);
+  S.truhe[i] = {rid, at:Date.now(), uid:rid + '@' + Date.now() + '-' + Math.random().toString(36).slice(2, 6), mod:Date.now()}; const m = S.made[rid] || {count:0}; m.count++; m.last = Date.now(); S.made[rid] = m; persist(); closeSheet(); render(); confetti(); toast(`${getR(rid).name} ist in der Truhe – in 24 h bereit`);
 }
 function markMade(id) { const m = S.made[id] || {count:0}; m.count++; m.last = Date.now(); S.made[id] = m; persist(); confetti(); }
 
@@ -1668,9 +1766,9 @@ function tools() {
     {name:'log_feedback', description:'Speichert Nicos Feedback als Learning im Rezept.', inputSchema:{type:'object', properties:{id:{type:'string'}, text:{type:'string'}}, required:['id','text']},
      execute:({id, text}) => { const r = clone(getR(id)); if (!r) throw new Error('Rezept nicht gefunden'); r.notes.push(new Date().toLocaleDateString('de-DE') + ': ' + text); saveR(r, true); CUR && CUR.cards.push({type:'update', id, name:r.name + ' · Learning gemerkt'}); return {ok:true}; }},
     {name:'add_ingredient', description:'Legt eine neue Zutat mit Nährwerten pro 100 g/ml an.', inputSchema:{type:'object', properties:{name:{type:'string'}, unit:{type:'string', enum:['g','ml']}, kcal:{type:'number'}, protein:{type:'number'}, carbs:{type:'number'}, fat:{type:'number'}, have:{type:'boolean'}}, required:['name','unit','kcal','protein','carbs','fat']},
-     execute:(o) => { const id = 'x-' + slug(o.name); S.pantry[id] = {id, n:o.name, u:o.unit, k:o.kcal, p:o.protein, c:o.carbs, f:o.fat, g:'Sonstiges', have:o.have !== false}; persist(); return {id}; }},
+     execute:(o) => { const id = 'x-' + slug(o.name); S.pantry[id] = {id, n:o.name, u:o.unit, k:o.kcal, p:o.protein, c:o.carbs, f:o.fat, g:'Sonstiges', have:o.have !== false, _t:Date.now()}; persist(); return {id}; }},
     {name:'set_have', description:'Markiert Vorrats-Zutaten als vorhanden oder fehlend.', inputSchema:{type:'object', properties:{ids:{type:'array', items:{type:'string'}}, have:{type:'boolean'}}, required:['ids','have']},
-     execute:({ids, have}) => { const P = pantry(); let n = 0; for (const id of ids) if (P[id]) { S.pantry[id] = Object.assign({}, P[id], {have}); n++; } persist(); return {ok:true, geaendert:n}; }},
+     execute:({ids, have}) => { const P = pantry(); let n = 0; for (const id of ids) if (P[id]) { S.pantry[id] = Object.assign({}, P[id], {have, _t:Date.now()}); n++; } persist(); return {ok:true, geaendert:n}; }},
   ];
 }
 function md(t) {
@@ -1778,7 +1876,7 @@ document.addEventListener('click', e => {
   if (d.view) { S.prefs.view = d.view; persist(); render(); return; }
   if (d.mx) { openDetail(d.mx); return; }
   if (d.mf) { const [k, v] = d.mf.split(':'); MF[k] = v; $('#mf').innerHTML = modeFinder(); return; }
-  if (d.have) { const p = pantry()[d.have]; S.pantry[d.have] = Object.assign({}, p, {have:p.have === false}); persist(); render(); return; }
+  if (d.have) { const p = pantry()[d.have]; S.pantry[d.have] = Object.assign({}, p, {have:p.have === false, _t:Date.now()}); persist(); render(); return; }
   if (d.ing) { openIng(d.ing); return; }
   if (d.pm) { PMISS = d.pm === '1'; render(); return; }
   if (d.mk) { MKCAT = d.mk; $$('[data-mk]').forEach(b => b.setAttribute('aria-pressed', b.dataset.mk === d.mk)); toast(SN.CATS[d.mk].long); return; }
@@ -1790,6 +1888,11 @@ document.addEventListener('click', e => {
   if (a === 'close') closeSheet();
   else if (a === 'new') openEditor(null);
   else if (a === 'settings') openSettings();
+  else if (a === 'bridgenow') { BRIDGE.pull().then(() => { toast(BRIDGE.state === 'ok' ? 'Synchronisiert' : 'Sync hat nicht geklappt'); }); }
+  else if (a === 'copyurl') copy(d.u, 'URL kopiert');
+  else if (a === 'exportcode') copy(exportCode(), 'Code kopiert – auf dem anderen Gerät einfügen');
+  else if (a === 'importshow') $('#impbox').classList.toggle('hide');
+  else if (a === 'importdo') { try { const n = importCode($('#impcode').value); closeSheet(); toast('Zusammengeführt – ' + n + ' Sorten'); } catch (err) { toast(err.message); } }
   else if (a === 'logout') { AU.logout(); closeSheet(); render(); toast('Abgemeldet'); }
   else if (a === 'syncnow') { SYNC.pull().then(() => toast('Synchronisiert ✓')); closeSheet(); }
   else if (a === 'signup') { const f = $('#lgf'), fd = new FormData(f); AU.signup(fd.get('e'), fd.get('p')).then(() => { closeSheet(); toast('Konto angelegt'); SYNC.pull(); }, err => { $('#lgerr').textContent = err.message; }); }
@@ -1799,9 +1902,9 @@ document.addEventListener('click', e => {
   else if (a === 'filter') openFilter();
   else if (a === 'edcancel') { ED = null; location.hash = 'rezepte'; }
   else if (a === 'truhe') putTruhe(d.id);
-  else if (a === 'eaten') { const rid = S.truhe[+d.i] && S.truhe[+d.i].rid; S.truhe[+d.i] = null; persist(); render(); if (rid && getR(rid)) openRate(rid); else closeSheet(); }
-  else if (a === 'partial') { const t2 = S.truhe[+d.i]; if (t2) { t2.fill = +d.f; t2.rest = true; t2.at = Date.now(); persist(); closeSheet(); render(); toast(`Rest (${FILLTXT[+d.f]}) wieder in der Truhe – vor dem Essen RE-SPIN`); } }
-  else if (a === 'unfreeze') { S.truhe[+d.i] = null; persist(); closeSheet(); render(); }
+  else if (a === 'eaten') { const t3 = S.truhe[+d.i], rid = t3 && t3.rid; if (t3) S.gone[tkey(t3)] = Date.now(); S.truhe[+d.i] = null; persist(); render(); if (rid && getR(rid)) openRate(rid); else closeSheet(); }
+  else if (a === 'partial') { const t2 = S.truhe[+d.i]; if (t2) { t2.fill = +d.f; t2.rest = true; t2.at = Date.now(); t2.mod = Date.now(); persist(); closeSheet(); render(); toast(`Rest (${FILLTXT[+d.f]}) wieder in der Truhe – vor dem Essen RE-SPIN`); } }
+  else if (a === 'unfreeze') { const t4 = S.truhe[+d.i]; if (t4) S.gone[tkey(t4)] = Date.now(); S.truhe[+d.i] = null; persist(); closeSheet(); render(); }
   else if (a === 'made') putTruhe(d.id);
   else if (a === 'fb') { const v = $('#fb').value.trim(); if (!v) return; const r = clone(getR(d.id)); r.notes.push(new Date().toLocaleDateString('de-DE') + ': ' + v); saveR(r, true); openDetail(d.id); if (!AI) { toast('Learning gemerkt ✓'); return; } toast('Learning gemerkt', 'Scoopy anpassen lassen', () => ask(`Feedback zu „${r.name}“ (id ${r.id}): ${v}. Pass das Rezept entsprechend an.`)); }
   else if (a === 'copywa') copy(waText(getR(d.id)), 'WhatsApp-Text kopiert');
@@ -1811,8 +1914,8 @@ document.addEventListener('click', e => {
   else if (a === 'photomenu') { const r = getR(d.id); if (!r.photo) { PHOTOFOR = d.id; $('#filePhoto').click(); } else openSheet(`<h2 class="d-title" style="font-size:24px">Bild von ${esc(r.name)}</h2><div class="list-pick"><button data-act="photo" data-id="${esc(d.id)}">Neues Foto wählen</button><button data-act="photorm" data-id="${esc(d.id)}">Foto entfernen – Grafik verwenden</button></div><p class="muted" style="font-size:14px">Farben & Toppings der Grafik änderst du unter „Bearbeiten“.</p>`, true); }
   else if (a === 'photorm') { const r = clone(getR(d.id)); delete r.photo; saveR(r, true); openDetail(d.id); render(); toast('Grafik wiederhergestellt'); }
   else if (a === 'ratesave' || a === 'ratefinal' || a === 'ratekeep') saveRating(d.id, a);
-  else if (a === 'del') { const old = clone(getR(d.id)); if (SEEDMAP[d.id]) S.deleted.push(d.id); else delete S.recipes[d.id]; persist(); closeSheet(); render(); toast(old.name + ' gelöscht', 'Rückgängig', () => { S.deleted = S.deleted.filter(x => x !== d.id); S.recipes[d.id] = old; persist(); render(); }, 6000); }
-  else if (a === 'reset') { const old = clone(S.recipes[d.id]); delete S.recipes[d.id]; persist(); openDetail(d.id); render(); toast('Original wiederhergestellt', 'Rückgängig', () => { S.recipes[d.id] = old; persist(); render(); }); }
+  else if (a === 'del') { const old = clone(getR(d.id)); if (!S.deleted.includes(d.id)) S.deleted.push(d.id); S.deletedAt[d.id] = Date.now(); if (!SEEDMAP[d.id]) S.recipes[d.id] = old; persist(); closeSheet(); render(); toast(old.name + ' gelöscht', 'Rückgängig', () => { S.deleted = S.deleted.filter(x => x !== d.id); delete S.deletedAt[d.id]; saveR(old); }, 6000); }
+  else if (a === 'reset') { const old = clone(S.recipes[d.id]); S.recipes[d.id] = Object.assign(clone(SEEDMAP[d.id]), {updatedAt:Date.now()}); persist(); openDetail(d.id); render(); toast('Original wiederhergestellt', 'Rückgängig', () => saveR(old)); }
   else if (a === 'addrow') { readRows(); ED.ings.push({ing:'', name:'', amount:0, unit:'g'}); drawRows(); }
   else if (a === 'delrow') { readRows(); ED.ings.splice(+d.i, 1); drawRows(); liveMac(); }
   else if (a === 'send') sendChat();
