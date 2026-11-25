@@ -1428,7 +1428,7 @@ async function initCaps() {
 
 
 /* ================= PWA-MODUS: SUPABASE (Konto wie FPV Cockpit) ================= */
-const VERSION = '1.8.5';
+const VERSION = '1.8.6';
 const PWA = !!window.SN_PWA;
 const AI = true; /* Scoopy läuft jetzt überall: in Claude über Claude, in der iPhone-App kostenlos über Gemini (Supabase-Funktion scoopy) */
 const CLAUDE_URL = 'https://claude.ai/artifact/8mz7qbXNxS4notwaJyptjo';
@@ -1751,12 +1751,28 @@ function card(r, i, n) {
 }
 /* Anrede: Vorname aus dem Konto · Nico nur für sein Konto bzw. die Claude-Version · sonst Eis-Ninja */
 function userName() { if (!PWA) return 'Nico'; if (!AU.s) return 'Eis-Ninja'; if ((AU.s.email || '').toLowerCase() === OWNER_EMAIL) return AU.s.name || 'Nico'; const n = (AU.s.name || '').trim().split(/\s+/)[0]; return n || 'Eis-Ninja'; }
+/* Startseiten-Spruch: zufällig, einmal pro App-Start */
+const TAGLINES = {
+  all: ['Was landet heute im Becher?', 'Möge der Löffel mit dir sein.', 'Das ist nicht das Eis, das du suchst. …oder doch?', 'Kälter als Hoth. Cremiger als Bespin.', 'Ich spüre eine Störung in der Gefriertruhe.', 'Tu es oder tu es nicht. Es gibt kein Probieren. Außer beim Abschmecken.', 'Ein Re-Spin. Mehr braucht es nicht.', 'Ränder abkratzen. Immer. Ohne Ausnahme.', 'Kein Eis ist auch keine Lösung.', 'Protein ist auch nur Eis mit Ambitionen.', 'Heute schon was eingefroren? Außer deinen Gefühlen?', 'Die Creami brummt. Das ist ein gutes Zeichen.', '24 Stunden Geduld. 3 Minuten Glück.', 'Gefrierschrank auf, Herz auf.', 'Eis ist die Antwort. Egal, wie die Frage war.', 'Brain Freeze ist nur ein Zeichen von Leidenschaft.', 'Scoop happens.', 'Zu cremig gibt’s nicht.', 'Einmal Mix-In, alles drin.', 'Wer zuerst löffelt, löffelt zuerst.', 'Löffel bereit? Dann los.', 'Dein Eis glaubt an dich.'],
+  morning: ['Frühstückseis ist auch Frühstück.', 'Guten Morgen! Der Becher war schon wach.', 'Kaffee ist gut. Kaffee-Eis ist besser.', 'Früh aufstehen lohnt sich – die Truhe ist voll.'],
+  day: ['Mittagspause? Eispause!', 'Nachmittagstief? Dafür gibt’s Becher.', 'Die Sonne steht hoch, das Eis bleibt kalt.'],
+  evening: ['Feierabend heißt Löffelzeit.', 'Ein Becher zum Sonnenuntergang?', 'Netflix an, Löffel raus.'],
+  night: ['Mitternachtssnack? Wir verraten nichts.', 'Nachts ist Eis kalorienfrei. Sagt niemand. Aber wäre schön.', 'Die Truhe schläft nie.']
+};
+let TAG = null;
+function tagline() {
+  if (TAG) return TAG;
+  const h = new Date().getHours(), part = h < 5 ? 'night' : h < 11 ? 'morning' : h < 17 ? 'day' : h < 23 ? 'evening' : 'night';
+  const pool = Math.random() < .3 ? TAGLINES[part] : TAGLINES.all;
+  TAG = pool[Math.floor(Math.random() * pool.length)];
+  return TAG;
+}
 function hello() { const h = new Date().getHours(), n = userName(); return h < 11 ? 'Guten Morgen, ' + n : h < 17 ? 'Hey ' + n : 'Guten Abend, ' + n; }
 function vStart() {
   const all = allRecipes();
   const hof = all.filter(r => r.rank).sort((a, b) => a.rank - b.rank).concat(all.filter(r => r.champ));
   return `<div class="view">
-  ${pageTitle(hello(), 'Was landet heute im Becher?')}
+  ${pageTitle(hello(), tagline())}
   ${vTruhe()}
   ${AI ? '' : `<section class="sec card tip"><span class="ti ava lg2">${SN.scoopy()}</span><p><b>Scoopy & Eis-Entwickeln</b> gibt’s in der Claude-Version – ohne Zusatzkosten. <a class="lnk" href="${CLAUDE_URL}" target="_blank" rel="noopener">In Claude öffnen ›</a></p></section><template>`}<section class="sec card maker"><div class="row" style="justify-content:space-between"><h3>Eis entwickeln</h3><div class="seg mini" id="mkcat" role="group" aria-label="Kategorie">${['protein','natur','deluxe'].map(c => `<button aria-pressed="${MKCAT === c}" data-mk="${c}" >${SN.CATS[c].label}</button>`).join('')}</div></div>
    <div class="cbar" style="box-shadow:none"><input class="field" id="mkin" placeholder="Zutaten, z. B. Mango, Skyr …" enterkeyhint="go" style="border:0;background:transparent;min-height:44px"><button class="iconbtn" data-act="scan" aria-label="Zutaten fotografieren">${IC.cam}</button><button class="iconbtn send" data-act="mkgo" aria-label="Entwickeln">${IC.send}</button></div>
