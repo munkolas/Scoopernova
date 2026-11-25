@@ -1428,7 +1428,7 @@ async function initCaps() {
 
 
 /* ================= PWA-MODUS: SUPABASE (Konto wie FPV Cockpit) ================= */
-const VERSION = '1.8.2';
+const VERSION = '1.8.3';
 const PWA = !!window.SN_PWA;
 const AI = true; /* Scoopy läuft jetzt überall: in Claude über Claude, in der iPhone-App kostenlos über Gemini (Supabase-Funktion scoopy) */
 const CLAUDE_URL = 'https://claude.ai/artifact/8mz7qbXNxS4notwaJyptjo';
@@ -1437,9 +1437,9 @@ const AU = {
   s: (() => { try { return JSON.parse(localStorage.getItem('scoopernova.auth') || 'null'); } catch (e) { return null; } })(),
   keep(s) { this.s = s; try { s ? localStorage.setItem('scoopernova.auth', JSON.stringify(s)) : localStorage.removeItem('scoopernova.auth'); } catch (e) {} },
   async req(path, body) { const r = await fetch(SB.url + '/auth/v1/' + path, {method:'POST', headers:{apikey:SB.key, 'Content-Type':'application/json'}, body:JSON.stringify(body || {})}); const j = await r.json().catch(() => ({})); if (!r.ok) throw new Error(j.error_description || j.msg || j.message || 'Anmeldung fehlgeschlagen'); return j; },
-  sess(j) { if (!j.access_token) throw new Error('Keine Sitzung'); this.keep({access_token:j.access_token, refresh_token:j.refresh_token, exp:Date.now() + (j.expires_in || 3600) * 1000, id:j.user && j.user.id, email:j.user && j.user.email}); return this.s; },
+  sess(j) { if (!j.access_token) throw new Error('Keine Sitzung'); const md = (j.user && j.user.user_metadata) || {}; this.keep({access_token:j.access_token, refresh_token:j.refresh_token, exp:Date.now() + (j.expires_in || 3600) * 1000, id:j.user && j.user.id, email:j.user && j.user.email, name:md.name || (this.s && this.s.name) || ''}); return this.s; },
   async login(email, pw) { return this.sess(await this.req('token?grant_type=password', {email, password:pw})); },
-  async signup(email, pw) { const j = await this.req('signup', {email, password:pw, data:{name:'Nico'}}); if (j.access_token) return this.sess(j); throw new Error('Konto angelegt – bitte E-Mail bestätigen, dann anmelden.'); },
+  async signup(email, pw, name) { const j = await this.req('signup', {email, password:pw, data:{name:(name || '').trim()}}); if (j.access_token) return this.sess(j); throw new Error('Konto angelegt – bitte E-Mail bestätigen, dann anmelden.'); },
   async token() { if (!this.s) return null; if (this.s.exp - Date.now() < 90e3) { try { this.sess(await this.req('token?grant_type=refresh_token', {refresh_token:this.s.refresh_token})); } catch (e) { this.keep(null); return null; } } return this.s.access_token; },
   logout() { const s = this.s; this.keep(null); if (s) fetch(SB.url + '/auth/v1/logout', {method:'POST', headers:{apikey:SB.key, Authorization:'Bearer ' + s.access_token}}).catch(() => {}); },
 };
@@ -1494,7 +1494,7 @@ function openSettings() {
   openSheet(`<div style="text-align:center;padding:6px 0 4px"><div style="width:72px;height:72px;margin:0 auto">${SN.logo()}</div><h2 class="d-title" style="margin:8px 0 0">Scoopernova</h2><p class="muted" style="margin:2px 0 0">created by munkolas · Version ${VERSION}</p></div><h3 style="font:800 20px var(--title);margin:18px 0 0">Einstellungen</h3>
    <div class="card" style="padding:14px;margin-top:16px"><b>${PWA ? 'Konto' : 'Speicher'}</b><p class="muted" style="margin:4px 0 10px;font-size:15px">${esc(SYNC.label())}</p>
    ${PWA ? (AU.s ? `<div class="row"><button class="btn" data-act="syncnow" style="flex:1">↻ Jetzt synchronisieren</button><button class="btn danger" data-act="logout" style="flex:1">Abmelden</button></div>`
-     : `<form class="ed" id="lgf"><p class="muted" style="margin:0;font-size:14px">Gleiches Konto wie FPV Cockpit.</p><input class="field" name="e" type="email" autocomplete="email" placeholder="E-Mail" required><input class="field" name="p" type="password" autocomplete="current-password" placeholder="Passwort (mind. 6 Zeichen)" required minlength="6"><div class="row"><button class="btn pri" style="flex:2">Anmelden</button><button type="button" class="btn" data-act="signup" style="flex:1">Neu</button></div><p class="muted" id="lgerr" style="margin:0;font-size:14px"></p></form>`) : ''}</div>
+     : `<form class="ed" id="lgf"><p class="muted" style="margin:0;font-size:14px">Anmelden – oder mit „Neu“ ein eigenes Konto anlegen.</p><input class="field" name="n" type="text" autocomplete="given-name" placeholder="Vorname (nur bei neuem Konto)"><input class="field" name="e" type="email" autocomplete="email" placeholder="E-Mail" required><input class="field" name="p" type="password" autocomplete="current-password" placeholder="Passwort (mind. 6 Zeichen)" required minlength="6"><div class="row"><button class="btn pri" style="flex:2">Anmelden</button><button type="button" class="btn" data-act="signup" style="flex:1">Neu</button></div><p class="muted" id="lgerr" style="margin:0;font-size:14px"></p></form>`) : ''}</div>
    ${syncCard()}
    <div class="card" style="padding:14px;margin-top:12px"><b>Daten von Hand übertragen</b><p class="muted" style="margin:4px 0 10px;font-size:14px">Notlösung ohne Sync: Code kopieren, auf dem anderen Gerät einfügen. Es wird zusammengeführt – nichts wird überschrieben.</p>
     <div class="row"><button class="btn" data-act="exportcode" style="flex:1">Code kopieren</button><button class="btn" data-act="importshow" style="flex:1">Code einfügen</button></div>
@@ -1749,7 +1749,9 @@ function card(r, i, n) {
     ${S.prefs.sort === 'fav' && S.prefs.edit ? `<div class="sorthandle"><button class="btn sm" data-mv="${esc(r.id)}:-1" ${i === 0 ? 'disabled' : ''} aria-label="nach oben">↑</button><button class="btn sm" data-mv="${esc(r.id)}:1" ${i === n - 1 ? 'disabled' : ''} aria-label="nach unten">↓</button></div>` : ''}
   </article>`;
 }
-function hello() { const h = new Date().getHours(); return h < 11 ? 'Guten Morgen, Nico' : h < 17 ? 'Hey Nico' : 'Guten Abend, Nico'; }
+/* Anrede: Vorname aus dem Konto · Nico nur für sein Konto bzw. die Claude-Version · sonst Eis-Ninja */
+function userName() { if (!PWA) return 'Nico'; if (!AU.s) return 'Eis-Ninja'; if ((AU.s.email || '').toLowerCase() === OWNER_EMAIL) return AU.s.name || 'Nico'; const n = (AU.s.name || '').trim().split(/\s+/)[0]; return n || 'Eis-Ninja'; }
+function hello() { const h = new Date().getHours(), n = userName(); return h < 11 ? 'Guten Morgen, ' + n : h < 17 ? 'Hey ' + n : 'Guten Abend, ' + n; }
 function vStart() {
   const all = allRecipes();
   const hof = all.filter(r => r.rank).sort((a, b) => a.rank - b.rank).concat(all.filter(r => r.champ));
@@ -2087,7 +2089,7 @@ const noEmoji = t => String(t || '').replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27
 let PENDING_IMG = null, BUSY = false, ABORT = null, UNDO = {};
 function sysPrompt() {
   const P = Object.values(pantry());
-  return `Du bist „Scoopy“, der Ninja-Creami-Coach in Nicos App „Scoopernova“. Antworte auf Deutsch, locker. Benutze KEINE Emojis (die App zeigt eigene Grafiken). Rezepte & Antworten kurz und knackig, kein Gelaber.
+  return `Du bist „Scoopy“, der Ninja-Creami-Coach in der App „Scoopernova“ (gebaut von Nico). Du sprichst gerade mit ${userName()}. Antworte auf Deutsch, locker. Benutze KEINE Emojis (die App zeigt eigene Grafiken). Rezepte & Antworten kurz und knackig, kein Gelaber.
 
 GERÄT: Ninja Creami Basismodell (Modi: ICE CREAM, LITE ICE CREAM, SORBET, GELATO, MILKSHAKE, SMOOTHIE BOWL, MIX-IN, RE-SPIN; KEIN Frozen-Yogurt-Knopf → LITE ICE CREAM). 6 Becher. Max-Linie ≈ 460 ml – Rezepte immer nach Volumen prüfen.
 
@@ -2186,7 +2188,7 @@ const SUGG = ['Was mache ich als nächste Sorte?','Lemon Cheesecake 10 % süßer
 function vChat() {
   const off = PWA ? !AU.s : !CAP.sample;
   return `<div class="view chatv"><div class="msgs" id="msgs">
-   ${!CHAT.length ? `<div class="arow">${avatar()}<div class="m a"><p><b>Hey Nico, ich bin Scoopy.</b></p><p>Ich kenne alle deine Rezepte, Regeln und Learnings. Frag mich nach Techniken, lass Rezepte anpassen („Tiramisu 5 g mehr Erythrit“), nenn mir Zutaten – oder schick ein Foto vom Kühlschrank, dann bau ich dir ein Eis.</p></div></div>` : CHAT.map(msgHtml).join('')}
+   ${!CHAT.length ? `<div class="arow">${avatar()}<div class="m a"><p><b>Hey ${esc(userName())}, ich bin Scoopy.</b></p><p>Ich kenne alle deine Rezepte, Regeln und Learnings. Frag mich nach Techniken, lass Rezepte anpassen („Tiramisu 5 g mehr Erythrit“), nenn mir Zutaten – oder schick ein Foto vom Kühlschrank, dann bau ich dir ein Eis.</p></div></div>` : CHAT.map(msgHtml).join('')}
    ${off ? (PWA ? `<div class="m a"><p>Melde dich kurz an (gleiches Konto wie FPV Cockpit), dann bin ich da.</p><p><button class="btn sm pri" data-act="settings">Anmelden</button></p></div>` : `<div class="arow">${avatar()}<div class="m a"><p>Scoopy wacht gerade nicht auf – der Chat braucht die Claude-Verbindung. Öffne Scoopernova auf claude.ai und erlaube „Claude fragen“.</p></div></div>`) : ''}
   </div>
   <div class="composer">${CHAT.length ? `<button class="btn sm ghost" data-act="clearchat" style="justify-self:start">Chat leeren</button>` : ''}
@@ -2287,7 +2289,7 @@ document.addEventListener('click', e => {
   else if (a === 'importdo') { try { const n = importCode($('#impcode').value); closeSheet(); toast('Zusammengeführt – ' + n + ' Sorten'); } catch (err) { toast(err.message); } }
   else if (a === 'logout') { AU.logout(); closeSheet(); render(); toast('Abgemeldet'); }
   else if (a === 'syncnow') { SYNC.pull().then(() => toast('Synchronisiert ✓')); closeSheet(); }
-  else if (a === 'signup') { const f = $('#lgf'), fd = new FormData(f); AU.signup(fd.get('e'), fd.get('p')).then(() => { closeSheet(); toast('Konto angelegt'); SYNC.pull(); }, err => { $('#lgerr').textContent = err.message; }); }
+  else if (a === 'signup') { const f = $('#lgf'), fd = new FormData(f); AU.signup(fd.get('e'), fd.get('p'), fd.get('n')).then(() => { closeSheet(); toast('Konto angelegt'); SYNC.pull(); }, err => { $('#lgerr').textContent = err.message; }); }
   else if (a === 'newing') openIng(null);
   else if (a === 'sortmenu') openSheet(`<h2 class="d-title" style="font-size:26px">Sortieren</h2><div class="list-pick">${SORTS.map(([k, l]) => `<button data-act="setsort" data-k="${k}"><span style="width:28px;text-align:center">${S.prefs.sort === k ? '✓' : ''}</span><b>${l}</b></button>`).join('')}</div><p class="muted" style="font-size:14px">„Meine Reihenfolge“ blendet ↑↓-Knöpfe an jeder Karte ein.</p>`, true);
   else if (a === 'setsort') { S.prefs.sort = d.k; S.prefs.dir = DIRDEF[d.k === 'naehr' ? (S.prefs.nk || 'kcal') : d.k]; if (d.k !== 'fav') S.prefs.edit = false; persist(); render(); if (d.keep) openFilter(); else if (SHEET) closeSheet(); }
