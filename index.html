@@ -1428,7 +1428,7 @@ async function initCaps() {
 
 
 /* ================= PWA-MODUS: SUPABASE (Konto wie FPV Cockpit) ================= */
-const VERSION = '1.8.3';
+const VERSION = '1.8.4';
 const PWA = !!window.SN_PWA;
 const AI = true; /* Scoopy läuft jetzt überall: in Claude über Claude, in der iPhone-App kostenlos über Gemini (Supabase-Funktion scoopy) */
 const CLAUDE_URL = 'https://claude.ai/artifact/8mz7qbXNxS4notwaJyptjo';
@@ -1801,7 +1801,7 @@ const FILLTXT = {1:'voll', 0.75:'¾', 0.5:'½', 0.25:'¼'};
 const slotReady = t => t.at + (t.rest ? 12 : 24) * 36e5 - Date.now();
 function vTruhe() {
   const used = S.truhe.filter(Boolean).length;
-  return `<section class="sec card truhe"><div class="truhe-top"><div><b>Gefriertruhe</b> <span class="muted" style="font-size:14px;font-weight:600">${used}/6</span></div>${AI && used < 6 && used > 0 ? `<button class="btn sm" data-ask="In meiner Truhe sind: ${S.truhe.filter(Boolean).map(t => (getR(t.rid) || {}).name).filter(Boolean).join(', ')}. Was mache ich als nächste Sorte? Gib mir 3 Vorschläge, die sich davon abheben.">Was als Nächstes? ✨</button>` : ''}</div>
+  return `<section class="sec card truhe"><div class="truhe-top"><div><b>Gefriertruhe</b> <span class="muted" style="font-size:14px;font-weight:600">${used}/6</span></div>${AI && used < 6 && used > 0 ? `<button class="btn sm" data-ask="In meiner Truhe sind: ${S.truhe.filter(Boolean).map(t => (getR(t.rid) || {}).name).filter(Boolean).join(', ')}. Was mache ich als nächste Sorte? Gib mir 3 Vorschläge, die sich davon abheben. Bestehende Sorten aus meiner Sammlung nenn exakt mit ihrem Namen, neue Ideen leg bitte direkt mit propose_recipe als Rezeptkarte an.">Was als Nächstes? ✨</button>` : ''}</div>
   <div class="slots">${S.truhe.map((t, i) => { const r = t && getR(t.rid); if (!r) return `<button class="slot empty" data-slot="${i}" aria-label="Becher ${i + 1} leer"><span class="plus">＋</span><small>frei</small></button>`;
     const left = slotReady(t), ready = left <= 0; const h = Math.ceil(left / 36e5); const f = t.fill || 1;
     return `<button class="slot ${ready ? 'ready' : ''}" data-slot="${i}" aria-label="${esc(r.name)}">${ready ? '' : '<span class="frost"></span>'}<span class="em">${esc((r.emoji || '').split(/(?=[\uD800-\uDBFF])/)[0] || '🍨')}</span>${SN.pintIcon((r.a.c || [])[0], .82 * f, ready)}<small>${f < 1 ? FILLTXT[f] + ' · ' : ''}${ready ? 'bereit' : h + ' h'}</small></button>`; }).join('')}</div></section>`;
@@ -2093,6 +2093,8 @@ function sysPrompt() {
 
 GERÄT: Ninja Creami Basismodell (Modi: ICE CREAM, LITE ICE CREAM, SORBET, GELATO, MILKSHAKE, SMOOTHIE BOWL, MIX-IN, RE-SPIN; KEIN Frozen-Yogurt-Knopf → LITE ICE CREAM). 6 Becher. Max-Linie ≈ 460 ml – Rezepte immer nach Volumen prüfen.
 
+ANTWORT-REGEL: Nennst du Sorten aus der Sammlung, schreib ihren Namen exakt so wie in der Rezeptliste (die App verlinkt sie dann). Schlägst du eine NEUE Sorte konkret vor, leg sie mit propose_recipe an, damit sie als Karte zum Speichern erscheint.
+
 NICOS FESTE REGELN (immer einhalten & im Rezept erwähnen):
 - Ohne Deckel einfrieren (sonst Hügel). 24 h frieren.
 - Vor jedem Re-Spin/Mix-In: Ränder abkratzen („scrape the edges“).
@@ -2177,6 +2179,13 @@ function md(t) {
 }
 function msgHtml(m, i) {
   let h = m.role === 'user' ? `<div class="m u">${m.img ? `<img src="${esc(m.img)}" alt="Foto">` : ''}${md(m.text || '')}</div>` : (m.text ? `<div class="arow">${avatar()}<div class="m a">${md(noEmoji(m.text))}</div></div>` : '');
+  if (m.role === 'assistant' && m.text) {
+    const shown = new Set((m.cards || []).map(c => c.saved || c.id).filter(Boolean)), low = m.text.toLowerCase();
+    const hits = allRecipes().filter(r => r.name && r.name.length >= 4 && !shown.has(r.id) && low.includes(r.name.toLowerCase()))
+      .filter((r, k, arr) => !arr.some(o => o !== r && o.name.length > r.name.length && o.name.toLowerCase().includes(r.name.toLowerCase()) && low.includes(o.name.toLowerCase())))
+      .slice(0, 6);
+    if (hits.length) h += `<div class="card" style="padding:12px;margin:6px 0 10px 44px"><b style="font-size:14px">Deine Sorten aus der Antwort</b><div class="list-pick" style="margin-top:8px">${hits.map(pickRow).join('')}</div></div>`;
+  }
   (m.cards || []).forEach((c, j) => {
     if (c.type === 'proposal') { const r = c.recipe, mc = macros(r); h += `<div class="card prop"><div class="im">${SN.art(r)}</div><div class="tx"><b>${esc(r.name)}</b><span class="muted" style="font-size:14px">${esc(r.sub || '')}</span><div class="mac"><span class="pill">${Math.round(mc.k)} kcal</span><span class="pill p">${Math.round(mc.p)} g P</span><span class="pill">${r.ings.length} Zutaten</span></div>
       ${c.saved ? `<button class="btn" data-open="${esc(c.saved)}">✓ Gespeichert – öffnen</button>` : `<div class="row"><button class="btn pri" data-save="${i}:${j}" style="flex:1">Speichern</button><button class="btn" data-peek="${i}:${j}">Ansehen</button></div>`}</div></div>`; }
