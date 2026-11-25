@@ -1428,7 +1428,7 @@ async function initCaps() {
 
 
 /* ================= PWA-MODUS: SUPABASE (Konto wie FPV Cockpit) ================= */
-const VERSION = '1.8.4';
+const VERSION = '1.8.5';
 const PWA = !!window.SN_PWA;
 const AI = true; /* Scoopy läuft jetzt überall: in Claude über Claude, in der iPhone-App kostenlos über Gemini (Supabase-Funktion scoopy) */
 const CLAUDE_URL = 'https://claude.ai/artifact/8mz7qbXNxS4notwaJyptjo';
@@ -2093,7 +2093,7 @@ function sysPrompt() {
 
 GERÄT: Ninja Creami Basismodell (Modi: ICE CREAM, LITE ICE CREAM, SORBET, GELATO, MILKSHAKE, SMOOTHIE BOWL, MIX-IN, RE-SPIN; KEIN Frozen-Yogurt-Knopf → LITE ICE CREAM). 6 Becher. Max-Linie ≈ 460 ml – Rezepte immer nach Volumen prüfen.
 
-ANTWORT-REGEL: Nennst du Sorten aus der Sammlung, schreib ihren Namen exakt so wie in der Rezeptliste (die App verlinkt sie dann). Schlägst du eine NEUE Sorte konkret vor, leg sie mit propose_recipe an, damit sie als Karte zum Speichern erscheint.
+ANTWORT-REGEL: Schreib NIE Platzhalter wie [Vorschlag: …] oder [Rezept: …] in den Text – ein neues Rezept erscheint nur, wenn du wirklich das Werkzeug propose_recipe aufrufst. Nennst du Sorten aus der Sammlung, schreib ihren Namen exakt so wie in der Rezeptliste (die App verlinkt sie dann). Schlägst du eine NEUE Sorte konkret vor, leg sie mit propose_recipe an, damit sie als Karte zum Speichern erscheint.
 
 NICOS FESTE REGELN (immer einhalten & im Rezept erwähnen):
 - Ohne Deckel einfrieren (sonst Hügel). 24 h frieren.
@@ -2178,8 +2178,11 @@ function md(t) {
   return h + (ul ? '</ul>' : '');
 }
 function msgHtml(m, i) {
-  let h = m.role === 'user' ? `<div class="m u">${m.img ? `<img src="${esc(m.img)}" alt="Foto">` : ''}${md(m.text || '')}</div>` : (m.text ? `<div class="arow">${avatar()}<div class="m a">${md(noEmoji(m.text))}</div></div>` : '');
+  let h = m.role === 'user' ? `<div class="m u">${m.img ? `<img src="${esc(m.img)}" alt="Foto">` : ''}${md(m.text || '')}</div>` : (m.text ? `<div class="arow">${avatar()}<div class="m a">${md(noEmoji(m.text.replace(/\s*\[(?:Vorschlag|Rezept|Rezeptvorschlag|Neues Rezept|aktualisiert)\s*:[^\]\n]*\]/gi, '')))}</div></div>` : '');
   if (m.role === 'assistant' && m.text) {
+    const tags = [...m.text.matchAll(/\[(?:Vorschlag|Rezept|Rezeptvorschlag|Neues Rezept)\s*:\s*([^\]\n]{2,60})\]/gi)].map(x => x[1].trim());
+    const fresh = tags.filter(n => !allRecipes().some(r => r.name.toLowerCase() === n.toLowerCase()) && !(m.cards || []).some(c => c.type === 'proposal' && c.recipe.name.toLowerCase() === n.toLowerCase()));
+    if (fresh.length) h += `<div class="card" style="padding:12px;margin:6px 0 10px 44px"><b style="font-size:14px">Rezeptkarten anzeigen</b><div class="row" style="flex-wrap:wrap;gap:8px;margin-top:8px">${fresh.map(n => `<button class="btn sm pri" data-ask="Leg „${esc(n)}“ bitte jetzt mit propose_recipe als Rezeptkarte an.">${esc(n)}</button>`).join('')}</div></div>`;
     const shown = new Set((m.cards || []).map(c => c.saved || c.id).filter(Boolean)), low = m.text.toLowerCase();
     const hits = allRecipes().filter(r => r.name && r.name.length >= 4 && !shown.has(r.id) && low.includes(r.name.toLowerCase()))
       .filter((r, k, arr) => !arr.some(o => o !== r && o.name.length > r.name.length && o.name.toLowerCase().includes(r.name.toLowerCase()) && low.includes(o.name.toLowerCase())))
@@ -2221,7 +2224,7 @@ async function sendChat(text) {
   CHAT.push({role:'user', text:text || 'Was kann ich daraus machen?', img:imgp ? imgp.thumb : null});
   CUR = {role:'assistant', text:'', cards:[]}; CHAT.push(CUR); BUSY = true; render();
   const box = $('#msgs'); box.insertAdjacentHTML('beforeend', `<div class="arow">${avatar()}<div class="m a" id="live"><span class="typing"><i></i><i></i><i></i></span></div></div>`); window.scrollTo(0, document.body.scrollHeight);
-  const hist = []; for (const m of CHAT.slice(-17, -1)) { const c = (m.text || '') + ((m.cards || []).length ? '\n[' + m.cards.map(x => x.type === 'proposal' ? 'Vorschlag: ' + x.recipe.name : 'aktualisiert: ' + x.name).join(', ') + ']' : ''); if (!c.trim()) continue; const last = hist[hist.length - 1]; if (last && last.role === m.role) last.content += '\n' + c; else hist.push({role:m.role, content:c}); }
+  const hist = []; for (const m of CHAT.slice(-17, -1)) { const c = (m.text || '') + ((m.cards || []).length ? '\n(Die App hat dazu ' + m.cards.map(x => x.type === 'proposal' ? 'die Rezeptkarte „' + x.recipe.name + '“' : 'die Änderung an „' + x.name + '“').join(' und ') + ' angezeigt.)' : ''); if (!c.trim()) continue; const last = hist[hist.length - 1]; if (last && last.role === m.role) last.content += '\n' + c; else hist.push({role:m.role, content:c}); }
   while (hist.length && hist[0].role !== 'user') hist.shift();
   const input = [{role:'user', content:sysPrompt() + '\n\nVerstanden?'}, {role:'assistant', content:'Alles klar, ich bin Scoopy.'}].concat(hist);
   if (input[input.length - 1].role !== 'user') input.push({role:'user', content:text});
