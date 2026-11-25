@@ -1406,9 +1406,9 @@ async function initCaps() {
 
 
 /* ================= PWA-MODUS: SUPABASE (Konto wie FPV Cockpit) ================= */
-const VERSION = '1.7.2';
+const VERSION = '1.8.0';
 const PWA = !!window.SN_PWA;
-const AI = !PWA; /* KI-Funktionen nur in der Claude-Version – die iPhone-App bleibt kostenlos */
+const AI = true; /* Scoopy läuft jetzt überall: in Claude über Claude, in der iPhone-App kostenlos über Gemini (Supabase-Funktion scoopy) */
 const CLAUDE_URL = 'https://claude.ai/artifact/8mz7qbXNxS4notwaJyptjo';
 const SB = {url:'https://esdcasflulavhtuumuhm.supabase.co', key:'sb_publishable_2sNRKSgMxkNa-ngjs4h4Sg_hDUBWS1K'};
 const AU = {
