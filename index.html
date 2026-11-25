@@ -329,9 +329,10 @@ details.acc li::before{content:"";position:absolute;left:2px;top:.62em;width:7px
 .prow .kc{font-size:13px;color:var(--mute);font-weight:700;white-space:nowrap}
 
 /* Toast & confetti */
-.toast{position:fixed;left:50%;bottom:calc(var(--tabh) + env(safe-area-inset-bottom) + 18px);transform:translate(-50%,30px);opacity:0;z-index:90;background:var(--ink);color:var(--bg);padding:12px 16px;border-radius:16px;font-weight:700;font-size:15px;display:flex;gap:12px;align-items:center;transition:.3s;max-width:92vw;box-shadow:0 10px 30px rgba(0,0,0,.25)}
-.toast.on{opacity:1;transform:translate(-50%,0)}
-.toast button{color:var(--berry);font-weight:800;min-height:32px}
+.toast{position:fixed;left:16px;right:16px;margin:0 auto;width:max-content;max-width:min(520px,calc(100vw - 32px));bottom:calc(var(--tabh) + env(safe-area-inset-bottom) + 18px);transform:translateY(30px);opacity:0;pointer-events:none;z-index:90;background:var(--ink);color:var(--bg);padding:12px 16px;border-radius:16px;font-weight:700;font-size:15px;line-height:1.3;display:flex;gap:14px;align-items:center;justify-content:space-between;transition:.3s;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+.toast.on{opacity:1;transform:translateY(0);pointer-events:auto}
+.toast span{flex:1 1 auto;min-width:0}
+.toast button{flex:none;white-space:nowrap;color:var(--berry);font-weight:800;min-height:32px;background:none;border:0;padding:0 2px;font-size:15px}
 .conf{position:fixed;inset:0;pointer-events:none;z-index:95;overflow:hidden}
 .conf i{position:absolute;top:-20px;width:8px;height:14px;border-radius:4px;animation:fall 1.8s cubic-bezier(.3,.6,.5,1) forwards}
 @keyframes fall{to{transform:translate(var(--dx),110vh) rotate(var(--rot))}}
@@ -441,6 +442,19 @@ button,a,input,select,textarea,label,[data-act],[data-ask]{touch-action:manipula
 .sheet *{min-width:0}
 .sheet img,.sheet svg,.sheet video,.sheet canvas,.sheet table,.sheet pre{max-width:100%}
 .sheet p,.sheet li,.sheet td,.sheet h1,.sheet h2,.sheet h3,.sheet b{overflow-wrap:anywhere}
+
+/* Brain Freeze: Bildschirm vereist kurz */
+.bfz{position:fixed;inset:0;z-index:200;display:flex;align-items:center;justify-content:center;pointer-events:auto;animation:bfzIn .35s ease-out both}
+.bfz.out{animation:bfzOut .6s ease-in both}
+.bfz-ice{position:absolute;inset:0;-webkit-backdrop-filter:blur(6px) saturate(.4) brightness(1.15);backdrop-filter:blur(6px) saturate(.4) brightness(1.15);background:radial-gradient(ellipse at center,rgba(200,235,255,.25) 0%,rgba(170,220,255,.55) 60%,rgba(235,250,255,.92) 100%),repeating-linear-gradient(115deg,rgba(255,255,255,.18) 0 2px,transparent 2px 22px),repeating-linear-gradient(35deg,rgba(255,255,255,.12) 0 1px,transparent 1px 30px)}
+.bfz-txt{position:relative;text-align:center;color:#0b3b5c;display:flex;flex-direction:column;align-items:center;gap:6px;animation:bfzShake .5s .35s 2}
+.bfz-em{font-size:84px;line-height:1}
+.bfz-txt b{font:900 40px/1 var(--title);letter-spacing:1px;text-shadow:0 2px 0 #fff,0 0 24px #bfe6ff}
+.bfz-txt small{font-weight:700;font-size:16px;opacity:.8}
+@keyframes bfzIn{from{opacity:0;transform:scale(1.04)}to{opacity:1;transform:none}}
+@keyframes bfzOut{to{opacity:0}}
+@keyframes bfzShake{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px) rotate(-1deg)}40%{transform:translateX(6px) rotate(1deg)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+@media (prefers-reduced-motion: reduce){.bfz,.bfz-txt{animation:none}}
 </style>
 </head>
 <body>
@@ -1414,7 +1428,7 @@ async function initCaps() {
 
 
 /* ================= PWA-MODUS: SUPABASE (Konto wie FPV Cockpit) ================= */
-const VERSION = '1.8.1';
+const VERSION = '1.8.2';
 const PWA = !!window.SN_PWA;
 const AI = true; /* Scoopy läuft jetzt überall: in Claude über Claude, in der iPhone-App kostenlos über Gemini (Supabase-Funktion scoopy) */
 const CLAUDE_URL = 'https://claude.ai/artifact/8mz7qbXNxS4notwaJyptjo';
@@ -1612,6 +1626,14 @@ function toast(msg, btn, fn, ms) {
   t.classList.add('on'); if (btn) $('#tbtn').onclick = () => { fn && fn(); t.classList.remove('on'); };
   clearTimeout(t._t); t._t = setTimeout(() => t.classList.remove('on'), ms || 3200);
 }
+function brainFreeze() {
+  if (document.querySelector('.bfz')) return;
+  const d = document.createElement('div'); d.className = 'bfz';
+  d.innerHTML = '<div class="bfz-ice"></div><div class="bfz-txt"><span class="bfz-em">🥶</span><b>BRAIN FREEZE!</b><small>Zu schnell gelöffelt.</small></div>';
+  document.body.appendChild(d); try { navigator.vibrate && navigator.vibrate([30, 60, 30]); } catch (e) {}
+  confetti(true);
+  setTimeout(() => d.classList.add('out'), 2300); setTimeout(() => d.remove(), 2900);
+}
 function confetti(snow) {
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   const d = document.createElement('div'); d.className = 'conf' + (snow ? ' snow' : '');
@@ -1643,7 +1665,7 @@ const ICONS = {
   start:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11 12 4l9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-5h4v5"/></svg>',
   rezepte:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 11a5 5 0 0 1 10 0"/><path d="M6 11h12l-6 11z"/></svg>',
   matrix:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3v18M3 12h18"/><circle cx="7.5" cy="7.5" r="1.6" fill="currentColor"/><circle cx="16" cy="15.5" r="1.6" fill="currentColor"/><circle cx="16.5" cy="7" r="1.6" fill="currentColor"/></svg>',
-  chat:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"/><path d="M9 10h.01M12 10h.01M15 10h.01"/></svg>',
+  chat:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="13" r="8"/><path d="M8 12h.01M14 12h.01"/><path d="M8 15.5c1.6 1.6 4.4 1.6 6 0"/><path d="M19.5 1.8l.7 1.6 1.6.7-1.6.7-.7 1.6-.7-1.6-1.6-.7 1.6-.7z" fill="currentColor" stroke-width="1.2"/><path d="M22 8.2l.35.8.8.35-.8.35-.35.8-.35-.8-.8-.35.8-.35z" fill="currentColor" stroke-width="1"/></svg>',
   wissen:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 21V5M9 8h6"/></svg>',
   vorrat:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3h8v4l2 3v11H6V10l2-3z"/><path d="M6 13h12"/></svg>',
 };
@@ -2305,7 +2327,7 @@ document.addEventListener('input', e => {
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && SHEET !== null) closeSheet(); if (e.key === 'Enter' && e.target.id === 'mkin') { e.preventDefault(); $('[data-act=mkgo]').click(); } });
 $('#scrim').addEventListener('click', closeSheet);
 let logoTaps = 0; $('#logo').innerHTML = SN.logo();
-$('#logo').addEventListener('click', () => { logoTaps++; clearTimeout(window._lt); window._lt = setTimeout(() => logoTaps = 0, 1500); if (logoTaps >= 5) { logoTaps = 0; confetti(true); toast('🥶 BRAIN FREEZE!'); } else if (VIEW !== 'start') location.hash = 'start'; });
+$('#logo').addEventListener('click', () => { logoTaps++; clearTimeout(window._lt); window._lt = setTimeout(() => logoTaps = 0, 1500); if (logoTaps >= 5) { logoTaps = 0; brainFreeze(); } else if (VIEW !== 'start') location.hash = 'start'; });
 window.addEventListener('scroll', () => $('#hdr').classList.toggle('scrolled', scrollY > 4), {passive:true});
 new ResizeObserver(() => { if (VIEW === 'rezepte' && S.prefs.view === 'matrix') layoutMatrix(); }).observe(document.body);
 setInterval(() => { if (VIEW === 'start' && !SHEET) { const tr = $('.truhe'); if (tr) tr.outerHTML = vTruhe(); } }, 60000);
