@@ -424,6 +424,7 @@ details.acc li::before{content:"";position:absolute;left:2px;top:.62em;width:7px
 .cbar .iconbtn svg,.maker .iconbtn svg{display:block}
 .ava{padding:1px;overflow:hidden}
 .ava.big{width:72px;height:72px}
+.seg.wrapseg{flex-wrap:wrap}.seg.wrapseg button{flex:1 1 auto}
 
 </style>
 </head>
@@ -431,7 +432,7 @@ details.acc li::before{content:"";position:absolute;left:2px;top:.62em;width:7px
 <div class="drip" aria-hidden="true"></div>
 <div class="app" id="app">
   <header class="hdr" id="hdr"><div class="hdr-in">
-    <div class="brand"><button class="lg" id="logo" aria-label="Scoopernova"></button><div><h1 id="ttl">Scoopernova</h1><small id="subttl">created by munkolas · v1.6</small></div></div>
+    <div class="brand"><button class="lg" id="logo" aria-label="Scoopernova"></button><div><h1 id="ttl">Scoopernova</h1><small id="subttl">created by munkolas · v1.6.1</small></div></div>
     <div id="hdrbtns" class="row"></div>
   </div></header>
   <main id="main"></main>
@@ -1104,7 +1105,7 @@ async function initCaps() {
 
 
 /* ================= PWA-MODUS: SUPABASE (Konto wie FPV Cockpit) ================= */
-const VERSION = '1.6';
+const VERSION = '1.6.1';
 const PWA = !!window.SN_PWA;
 const AI = !PWA; /* KI-Funktionen nur in der Claude-Version – die iPhone-App bleibt kostenlos */
 const CLAUDE_URL = 'https://claude.ai/artifact/8mz7qbXNxS4notwaJyptjo';
@@ -1175,7 +1176,7 @@ function openSettings() {
    <div class="card" style="padding:14px;margin-top:12px"><b>Daten von Hand übertragen</b><p class="muted" style="margin:4px 0 10px;font-size:14px">Notlösung ohne Sync: Code kopieren, auf dem anderen Gerät einfügen. Es wird zusammengeführt – nichts wird überschrieben.</p>
     <div class="row"><button class="btn" data-act="exportcode" style="flex:1">Code kopieren</button><button class="btn" data-act="importshow" style="flex:1">Code einfügen</button></div>
     <div id="impbox" class="hide" style="margin-top:10px"><textarea class="field" id="impcode" rows="4" placeholder="Code hier einfügen"></textarea><button class="btn pri full" data-act="importdo" style="margin-top:8px">Zusammenführen</button></div></div>
-   <div class="card" style="padding:14px;margin-top:12px"><b>Neu in ${VERSION}</b><ul class="bul" style="margin-top:8px"><li>Rezepte als eigener Tab, Start aufgeräumt</li><li>v1.6: Claude-Version und iPhone-App synchronisieren sich – alles wird zusammengeführt, nichts geht verloren</li><li>v1.5.2: Scoopy hat ein Gesicht</li><li>v1.5.1: Chat mit Grafiken statt Emojis</li><li>v1.5: Gefriertruhe kennt halbe Pints (¾ · ½ · ¼ übrig)</li><li>v1.4.1: heißt jetzt Flavour-Matrix</li><li>v1.4: neue Grafiken, Bewerten mit Kugeln, Bild ändern direkt im Rezept, Matrix öffnet Rezepte</li><li>v1.3: Rezepte aufgeräumt, „Neu“ als eigene Seite, Gemacht → landet automatisch in der Truhe</li><li>iPhone-App über GitHub & Supabase</li><li>v1.2: iPhone-App ohne KI &amp; kostenlos – Scoopy bleibt in der Claude-Version</li></ul></div>`, true);
+   <div class="card" style="padding:14px;margin-top:12px"><b>Neu in ${VERSION}</b><ul class="bul" style="margin-top:8px"><li>Rezepte als eigener Tab, Start aufgeräumt</li><li>v1.6.1: Sortierung vereinfacht, auf- oder absteigend, Neueste oben</li><li>v1.6: Claude-Version und iPhone-App synchronisieren sich – alles wird zusammengeführt, nichts geht verloren</li><li>v1.5.2: Scoopy hat ein Gesicht</li><li>v1.5.1: Chat mit Grafiken statt Emojis</li><li>v1.5: Gefriertruhe kennt halbe Pints (¾ · ½ · ¼ übrig)</li><li>v1.4.1: heißt jetzt Flavour-Matrix</li><li>v1.4: neue Grafiken, Bewerten mit Kugeln, Bild ändern direkt im Rezept, Matrix öffnet Rezepte</li><li>v1.3: Rezepte aufgeräumt, „Neu“ als eigene Seite, Gemacht → landet automatisch in der Truhe</li><li>iPhone-App über GitHub & Supabase</li><li>v1.2: iPhone-App ohne KI &amp; kostenlos – Scoopy bleibt in der Claude-Version</li></ul></div>`, true);
   SHEET = 'settings';
   const f = $('#lgf'); if (f) f.addEventListener('submit', async e => { e.preventDefault(); const fd = new FormData(f); try { await AU.login(fd.get('e'), fd.get('p')); closeSheet(); toast('Angemeldet'); await SYNC.pull(); } catch (err) { $('#lgerr').textContent = err.message; } });
 }
@@ -1337,22 +1338,37 @@ function render() {
 const pageTitle = (t, sub) => `<div class="ptitle"><h2>${t}</h2>${sub ? `<p>${sub}</p>` : ''}</div>`;
 
 /* ---------- REZEPTE ---------- */
-function sorted(list) {
-  const s = S.prefs.sort, mc = new Map(list.map(r => [r.id, macros(r)]));
-  const stOrd = {final:0, testen:1, neu:2, idee:3};
-  const fav = (a, b) => ((a.rank || 99) - (b.rank || 99)) || ((b.champ ? 1 : 0) - (a.champ ? 1 : 0)) || ((b.fav ? 1 : 0) - (a.fav ? 1 : 0)) || (stOrd[a.status] - stOrd[b.status]) || a.name.localeCompare(b.name);
-  const f = {
-    fav, name:(a, b) => a.name.localeCompare(b.name),
-    kcal:(a, b) => mc.get(a.id).k - mc.get(b.id).k,
-    protein:(a, b) => mc.get(b.id).p - mc.get(a.id).p,
-    rating:(a, b) => (b.rating || 0) - (a.rating || 0) || fav(a, b),
-    dichte:(a, b) => mc.get(b.id).dens - mc.get(a.id).dens,
-    made:(a, b) => ((S.made[b.id] || {}).last || 0) - ((S.made[a.id] || {}).last || 0),
-    mine:(a, b) => { const ia = S.order.indexOf(a.id), ib = S.order.indexOf(b.id); return (ia < 0 ? 999 : ia) - (ib < 0 ? 999 : ib) || fav(a, b); },
-  }[s] || fav;
-  return list.slice().sort(f);
+const SORTS = [['fav','Favoriten'],['recent','Neueste & zuletzt gemacht'],['naehr','Nährwerte'],['rating','Bewertung'],['name','Name']];
+const NAEHR = [['kcal','Kalorien'],['protein','Protein'],['dichte','Protein pro kcal']];
+const DIRDEF = {fav:'asc', recent:'desc', rating:'desc', name:'asc', kcal:'asc', protein:'desc', dichte:'desc'};
+const DIRTXT = {fav:['Platz 1 zuerst','Platz 1 zuletzt'], recent:['Älteste zuerst','Neueste zuerst'], rating:['Schlechteste zuerst','Beste zuerst'], name:['A → Z','Z → A'], kcal:['Wenigste zuerst','Meiste zuerst'], protein:['Wenigste zuerst','Meiste zuerst'], dichte:['Niedrigste zuerst','Höchste zuerst']};
+function sortPrefs() {
+  const p = S.prefs, legacy = {mine:'fav', made:'recent', protein:'naehr', kcal:'naehr', dichte:'naehr'};
+  if (legacy[p.sort]) { if (p.sort === 'protein' || p.sort === 'kcal' || p.sort === 'dichte') p.nk = p.sort; p.sort = legacy[p.sort]; }
+  if (!SORTS.find(x => x[0] === p.sort)) p.sort = 'fav';
+  if (!p.nk) p.nk = 'kcal';
+  const key = p.sort === 'naehr' ? p.nk : p.sort;
+  if (!p.dir) p.dir = DIRDEF[key];
+  return {key, dir:p.dir};
 }
-const SORTS = [['fav','Favoriten & Rang'],['rating','Beste Bewertung'],['mine','Meine Reihenfolge'],['protein','Meiste Proteine'],['dichte','Protein pro kcal'],['kcal','Wenigste Kalorien'],['made','Zuletzt gemacht'],['name','A–Z']];
+function activity(r) { return Math.max((S.made[r.id] || {}).last || 0, r.createdAt || 0, SEEDMAP[r.id] ? 0 : (r.updatedAt || 0)); }
+function sorted(list) {
+  const {key, dir} = sortPrefs(), mc = new Map(list.map(r => [r.id, macros(r)]));
+  const stOrd = {final:0, testen:1, neu:2, idee:3};
+  const byRank = (a, b) => ((a.rank || 99) - (b.rank || 99)) || ((b.champ ? 1 : 0) - (a.champ ? 1 : 0)) || ((b.fav ? 1 : 0) - (a.fav ? 1 : 0)) || (stOrd[a.status] - stOrd[b.status]) || a.name.localeCompare(b.name);
+  const fav = (a, b) => { if (S.order.length) { const ia = S.order.indexOf(a.id), ib = S.order.indexOf(b.id); if (ia >= 0 || ib >= 0) return (ia < 0 ? 999 : ia) - (ib < 0 ? 999 : ib) || byRank(a, b); } return byRank(a, b); };
+  const asc = {
+    fav, name:(a, b) => a.name.localeCompare(b.name, 'de'),
+    kcal:(a, b) => mc.get(a.id).k - mc.get(b.id).k,
+    protein:(a, b) => mc.get(a.id).p - mc.get(b.id).p,
+    dichte:(a, b) => mc.get(a.id).dens - mc.get(b.id).dens,
+    rating:(a, b) => (a.rating || 0) - (b.rating || 0),
+    recent:(a, b) => activity(a) - activity(b),
+  }[key] || fav;
+  const sgn = dir === 'desc' ? -1 : 1;
+  return list.slice().sort((a, b) => (sgn * asc(a, b)) || byRank(a, b));
+}
+function sortLabel() { const {key, dir} = sortPrefs(); const p = S.prefs; const base = p.sort === 'naehr' ? NAEHR.find(x => x[0] === p.nk)[1] : SORTS.find(x => x[0] === p.sort)[1]; return base + ' · ' + DIRTXT[key][dir === 'asc' ? 0 : 1]; }
 function filtered() {
   const {cat, fam, q} = S.prefs; const Q = (q || '').toLowerCase().trim();
   return allRecipes().filter(r => (cat === 'all' || r.cat === cat) && (!fam || (fam === 'fav' ? r.fav : r.fam === fam)) &&
@@ -1365,7 +1381,7 @@ function card(r, i, n) {
     <div class="tx"><b>${esc(r.name)}</b><span class="sub">${esc(r.sub || '')}</span>
     <div class="mac"><span class="pill">${Math.round(m.k)} kcal</span>${m.p >= 10 ? `<span class="pill p">${Math.round(m.p)} g P</span>` : ''}${r.rating ? `<span class="pill">★ ${r.rating}</span>` : ''}</div></div></button>
     <button class="heart ${r.fav ? 'on' : ''}" data-fav="${esc(r.id)}" aria-label="Favorit" aria-pressed="${!!r.fav}"><svg viewBox="0 0 24 24" width="20" height="20"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z" fill="${r.fav ? '#FF4D7E' : 'none'}" stroke="${r.fav ? '#FF4D7E' : 'currentColor'}" stroke-width="2"/></svg></button>
-    ${S.prefs.sort === 'mine' ? `<div class="sorthandle"><button class="btn sm" data-mv="${esc(r.id)}:-1" ${i === 0 ? 'disabled' : ''} aria-label="nach oben">↑</button><button class="btn sm" data-mv="${esc(r.id)}:1" ${i === n - 1 ? 'disabled' : ''} aria-label="nach unten">↓</button></div>` : ''}
+    ${S.prefs.sort === 'fav' && S.prefs.edit ? `<div class="sorthandle"><button class="btn sm" data-mv="${esc(r.id)}:-1" ${i === 0 ? 'disabled' : ''} aria-label="nach oben">↑</button><button class="btn sm" data-mv="${esc(r.id)}:1" ${i === n - 1 ? 'disabled' : ''} aria-label="nach unten">↓</button></div>` : ''}
   </article>`;
 }
 function hello() { const h = new Date().getHours(); return h < 11 ? 'Guten Morgen, Nico' : h < 17 ? 'Hey Nico' : 'Guten Abend, Nico'; }
@@ -1387,15 +1403,15 @@ function vStart() {
 const FAMTXT = {schoko:'Schoko', vanille:'Vanille & Creme', cheesecake:'Cheesecake', frucht:'Fruchtig', nuss:'Nussig', floral:'Floral', kaffee:'Kaffee'};
 function vRezepte() {
   const list = sorted(filtered()); const p = S.prefs; const mx = p.view === 'matrix';
-  const grouped = !mx && p.cat === 'all' && p.sort === 'fav' && !p.q && !p.fam;
-  const nFilt = (p.fam ? 1 : 0) + (p.sort !== 'fav' ? 1 : 0);
+  const grouped = !mx && p.cat === 'all' && p.sort === 'fav' && p.dir === 'asc' && !p.edit && !p.q && !p.fam;
+  sortPrefs(); const sortOn = !(p.sort === 'fav' && p.dir === 'asc'); const nFilt = (p.fam ? 1 : 0) + (sortOn ? 1 : 0);
   const grid = arr => `<div class="grid">${arr.map((r, i) => card(r, i, arr.length)).join('')}</div>`;
   return `<div class="view">
   <div class="ptitle row" style="justify-content:space-between;align-items:flex-end"><div><h2>Rezepte</h2><p>${allRecipes().length} Sorten</p></div><button class="btn pri newbtn" data-tab="neu">＋ Neues Rezept</button></div>
   <div class="tools">
    <div class="search"><input class="field" id="q" type="search" placeholder="Suchen" value="${esc(p.q)}"><button class="iconbtn ${nFilt ? 'act' : ''}" data-act="filter" aria-label="Filter & Sortierung"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M7 12h10M10 18h4"/></svg>${nFilt ? `<i class="badge">${nFilt}</i>` : ''}</button><div class="seg vt" role="group" aria-label="Ansicht"><button aria-pressed="${!mx}" data-view="grid" aria-label="Kacheln"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/></svg></button><button aria-pressed="${mx}" data-view="matrix" aria-label="Flavour-Matrix">${ICONS.matrix.replace('<svg ', '<svg width="18" height="18" ')}</button></div></div>
    <div class="seg" role="group" aria-label="Kategorie">${[['all','Alle'],['protein','Protein'],['natur','Frucht'],['deluxe','Deluxe']].map(([k, l]) => `<button aria-pressed="${p.cat === k}" data-cat="${k}">${l}</button>`).join('')}</div>
-   ${nFilt ? `<div class="chips">${p.fam ? `<button class="chip on" data-fam="">${esc(p.fam === 'fav' ? 'Favoriten' : FAMTXT[p.fam])} ✕</button>` : ''}${p.sort !== 'fav' ? `<button class="chip on" data-act="setsort" data-k="fav">${esc((SORTS.find(x => x[0] === p.sort) || SORTS[0])[1])} ✕</button>` : ''}</div>` : ''}
+   ${nFilt ? `<div class="chips">${p.fam ? `<button class="chip on" data-fam="">${esc(p.fam === 'fav' ? 'Favoriten' : FAMTXT[p.fam])} ✕</button>` : ''}${sortOn ? `<button class="chip on" data-act="setsort" data-k="fav">${esc(sortLabel())} ✕</button>` : ''}${p.sort === 'fav' && p.edit ? `<button class="chip on" data-act="editorder">Reihenfolge fertig ✓</button>` : ''}</div>` : ''}
   </div>
   ${mx ? vMatrix() : !list.length ? `<div class="empty"><span class="melt">🍦</span><p>Nix gefunden.</p>${AI ? `<button class="btn pri" data-ask="Entwickle mir ein Eis: ${esc(p.q)}">Scoopy fragen</button>` : ''}</div>`
    : grouped ? ['protein','natur','deluxe'].map(c => { const arr = list.filter(r => r.cat === c); return arr.length ? `<section class="grp"><div class="grp-h"><h3>${SN.CATS[c].label}</h3><span>${esc(SN.CATS[c].long.split('·')[1] || '')} · ${arr.length}</span></div>${grid(arr)}</section>` : ''; }).join('')
@@ -1404,11 +1420,14 @@ function vRezepte() {
   </div>`;
 }
 function openFilter() {
-  const p = S.prefs;
+  const p = S.prefs; const {key, dir} = sortPrefs();
   openSheet(`<h2 class="d-title" style="font-size:26px">Filter & Sortierung</h2>
    <div class="fsec"><b>Geschmack</b><div class="chips wrap">${[['', 'Alle'], ['fav', 'Favoriten']].concat(Object.entries(FAMTXT)).map(([k, l]) => `<button class="chip" aria-pressed="${p.fam === k}" data-fam="${k}" data-keep="1">${l}</button>`).join('')}</div></div>
-   <div class="fsec"><b>Sortieren nach</b><div class="list-pick">${SORTS.map(([k, l]) => `<button data-act="setsort" data-k="${k}" data-keep="1"><span style="width:24px;text-align:center;color:var(--berryd)">${p.sort === k ? '✓' : ''}</span>${l}</button>`).join('')}</div></div>
-   <p class="muted" style="font-size:14px">„Meine Reihenfolge“ blendet ↑↓ an jeder Karte ein.</p>
+   <div class="fsec"><b>Sortieren nach</b><div class="seg wrapseg" role="group">${SORTS.map(([k, l]) => `<button aria-pressed="${p.sort === k}" data-act="setsort" data-k="${k}" data-keep="1">${l}</button>`).join('')}</div>
+    ${p.sort === 'naehr' ? `<div class="seg" role="group" style="margin-top:8px">${NAEHR.map(([k, l]) => `<button aria-pressed="${p.nk === k}" data-act="setnk" data-k="${k}">${l}</button>`).join('')}</div>` : ''}
+    <div class="seg" role="group" style="margin-top:8px">${['asc', 'desc'].map((dd, i) => `<button aria-pressed="${dir === dd}" data-act="setdir" data-k="${dd}">${i ? '↓' : '↑'} ${DIRTXT[key][i]}</button>`).join('')}</div>
+    ${p.sort === 'fav' ? `<button class="btn sm" data-act="editorder" style="margin-top:10px">${p.edit ? 'Reihenfolge fertig ✓' : 'Eigene Reihenfolge festlegen (↑↓ an den Karten)'}</button>` : ''}
+    ${p.sort === 'recent' ? '<p class="muted" style="font-size:14px;margin:8px 0 0">Neu angelegte und zuletzt gemachte Sorten stehen oben.</p>' : ''}</div>
    <button class="btn pri full" data-act="close">Fertig</button>`, true);
 }
 const FILLTXT = {1:'voll', 0.75:'¾', 0.5:'½', 0.25:'¼'};
@@ -1561,7 +1580,7 @@ function submitEditor(id) {
   r.x = +f.get('x'); r.y = +f.get('y');
   r.a = Object.assign({}, r.a, {c:[f.get('c1'), (r.a.c || [])[1] && (r.a.c || [])[0] === f.get('c1') ? r.a.c[1] : SN.mix(f.get('c1'), '#ffffff', .25)], bg:f.get('bg'), v:f.get('v') || undefined, t:$$('[data-top][aria-pressed=true]').map(b => b.dataset.top)});
   if (r.rank) for (const o of allRecipes()) if (o.id !== r.id && o.rank === r.rank) { const c = clone(o); delete c.rank; saveR(c, true); }
-  if (!r.id) { r.id = slug(r.name); while (getR(r.id) || SEEDMAP[r.id]) r.id += '-' + Math.floor(Math.random() * 90 + 10); }
+  if (!r.id) { r.id = slug(r.name); while (getR(r.id) || SEEDMAP[r.id]) r.id += '-' + Math.floor(Math.random() * 90 + 10); r.createdAt = Date.now(); }
   const before = id ? clone(getR(id)) : null;
   delete r._from;
   saveR(r, VIEW === 'neu'); if (SHEET) closeSheet();
@@ -1881,7 +1900,7 @@ document.addEventListener('click', e => {
   if (d.pm) { PMISS = d.pm === '1'; render(); return; }
   if (d.mk) { MKCAT = d.mk; $$('[data-mk]').forEach(b => b.setAttribute('aria-pressed', b.dataset.mk === d.mk)); toast(SN.CATS[d.mk].long); return; }
   if (d.top) { t.setAttribute('aria-pressed', t.getAttribute('aria-pressed') !== 'true'); return; }
-  if (d.save) { const [i, j] = d.save.split(':').map(Number); const c = CHAT[i].cards[j]; const r = clone(c.recipe); r.id = slug(r.name); while (getR(r.id)) r.id += '-' + Math.floor(Math.random() * 90 + 10); saveR(r, true); c.saved = r.id; persistChat(); render(); confetti(); toast(r.name + ' gespeichert', 'Öffnen', () => openDetail(r.id)); return; }
+  if (d.save) { const [i, j] = d.save.split(':').map(Number); const c = CHAT[i].cards[j]; const r = clone(c.recipe); r.id = slug(r.name); while (getR(r.id)) r.id += '-' + Math.floor(Math.random() * 90 + 10); r.createdAt = Date.now(); saveR(r, true); c.saved = r.id; persistChat(); render(); confetti(); toast(r.name + ' gespeichert', 'Öffnen', () => openDetail(r.id)); return; }
   if (d.peek) { const [i, j] = d.peek.split(':').map(Number); openEditor(null, CHAT[i].cards[j].recipe); return; }
   if (d.undo) { const [k, id] = d.undo.split(':'); if (UNDO[k]) { saveR(UNDO[k], true); delete UNDO[k]; render(); toast('Rückgängig gemacht'); } return; }
   const a = d.act; if (!a) return;
@@ -1898,7 +1917,10 @@ document.addEventListener('click', e => {
   else if (a === 'signup') { const f = $('#lgf'), fd = new FormData(f); AU.signup(fd.get('e'), fd.get('p')).then(() => { closeSheet(); toast('Konto angelegt'); SYNC.pull(); }, err => { $('#lgerr').textContent = err.message; }); }
   else if (a === 'newing') openIng(null);
   else if (a === 'sortmenu') openSheet(`<h2 class="d-title" style="font-size:26px">Sortieren</h2><div class="list-pick">${SORTS.map(([k, l]) => `<button data-act="setsort" data-k="${k}"><span style="width:28px;text-align:center">${S.prefs.sort === k ? '✓' : ''}</span><b>${l}</b></button>`).join('')}</div><p class="muted" style="font-size:14px">„Meine Reihenfolge“ blendet ↑↓-Knöpfe an jeder Karte ein.</p>`, true);
-  else if (a === 'setsort') { S.prefs.sort = d.k; if (d.k === 'mine' && !S.order.length) S.order = sorted(allRecipes()).map(r => r.id); persist(); render(); if (d.keep) openFilter(); else if (SHEET) closeSheet(); }
+  else if (a === 'setsort') { S.prefs.sort = d.k; S.prefs.dir = DIRDEF[d.k === 'naehr' ? (S.prefs.nk || 'kcal') : d.k]; if (d.k !== 'fav') S.prefs.edit = false; persist(); render(); if (d.keep) openFilter(); else if (SHEET) closeSheet(); }
+  else if (a === 'setnk') { S.prefs.nk = d.k; S.prefs.dir = DIRDEF[d.k]; persist(); render(); openFilter(); }
+  else if (a === 'setdir') { S.prefs.dir = d.k; persist(); render(); openFilter(); }
+  else if (a === 'editorder') { S.prefs.edit = !S.prefs.edit; if (S.prefs.edit) { S.prefs.dir = 'asc'; if (!S.order.length) S.order = sorted(allRecipes()).map(r => r.id); } persist(); render(); if (SHEET) closeSheet(); if (S.prefs.edit) toast('Mit ↑↓ an den Karten sortieren'); }
   else if (a === 'filter') openFilter();
   else if (a === 'edcancel') { ED = null; location.hash = 'rezepte'; }
   else if (a === 'truhe') putTruhe(d.id);
