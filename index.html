@@ -2178,7 +2178,7 @@ function md(t) {
   return h + (ul ? '</ul>' : '');
 }
 function msgHtml(m, i) {
-  let h = m.role === 'user' ? `<div class="m u">${m.img ? `<img src="${esc(m.img)}" alt="Foto">` : ''}${md(m.text || '')}</div>` : (m.text ? `<div class="arow">${avatar()}<div class="m a">${md(noEmoji(m.text.replace(/\s*\[(?:Vorschlag|Rezept|Rezeptvorschlag|Neues Rezept|aktualisiert)\s*:[^\]\n]*\]/gi, '')))}</div></div>` : '');
+  let h = m.role === 'user' ? `<div class="m u">${m.img ? `<img src="${esc(m.img)}" alt="Foto">` : ''}${md(m.text || '')}</div>` : (m.text ? `<div class="arow">${avatar()}<div class="m a">${md(noEmoji(m.text.replace(/\s*\[(?:Vorschlag|Rezept|Rezeptvorschlag|Neues Rezept|aktualisiert)\s*:[^\]\n]*\]/gi, '').replace(/^\s*(?:[-•*]|\d+\.)\s*$/gm, '')))}</div></div>` : '');
   if (m.role === 'assistant' && m.text) {
     const tags = [...m.text.matchAll(/\[(?:Vorschlag|Rezept|Rezeptvorschlag|Neues Rezept)\s*:\s*([^\]\n]{2,60})\]/gi)].map(x => x[1].trim());
     const fresh = tags.filter(n => !allRecipes().some(r => r.name.toLowerCase() === n.toLowerCase()) && !(m.cards || []).some(c => c.type === 'proposal' && c.recipe.name.toLowerCase() === n.toLowerCase()));
