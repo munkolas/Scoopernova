@@ -446,7 +446,7 @@ button,a,input,select,textarea,label,[data-act],[data-ask]{touch-action:manipula
 /* Brain Freeze: Bildschirm vereist kurz */
 .bfz{position:fixed;inset:0;z-index:200;display:flex;align-items:center;justify-content:center;pointer-events:auto;animation:bfzIn .35s ease-out both}
 .bfz.out{animation:bfzOut .6s ease-in both}
-.bfz-ice{position:absolute;inset:0;-webkit-backdrop-filter:blur(6px) saturate(.4) brightness(1.15);backdrop-filter:blur(6px) saturate(.4) brightness(1.15);background:radial-gradient(ellipse at center,rgba(200,235,255,.25) 0%,rgba(170,220,255,.55) 60%,rgba(235,250,255,.92) 100%),repeating-linear-gradient(115deg,rgba(255,255,255,.18) 0 2px,transparent 2px 22px),repeating-linear-gradient(35deg,rgba(255,255,255,.12) 0 1px,transparent 1px 30px)}
+.bfz-ice{position:absolute;inset:0;-webkit-backdrop-filter:blur(12px) saturate(.3);backdrop-filter:blur(12px) saturate(.3);background:radial-gradient(ellipse at center,rgba(232,246,255,.86) 0%,rgba(205,234,255,.82) 55%,rgba(245,252,255,.96) 100%),repeating-linear-gradient(115deg,rgba(255,255,255,.35) 0 2px,transparent 2px 24px),repeating-linear-gradient(35deg,rgba(255,255,255,.25) 0 1px,transparent 1px 32px);background-blend-mode:normal}
 .bfz-txt{position:relative;text-align:center;color:#0b3b5c;display:flex;flex-direction:column;align-items:center;gap:6px;animation:bfzShake .5s .35s 2}
 .bfz-em{font-size:84px;line-height:1}
 .bfz-txt b{font:900 40px/1 var(--title);letter-spacing:1px;text-shadow:0 2px 0 #fff,0 0 24px #bfe6ff}
