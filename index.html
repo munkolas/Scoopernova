@@ -425,6 +425,13 @@ details.acc li::before{content:"";position:absolute;left:2px;top:.62em;width:7px
 .ava{padding:1px;overflow:hidden}
 .ava.big{width:72px;height:72px}
 .seg.wrapseg{flex-wrap:wrap}.seg.wrapseg button{flex:1 1 auto}
+/* v1.7 Grafik-Editor */
+.artbox{display:flex;gap:12px;align-items:center;background:var(--card,#fff);border-radius:16px;padding:10px}
+.artprev{width:92px;height:92px;flex:none;border-radius:14px;overflow:hidden}
+.artprev svg{width:100%;height:100%;display:block}
+.chk{display:flex!important;flex-direction:row!important;align-items:center;gap:8px;font-weight:700}
+.chk input{width:20px;height:20px;accent-color:var(--pink,#FF5C86)}
+.artbox .hint{font-size:12px;color:var(--mute);margin-top:4px;line-height:1.35}
 
 </style>
 </head>
@@ -432,7 +439,7 @@ details.acc li::before{content:"";position:absolute;left:2px;top:.62em;width:7px
 <div class="drip" aria-hidden="true"></div>
 <div class="app" id="app">
   <header class="hdr" id="hdr"><div class="hdr-in">
-    <div class="brand"><button class="lg" id="logo" aria-label="Scoopernova"></button><div><h1 id="ttl">Scoopernova</h1><small id="subttl">created by munkolas · v1.6.1</small></div></div>
+    <div class="brand"><button class="lg" id="logo" aria-label="Scoopernova"></button><div><h1 id="ttl">Scoopernova</h1><small id="subttl">created by munkolas · v1.7.0</small></div></div>
     <div id="hdrbtns" class="row"></div>
   </div></header>
   <main id="main"></main>
@@ -993,6 +1000,253 @@ SN.logo=function(){
 
 </script>
 <script>
+/* Scoopernova – Grafik-System v2
+   Regeln: eine Lichtquelle (oben links), feste Zonen pro Kugel:
+   Krone (oben, Toppings & Soße) · Gesicht (Mitte, bleibt immer frei) · Sockel (Gefäß).
+   Gefäße: Protein = Creami-Pint · Frucht = Keramikschale · Deluxe = Eisbecher-Glas */
+(function () {
+const SN = window.SN = window.SN || {};
+const hex = c => { c = String(c).replace('#', ''); if (c.length === 3) c = [...c].map(x => x + x).join(''); const n = parseInt(c, 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; };
+const mix = (a, b, t) => '#' + hex(a).map((v, i) => Math.round(v + (hex(b)[i] - v) * t).toString(16).padStart(2, '0')).join('');
+const lum = c => { const [r, g, b] = hex(c); return (0.299 * r + 0.587 * g + 0.114 * b) / 255; };
+function rng(seed) { let a = seed >>> 0 || 1; return () => { a = (a + 0x6D2B79F5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
+const hash = s => [...String(s)].reduce((h, c) => (Math.imul(h ^ c.charCodeAt(0), 16777619)) >>> 0, 2166136261);
+let UID = 0;
+
+/* ---------- Kugel ---------- */
+function ballGeo(cx, by, w, h) { const r = w / 2, cy = by - h + r, dy = by - cy, hx = Math.abs(dy) < r ? Math.sqrt(r * r - dy * dy) : r; return {r, cy, hx}; }
+function domePath(cx, by, w, h) {
+  const {r, hx} = ballGeo(cx, by, w, h), big = (by - (by - h + r)) > 0 ? 1 : 0;
+  return `M${cx - hx},${by} A${r},${r} 0 ${big} 1 ${cx + hx},${by} Z`;
+}
+function skirt(cx, by, w, col) {
+  const n = 9, r = w / n * .62; let s = '';
+  for (let i = 0; i < n; i++) { const x = cx - w / 2 + (i + .5) * (w / n); s += `<circle cx="${x.toFixed(1)}" cy="${by - r * .15}" r="${r.toFixed(1)}" fill="${col}"/>`; }
+  return s;
+}
+function face(cx, by, w, h, col) {
+  const dark = lum(col) < .38, ink = dark ? '#1A0D08' : '#3A2218';
+  const ey = by - h * .36, ex = w * .14, er = w * .036;
+  return `<g class="face">
+   <ellipse cx="${cx - ex}" cy="${ey}" rx="${er}" ry="${er * 1.25}" fill="${ink}"/><ellipse cx="${cx + ex}" cy="${ey}" rx="${er}" ry="${er * 1.25}" fill="${ink}"/>
+   <circle cx="${cx - ex + er * .35}" cy="${ey - er * .45}" r="${er * .38}" fill="#fff"/><circle cx="${cx + ex + er * .35}" cy="${ey - er * .45}" r="${er * .38}" fill="#fff"/>
+   <path d="M${cx - w * .055},${ey + w * .062} Q${cx},${ey + w * .11} ${cx + w * .055},${ey + w * .062}" stroke="${ink}" stroke-width="${w * .022}" fill="none" stroke-linecap="round"/>
+   <ellipse cx="${cx - w * .25}" cy="${ey + w * .075}" rx="${w * .06}" ry="${w * .032}" fill="#FF6F91" opacity="${dark ? .55 : .42}"/><ellipse cx="${cx + w * .25}" cy="${ey + w * .075}" rx="${w * .06}" ry="${w * .032}" fill="#FF6F91" opacity="${dark ? .55 : .42}"/></g>`;
+}
+/* Soße als Kappe auf der Krone – Tropfen nur seitlich, enden über den Augen */
+function sauce(cx, by, w, h, col, R) {
+  const top = by - h - 2, capY = by - h * .66, x0 = cx - w / 2 - 4, x1 = cx + w / 2 + 4;
+  let d = `M${x0},${top} L${x1},${top} L${x1},${capY}`;
+  const n = 8, step = (x1 - x0) / n;
+  for (let i = n; i > 0; i--) {
+    const xa = x0 + i * step, xb = xa - step, xm = (xa + xb) / 2, side = Math.abs(xm - cx) > w * .3;
+    const dip = side && i % 2 ? h * (.16 + R() * .08) : h * (.03 + R() * .04);
+    d += ` Q${xa - step * .1},${capY + dip} ${xm},${capY + dip} Q${xb + step * .1},${capY + dip} ${xb},${capY}`;
+  }
+  d += 'Z';
+  return `<path d="${d}" fill="${col}"/><path d="${d}" fill="url(#gloss)" opacity=".55"/><path d="M${cx - w * .3},${top + h * .12} q${w * .15},${-h * .06} ${w * .3},${-h * .03}" stroke="#fff" stroke-width="${w * .022}" fill="none" stroke-linecap="round" opacity=".5"/>`;
+}
+/* Streu-Toppings nur in der Krone */
+function crownBits(t, cx, by, w, h, R) {
+  let s = ''; const pts = n => Array.from({length: n}, () => { const a = Math.PI * (1.1 + R() * .8), rr = .12 + R() * .3; return [cx + Math.cos(a) * w * rr, by - h * .76 + Math.sin(a) * h * rr * .5]; });
+  const cols = ['#FF4D7E', '#FFD23F', '#3DDC97', '#5E8BFF', '#FF8A3D', '#B07CFF'];
+  if (t.includes('sprinkles')) pts(12).forEach(([x, y], i) => s += `<rect x="${x}" y="${y}" width="${w * .07}" height="${w * .022}" rx="${w * .011}" fill="${cols[i % 6]}" transform="rotate(${R() * 180} ${x} ${y})"/>`);
+  if (t.includes('cosmic')) pts(14).forEach(([x, y], i) => s += `<circle cx="${x}" cy="${y}" r="${w * .03}" fill="${cols[i % 6]}"/><circle cx="${x - w * .01}" cy="${y - w * .01}" r="${w * .009}" fill="#fff" opacity=".7"/>`);
+  if (t.includes('nuts')) pts(8).forEach(([x, y]) => s += `<g transform="rotate(${R() * 360} ${x} ${y})"><path d="M${x - w * .05},${y} q${w * .012},${-w * .055} ${w * .05},${-w * .055} q${w * .045},0 ${w * .05},${w * .05} q${-w * .02},${w * .045} ${-w * .055},${w * .04} q${-w * .045},0 ${-w * .045},${-w * .035}Z" fill="#C9935C"/><path d="M${x - w * .02},${y - w * .02} q${w * .02},${-w * .015} ${w * .04},0" stroke="#F1D2A6" stroke-width="${w * .012}" fill="none" stroke-linecap="round"/></g>`);
+  if (t.includes('pistachio')) pts(6).forEach(([x, y]) => s += `<g transform="rotate(${R() * 360} ${x} ${y})"><ellipse cx="${x}" cy="${y}" rx="${w * .045}" ry="${w * .028}" fill="#7FB44A"/><ellipse cx="${x - w * .008}" cy="${y - w * .006}" rx="${w * .02}" ry="${w * .011}" fill="#B9DE8A"/></g>`);
+  if (t.includes('coconut')) pts(8).forEach(([x, y]) => s += `<path d="M${x},${y} q${w * .03},${-w * .025} ${w * .065},0" stroke="#fff" stroke-width="${w * .02}" fill="none" stroke-linecap="round"/>`);
+  if (t.includes('cocoa')) for (let i = 0; i < 60; i++) { const [x, y] = pts(1)[0]; s += `<circle cx="${x}" cy="${y}" r="${w * .008}" fill="#4A2A1A" opacity=".5"/>`; }
+  if (t.includes('choc-chips')) pts(6).forEach(([x, y]) => s += `<path d="M${x},${y - w * .03} l${w * .028},${w * .045} h${-w * .056}Z" fill="#3B2015"/>`);
+  if (t.includes('zest')) pts(5).forEach(([x, y]) => s += `<path d="M${x},${y} q${w * .025},${-w * .03} ${w * .055},${-w * .008}" stroke="#FFC400" stroke-width="${w * .016}" fill="none" stroke-linecap="round"/>`);
+  return s;
+}
+function vanillaDots(cx, by, w, h, R) { let s = ''; for (let i = 0; i < 22; i++) { const x = cx + (R() - .5) * w * .8, y = by - h * (.08 + R() * .8); if (Math.abs(x - cx) < w * .3 && y > by - h * .55 && y < by - h * .1) continue; s += `<circle cx="${x}" cy="${y}" r="${w * .009}" fill="#2a1a14" opacity=".55"/>`; } return s; }
+
+/* Garnituren – sitzen oben rechts auf der Krone */
+const G = {
+  berry: (x, y, r) => [[0, 0], [-.55, -.25], [.55, -.25], [-.3, -.7], [.3, -.7], [0, .45], [-.55, .35], [.55, .35], [0, -.35]].map(([a, b]) => `<circle cx="${x + a * r}" cy="${y + b * r}" r="${r * .34}" fill="#D9265A"/><circle cx="${x + a * r - r * .1}" cy="${y + b * r - r * .1}" r="${r * .1}" fill="#fff" opacity=".45"/>`).join(''),
+  cherry: (x, y, r) => `<path d="M${x},${y - r * .9} q${r * .2},${-r * 1.3} ${r * 1.1},${-r * 1.6}" stroke="#4F7A2A" stroke-width="${r * .16}" fill="none" stroke-linecap="round"/><circle cx="${x}" cy="${y}" r="${r}" fill="#C8102E"/><circle cx="${x - r * .35}" cy="${y - r * .35}" r="${r * .28}" fill="#fff" opacity=".5"/>`,
+  lemon: (x, y, r) => `<g transform="rotate(-20 ${x} ${y})"><path d="M${x - r},${y} A${r},${r} 0 0 1 ${x + r},${y} Z" fill="#FFCF2E"/><path d="M${x - r * .82},${y} A${r * .82},${r * .82} 0 0 1 ${x + r * .82},${y} Z" fill="#FFF1A6"/>${[0, 1, 2, 3].map(i => { const a = Math.PI + (i + .5) * Math.PI / 4; return `<path d="M${x},${y} L${x + Math.cos(a - .32) * r * .72},${y + Math.sin(a - .32) * r * .72} A${r * .72},${r * .72} 0 0 1 ${x + Math.cos(a + .32) * r * .72},${y + Math.sin(a + .32) * r * .72}Z" fill="#FFE066"/>`; }).join('')}</g>`,
+  mango: (x, y, r) => `<rect x="${x - r * .6}" y="${y - r * .6}" width="${r * 1.2}" height="${r * 1.2}" rx="${r * .3}" fill="#FFA41B" transform="rotate(14 ${x} ${y})"/><rect x="${x - r * 1.5}" y="${y - r * .2}" width="${r}" height="${r}" rx="${r * .25}" fill="#FFB84D" transform="rotate(-10 ${x} ${y})"/>`,
+  banana: (x, y, r) => [[0, 0], [-r * 1.1, r * .25]].map(([a, b]) => `<circle cx="${x + a}" cy="${y + b}" r="${r * .7}" fill="#FFF3B8" stroke="#EFD26A" stroke-width="${r * .14}"/><circle cx="${x + a}" cy="${y + b}" r="${r * .12}" fill="#C9A85A"/>`).join(''),
+  coffee: (x, y, r) => [[0, 0, 30], [-r * 1.2, r * .3, -25]].map(([a, b, rot]) => `<g transform="rotate(${rot} ${x + a} ${y + b})"><ellipse cx="${x + a}" cy="${y + b}" rx="${r * .7}" ry="${r * .5}" fill="#5A3420"/><path d="M${x + a - r * .55},${y + b} q${r * .55},${r * .25} ${r * 1.1},0" stroke="#2E170C" stroke-width="${r * .12}" fill="none"/></g>`).join(''),
+  cookie: (x, y, r) => `<g transform="rotate(-16 ${x} ${y})"><rect x="${x - r}" y="${y - r * .55}" width="${r * 2}" height="${r * 1.1}" rx="${r * .25}" fill="#D9A35B"/>${[-.5, 0, .5].map(a => `<circle cx="${x + a * r}" cy="${y}" r="${r * .1}" fill="#A8723A"/>`).join('')}</g>`,
+  flower: (x, y, r) => [0, 1, 2, 3, 4].map(i => { const a = i * 1.2566 - 1.57; return `<ellipse cx="${x + Math.cos(a) * r * .55}" cy="${y + Math.sin(a) * r * .55}" rx="${r * .45}" ry="${r * .3}" fill="#fff" transform="rotate(${a * 57.3} ${x + Math.cos(a) * r * .55} ${y + Math.sin(a) * r * .55})"/>`; }).join('') + `<circle cx="${x}" cy="${y}" r="${r * .28}" fill="#FFB347"/>`,
+  star: (x, y, r) => `<path d="M${x},${y - r} Q${x + r * .18},${y - r * .18} ${x + r},${y} Q${x + r * .18},${y + r * .18} ${x},${y + r} Q${x - r * .18},${y + r * .18} ${x - r},${y} Q${x - r * .18},${y - r * .18} ${x},${y - r}Z" fill="#FFC93C"/>`,
+  peach: (x, y, r) => `<g transform="rotate(-18 ${x} ${y})"><path d="M${x - r},${y} A${r},${r} 0 0 0 ${x + r},${y} Q${x},${y + r * .35} ${x - r},${y}Z" fill="#FF9F6E"/></g>`,
+  wafer: (x, y, r) => `<g transform="rotate(-26 ${x} ${y})"><rect x="${x - r * .28}" y="${y - r * 2.2}" width="${r * .56}" height="${r * 2.6}" rx="${r * .28}" fill="#E3B26A"/><path d="M${x - r * .28},${y - r * 1.6} l${r * .56},${-r * .35} M${x - r * .28},${y - r * .9} l${r * .56},${-r * .35} M${x - r * .28},${y - r * .2} l${r * .56},${-r * .35}" stroke="#C48A3E" stroke-width="${r * .08}"/></g>`,
+  cream: (x, y, r) => `<path d="M${x - r},${y} q${r * .1},${-r * .7} ${r * .55},${-r * .55} q${r * .05},${-r * .75} ${r * .45},${-r * .8} q${r * .35},${.05} ${r * .4},${r * .75} q${r * .5},0 ${r * .6},${r * .6}Z" fill="#FFFDF6"/><path d="M${x - r * .3},${y - r * .5} q${r * .3},${-r * .25} ${r * .55},${-r * .1}" stroke="#EDE3D2" stroke-width="${r * .08}" fill="none"/>`,
+};
+G.strawberry = (x, y, r) => `<path d="M${x},${y + r} C${x - r * 1.1},${y + r * .1} ${x - r * .95},${y - r * .8} ${x},${y - r * .7} C${x + r * .95},${y - r * .8} ${x + r * 1.1},${y + r * .1} ${x},${y + r}Z" fill="#E8344E"/>` + [[-.4, -.2], [0, -.35], [.4, -.2], [-.25, .2], [.25, .2], [0, .55]].map(([a, b]) => `<ellipse cx="${x + a * r}" cy="${y + b * r}" rx="${r * .06}" ry="${r * .09}" fill="#FFE08A"/>`).join('') + `<path d="M${x - r * .55},${y - r * .7} L${x - r * .2},${y - r * .55} L${x},${y - r * .95} L${x + r * .2},${y - r * .55} L${x + r * .55},${y - r * .7} L${x + r * .2},${y - r * .45} L${x - r * .2},${y - r * .45}Z" fill="#4F8A2E"/>`;
+G.blueberry = (x, y, r) => [[0, 0], [-r * .95, r * .35], [r * .9, r * .3]].map(([a, b]) => `<circle cx="${x + a}" cy="${y + b}" r="${r * .62}" fill="#4B4FA3"/><circle cx="${x + a}" cy="${y + b - r * .45}" r="${r * .17}" fill="#2E3170"/><circle cx="${x + a - r * .2}" cy="${y + b - r * .1}" r="${r * .14}" fill="#fff" opacity=".35"/>`).join('');
+G.kiwi = (x, y, r) => `<circle cx="${x}" cy="${y}" r="${r}" fill="#8B6A3E"/><circle cx="${x}" cy="${y}" r="${r * .86}" fill="#8FC24A"/><circle cx="${x}" cy="${y}" r="${r * .3}" fill="#F3F0C8"/>` + Array.from({length: 10}, (_, i) => { const a = i * Math.PI / 5; return `<ellipse cx="${x + Math.cos(a) * r * .5}" cy="${y + Math.sin(a) * r * .5}" rx="${r * .05}" ry="${r * .1}" fill="#2B2015" transform="rotate(${a * 57.3 + 90} ${x + Math.cos(a) * r * .5} ${y + Math.sin(a) * r * .5})"/>`; }).join('');
+G.ball = (x, y, r) => `<circle cx="${x}" cy="${y}" r="${r}" fill="#FBF8F1"/>` + [0, 1, 2, 3, 4, 5].map(k => `<circle cx="${x + Math.cos(k) * r * .55}" cy="${y + Math.sin(k * 1.7) * r * .55}" r="${r * .13}" fill="#E8E0D0"/>`).join('');
+const GARN = ['strawberry', 'blueberry', 'kiwi', 'raffaello', 'pear', 'berries', 'cherry', 'lemon', 'mango', 'banana', 'coffee', 'cookie', 'flower', 'star', 'peach'];
+function garnish(t, cx, by, w, h) {
+  const g = t.find(x => GARN.includes(x)); if (!g) return '';
+  const x = cx + w * .2, y = by - h * .96, r = w * .1;
+  return ({berries: G.berry(x, y, r * 1.05), cherry: G.cherry(cx + w * .04, by - h - r * .55, r * .85), lemon: G.lemon(x, y + r * .2, r * 1.5), mango: G.mango(x, y, r), banana: G.banana(x, y + r * .2, r * .95), coffee: G.coffee(x, y, r * .9), cookie: G.cookie(x, y, r * 1.1), flower: G.flower(x, y, r * 1.05), star: G.star(x, y - r * .2, r * .9) + G.star(x - r * 1.4, y + r * .3, r * .5), peach: G.peach(x, y, r * 1.3), strawberry: G.strawberry(x, y, r * 1.05), blueberry: G.blueberry(x, y + r * .2, r * .8), kiwi: G.kiwi(x, y + r * .2, r * 1.2), raffaello: G.ball(x, y, r * .9) + G.ball(x - r * 1.5, y + r * .4, r * .7), pear: G.pear(x, y, r * .9)})[g];
+}
+
+/* Komplette Kugel: Schatten → Sockel → Kuppel → Glanz → Krone → Gesicht */
+function scoop(o) {
+  const {cx, by, w, h, col, t = [], R, faceOn = true, skirtOn = true, band = false} = o, id = 'k' + (++UID);
+  const light = mix(col, '#fff', .28), deep = mix(col, '#000', .14), dark = lum(col) < .38;
+  let s = `<defs><radialGradient id="${id}g" cx=".36" cy=".3" r=".78"><stop offset="0" stop-color="${light}"/><stop offset=".5" stop-color="${col}"/><stop offset="1" stop-color="${deep}"/></radialGradient><clipPath id="${id}c"><path d="${domePath(cx, by, w, h)}"/></clipPath></defs>`;
+  if (skirtOn) s += skirt(cx, by + 1, ballGeo(cx, by, w, h).hx * 2.12, deep);
+  s += `<path d="${domePath(cx, by, w, h)}" fill="url(#${id}g)"/>`;
+  s += `<g clip-path="url(#${id}c)">`;
+  const sc = {'choc-drizzle': lum(col) < .4 ? '#24100A' : '#3B2015', 'swirl': '#D9265A', 'swirl-green': '#7FB44A', 'honey': '#F2B21C', 'caramel': '#C98A3A'}[t.find(x => ['choc-drizzle', 'swirl', 'swirl-green', 'honey', 'caramel'].includes(x))];
+  if (sc) s += sauce(cx, by, w, h, sc, R);
+  if (t.includes('vanilla')) s += vanillaDots(cx, by, w, h, R);
+  s += crownBits(t, cx, by, w, h, R);
+  const tex = mix(col, '#fff', dark ? .18 : .35);
+  s += `<path d="M${cx - w * .36},${by - h * .14} q${w * .12},${h * .07} ${w * .24},${h * .02}" stroke="${tex}" stroke-width="${w * .022}" fill="none" stroke-linecap="round" opacity=".55"/><path d="M${cx + w * .1},${by - h * .1} q${w * .12},${h * .05} ${w * .24},${-h * .03}" stroke="${tex}" stroke-width="${w * .022}" fill="none" stroke-linecap="round" opacity=".45"/></g>`;
+  if (band) {
+    const g = ballGeo(cx, by, w, h), yb = by - h * .6, hx = Math.sqrt(Math.max(0, g.r * g.r - (yb - g.cy) ** 2)), th = h * .1, pk = '#FF4D7E', pd = mix('#FF4D7E', '#000', .25);
+    s += `<g clip-path="url(#${id}c)"><path d="M${cx - hx - 4},${yb - 2} Q${cx},${yb + h * .09} ${cx + hx + 4},${yb - 2}" stroke="${pd}" stroke-width="${th + 3}" fill="none"/><path d="M${cx - hx - 4},${yb - 2} Q${cx},${yb + h * .09} ${cx + hx + 4},${yb - 2}" stroke="${pk}" stroke-width="${th}" fill="none"/><path d="M${cx - hx},${yb - th * .25} Q${cx},${yb + h * .09 - th * .25} ${cx + hx},${yb - th * .25}" stroke="#fff" stroke-width="${th * .16}" fill="none" opacity=".45"/></g>`;
+    const kx = cx + hx - 3, ky = yb - 1;
+    s += `<path d="M${kx},${ky} q${w * .1},${-h * .02} ${w * .17},${h * .1} q${-w * .06},${-h * .01} ${-w * .09},${h * .06} Z" fill="${pk}" stroke="${pd}" stroke-width="1.6" stroke-linejoin="round"/><path d="M${kx},${ky + 2} q${w * .08},${h * .06} ${w * .1},${h * .17} q${-w * .05},${-h * .04} ${-w * .09},${-h * .01} Z" fill="${pk}" stroke="${pd}" stroke-width="1.6" stroke-linejoin="round"/><circle cx="${kx}" cy="${ky + 1}" r="${th * .55}" fill="${pk}" stroke="${pd}" stroke-width="1.6"/>`;
+  }
+  s += `<ellipse cx="${cx - w * .22}" cy="${by - h * .8}" rx="${w * .13}" ry="${h * .07}" fill="#fff" opacity="${sc ? .35 : .5}" transform="rotate(-24 ${cx - w * .22} ${by - h * .8})"/>`;
+  if (faceOn) s += face(cx, by, w, h, col);
+  s += garnish(t, cx, by, w, h);
+  return s;
+}
+
+/* ---------- Gefäße ---------- */
+/* Muskelarm: Schulter (sx,sy), Richtung dir = -1 links / 1 rechts */
+/* Muskelarm nach 💪-Vorlage: Schulter rechts im lokalen Raster (100,70), Ellbogen unten links, Faust oben */
+const ARM = 'M100,50 C94,36 72,32 60,44 C55,50 50,54 44,54 L46,30 C49,23 55,19 60,17 C67,13 67,4 60,1 C52,-3 37,-1 32,7 C28,14 29,21 31,26 L25,62 C23,75 31,83 44,83 C62,85 84,86 100,88 Z';
+function arm(sx, sy, dir, col) {
+  const k = .78, c = mix(col, '#fff', lum(col) < .4 ? .16 : .08), d = mix(col, '#000', .32), l = mix(col, '#fff', .5), sh = mix(col, '#000', .12), id = 'a' + (++UID);
+  const tf = dir < 0 ? `translate(${sx - 100 * k} ${sy - 70 * k}) scale(${k})` : `translate(${sx + 100 * k} ${sy - 70 * k}) scale(${-k} ${k})`;
+  return `<g class="arm" transform="${tf}"><defs><clipPath id="${id}"><path d="${ARM}"/></clipPath></defs>
+   <path d="${ARM}" fill="${c}" stroke="${d}" stroke-width="3.2" stroke-linejoin="round"/>
+   <g clip-path="url(#${id})"><path d="M20,70 C40,90 80,92 104,80 L104,100 L10,100Z" fill="${sh}" opacity=".7"/><path d="M24,30 L20,64" stroke="${sh}" stroke-width="7" opacity=".5"/></g>
+   <ellipse cx="76" cy="46" rx="13" ry="6" fill="${l}" opacity=".75" transform="rotate(-14 76 46)"/>
+   <path d="M44,54 C50,62 58,66 66,66" stroke="${d}" stroke-width="2.6" fill="none" stroke-linecap="round" opacity=".7"/>
+   <path d="M37,15 C43,17 49,19 55,17" stroke="${d}" stroke-width="2.4" fill="none" stroke-linecap="round" opacity=".75"/>
+   <path d="M58,6 C61,8 62,11 60,13" stroke="${d}" stroke-width="2.2" fill="none" stroke-linecap="round" opacity=".6"/>
+   <rect x="25" y="26" width="23" height="8" rx="3" fill="#FF4D7E" stroke="${mix('#FF4D7E', '#000', .25)}" stroke-width="1.6" transform="rotate(6 36 30)"/></g>`;
+}
+function pint(c1, c2, t, R, bg, dark) {
+  const edge = dark ? 'rgba(255,255,255,.35)' : 'rgba(70,40,25,.16)', pid = 'p' + (++UID);
+  let s = '';
+  s += arm(150, 150, -1, c1) + arm(250, 150, 1, c1);
+  s += `<ellipse cx="200" cy="158" rx="62" ry="10" fill="${mix(c2, '#000', .25)}"/>`;
+  s += `<g class="top-scoop">` + scoop({cx: 200, by: 166, w: 118, h: 100, col: c1, t, R, skirtOn: false, band: true}) + `</g>`;
+  s += `<defs><linearGradient id="${pid}" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity=".5"/><stop offset=".2" stop-color="#fff" stop-opacity=".1"/><stop offset=".78" stop-color="#000" stop-opacity=".04"/><stop offset="1" stop-color="#fff" stop-opacity=".25"/></linearGradient></defs>`;
+  const body = 'M138,160 L147,248 Q149,262 164,262 L236,262 Q251,262 253,248 L262,160 Q200,176 138,160Z';
+  s += `<path d="${body}" fill="${c2}"/><path d="${body}" fill="url(#${pid})" stroke="${edge}" stroke-width="2"/>`;
+  s += `<path d="M135,158 Q200,177 265,158 L265,165 Q200,184 135,165Z" fill="${dark ? '#EEF0F6' : '#fff'}"/><path d="M135,165 Q200,184 265,165" stroke="${edge}" stroke-width="1.5" fill="none"/>`;
+  s += `<path d="M152,180 L159,244" stroke="#fff" stroke-width="5" stroke-linecap="round" opacity=".5"/>`;
+  return s;
+}
+G.pear = (x, y, r) => `<path d="M${x},${y - r * 1.1} C${x + r * .5},${y - r * 1.1} ${x + r * .35},${y - r * .3} ${x + r * .8},${y + r * .3} C${x + r},${y + r} ${x - r},${y + r} ${x - r * .8},${y + r * .3} C${x - r * .35},${y - r * .3} ${x - r * .5},${y - r * 1.1} ${x},${y - r * 1.1}Z" fill="#C9D65B"/><path d="M${x},${y - r * 1.1} l${r * .1},${-r * .4}" stroke="#6B4B2B" stroke-width="${r * .14}" stroke-linecap="round"/><ellipse cx="${x + r * .25}" cy="${y - r * .55}" rx="${r * .3}" ry="${r * .14}" fill="#5E8B2E" transform="rotate(-30 ${x + r * .25} ${y - r * .55})"/>`;
+const FRUIT = ['strawberry', 'blueberry', 'kiwi', 'berries', 'mango', 'peach', 'pear', 'banana', 'cherry', 'lemon'];
+function fruitShow(t) {
+  const k = t.find(x => FRUIT.includes(x)); if (!k) return '';
+  const big = {
+    strawberry: (x, y) => G.strawberry(x, y - 22, 22), blueberry: (x, y) => G.blueberry(x, y - 12, 15), kiwi: (x, y) => `<ellipse cx="${x + 8}" cy="${y - 16}" rx="24" ry="18" fill="#8B6A3E"/>` + G.kiwi(x - 14, y - 20, 18),
+    berries: (x, y) => `<path d="M${x - 4},${y - 34} q4,-8 10,-4 q6,-6 10,2 q-8,0 -10,6 q-3,-6 -10,-4Z" fill="#5E8B2E"/>` + [[0, -22], [-9, -16], [9, -16], [-13, -6], [0, -8], [13, -6], [-9, 3], [9, 3], [0, 8]].map(([a, b]) => `<circle cx="${x + a}" cy="${y + b - 4}" r="7.5" fill="#D9265A"/><circle cx="${x + a - 2}" cy="${y + b - 6}" r="2.2" fill="#fff" opacity=".45"/>`).join(''),
+    mango: (x, y) => `<defs><radialGradient id="mg${UID}" cx=".35" cy=".35" r=".8"><stop offset="0" stop-color="#FFE27A"/><stop offset=".55" stop-color="#FFA21F"/><stop offset="1" stop-color="#E5482F"/></radialGradient></defs><ellipse cx="${x}" cy="${y - 16}" rx="30" ry="21" fill="url(#mg${UID})" transform="rotate(-18 ${x} ${y - 16})"/><path d="M${x + 22},${y - 32} q6,-6 12,-6" stroke="#6B4B2B" stroke-width="3" stroke-linecap="round"/><ellipse cx="${x + 34}" cy="${y - 40}" rx="11" ry="5" fill="#5E8B2E" transform="rotate(-30 ${x + 34} ${y - 40})"/><ellipse cx="${x - 10}" cy="${y - 26}" rx="9" ry="4" fill="#fff" opacity=".45" transform="rotate(-18 ${x - 10} ${y - 26})"/>`,
+    peach: (x, y) => `<circle cx="${x}" cy="${y - 20}" r="22" fill="#FFB085"/><circle cx="${x + 6}" cy="${y - 16}" r="16" fill="#FF8A65" opacity=".5"/><path d="M${x},${y - 42} q9,12 0,26" stroke="#E98A5E" stroke-width="2.5" fill="none"/><ellipse cx="${x + 9}" cy="${y - 43}" rx="9" ry="4" fill="#6E9B3A" transform="rotate(-25 ${x + 9} ${y - 43})"/>`,
+    pear: (x, y) => G.pear(x, y - 20, 22),
+    banana: (x, y) => `<path d="M${x - 30},${y - 18} Q${x - 4},${y + 12} ${x + 30},${y - 22} Q${x + 2},${y - 2} ${x - 30},${y - 18}Z" fill="#FFD84D" stroke="#E2B52A" stroke-width="2"/><path d="M${x + 28},${y - 22} l5,-5" stroke="#6B4B2B" stroke-width="3" stroke-linecap="round"/>`,
+    cherry: (x, y) => G.cherry(x - 8, y - 12, 12) + G.cherry(x + 10, y - 10, 12),
+    lemon: (x, y) => `<ellipse cx="${x}" cy="${y - 16}" rx="26" ry="18" fill="#FFD43B"/><ellipse cx="${x - 8}" cy="${y - 22}" rx="8" ry="3.5" fill="#fff" opacity=".5"/>`}[k];
+  const small = {strawberry: (x, y) => G.strawberry(x, y, 11), blueberry: (x, y) => G.blueberry(x, y, 8), kiwi: (x, y) => G.kiwi(x, y, 11), berries: (x, y) => G.berry(x, y, 9), mango: (x, y) => G.mango(x, y, 11), peach: (x, y) => G.peach(x, y, 14), pear: (x, y) => G.pear(x, y, 11), banana: (x, y) => G.banana(x, y, 9), cherry: (x, y) => G.cherry(x, y, 8), lemon: (x, y) => G.lemon(x, y, 14)}[k];
+  return {ground: big(104, 262) + small(300, 252), rim: small(288, 186)};
+}
+/* Vintage-Eisglas (60er): geriffelte Coupe mit Wellenrand auf Fuß */
+function bowl(c1, c2, t, R, bg, dark) {
+  const tint = mix(bg, '#C2456E', .25), edge = mix(bg, '#000', dark ? .05 : .28), gid = 'v' + (++UID);
+  const cup = 'M100,192 Q102,226 150,240 L250,240 Q298,226 300,192 Z';
+  let s = '';
+  s += `<ellipse cx="200" cy="192" rx="100" ry="15" fill="${mix(bg, '#000', .2)}"/>`;
+  s += scoop({cx: 148, by: 194, w: 78, h: 66, col: c2, t: [], R, faceOn: false});
+  s += scoop({cx: 252, by: 194, w: 78, h: 66, col: c2, t: [], R, faceOn: false});
+  s += `<g class="top-scoop">` + scoop({cx: 200, by: 196, w: 112, h: 98, col: c1, t, R}) + `</g>`;
+  s += `<defs><linearGradient id="${gid}" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity=".6"/><stop offset=".22" stop-color="${tint}" stop-opacity=".3"/><stop offset=".78" stop-color="${tint}" stop-opacity=".28"/><stop offset="1" stop-color="#fff" stop-opacity=".55"/></linearGradient><clipPath id="${gid}c"><path d="${cup}"/></clipPath></defs>`;
+  s += `<path d="${cup}" fill="url(#${gid})"/>`;
+  // Riffel
+  s += `<g clip-path="url(#${gid}c)">` + Array.from({length: 9}, (_, i) => { const x = 110 + i * 22.5; const xb = 156 + i * 11; return `<path d="M${x},190 Q${(x + xb) / 2 + (x < 200 ? 4 : -4)},222 ${xb},242" stroke="#fff" stroke-width="6" opacity=".7" fill="none"/><path d="M${x + 8},190 Q${(x + xb) / 2 + 6 + (x < 200 ? 4 : -4)},222 ${xb + 3},242" stroke="${edge}" stroke-width="1.4" opacity=".35" fill="none"/>`; }).join('') + `</g>`;
+  // Wellenrand
+  let rim = 'M100,192'; for (let i = 0; i < 10; i++) { const x0 = 100 + i * 20; rim += ` Q${x0 + 10},${(i < 5 ? 198 + i * 2.2 : 198 + (9 - i) * 2.2) + 6} ${x0 + 20},${i < 5 ? 194 + (i + 1) * 2.2 : 194 + (9 - i) * 2.2}`; }
+  s += `<path d="${rim}" stroke="${edge}" stroke-width="2.5" fill="none" stroke-linecap="round"/>`;
+  s += `<path d="${cup}" fill="none" stroke="${edge}" stroke-width="2"/>`;
+  // Stiel & Fuß mit Kugel
+  const fr = fruitShow(t); if (fr) s += fr.rim;
+  s += `<path d="M190,240 L192,252 L208,252 L210,240Z" fill="url(#${gid})" stroke="${edge}" stroke-width="2"/><circle cx="200" cy="247" r="6" fill="url(#${gid})" stroke="${edge}" stroke-width="1.6"/>`;
+  s += `<ellipse cx="200" cy="258" rx="40" ry="6.5" fill="url(#${gid})" stroke="${edge}" stroke-width="2"/><path d="M168,257 Q200,262 232,257" stroke="#fff" stroke-width="2.5" fill="none" opacity=".7"/>`;
+  if (fr) s += fr.ground;
+  return s;
+}
+/* Deluxe: Waffel im goldenen Ständer, Krone auf der Kugel */
+function crown(x, y, w) {
+  const h = w * .62, g1 = '#FFD45A', g2 = '#E0A21B';
+  return `<g class="crown"><path d="M${x - w / 2},${y} L${x - w / 2},${y - h * .55} L${x - w * .27},${y - h * .25} L${x},${y - h} L${x + w * .27},${y - h * .25} L${x + w / 2},${y - h * .55} L${x + w / 2},${y} Z" fill="${g1}" stroke="${g2}" stroke-width="2" stroke-linejoin="round"/>
+   <rect x="${x - w / 2}" y="${y - h * .18}" width="${w}" height="${h * .18}" fill="${g2}"/>
+   <circle cx="${x}" cy="${y - h}" r="${w * .07}" fill="${g1}" stroke="${g2}" stroke-width="1.5"/><circle cx="${x - w / 2}" cy="${y - h * .55}" r="${w * .055}" fill="${g1}" stroke="${g2}" stroke-width="1.5"/><circle cx="${x + w / 2}" cy="${y - h * .55}" r="${w * .055}" fill="${g1}" stroke="${g2}" stroke-width="1.5"/>
+   <circle cx="${x}" cy="${y - h * .45}" r="${w * .075}" fill="#FF4D7E"/><circle cx="${x - w * .28}" cy="${y - h * .3}" r="${w * .05}" fill="#5E8BFF"/><circle cx="${x + w * .28}" cy="${y - h * .3}" r="${w * .05}" fill="#3DDC97"/>
+   <path d="M${x - w * .38},${y - h * .5} l${w * .1},${-h * .12}" stroke="#fff" stroke-width="2" stroke-linecap="round" opacity=".7"/></g>`;
+}
+function sundae(c1, c2, t, R, bg, dark) {
+  const wid = 'w' + (++UID), gold = '#E0A21B';
+  let s = '';
+  // Ständer
+  s += `<ellipse cx="200" cy="257" rx="42" ry="7" fill="${gold}"/><ellipse cx="200" cy="255" rx="42" ry="6" fill="#FFD45A"/>`;
+  s += `<rect x="196" y="224" width="8" height="32" rx="3" fill="${gold}"/>`;
+  // Waffel
+  s += `<defs><pattern id="${wid}" width="13" height="13" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="13" height="13" fill="#E6AE62"/><path d="M0 0H13M0 0V13" stroke="#C78A40" stroke-width="2.6"/></pattern></defs>`;
+  s += `<path d="M152,170 L200,258 L248,170 Z" fill="url(#${wid})"/><path d="M152,170 L200,258 L176,170Z" fill="#fff" opacity=".12"/><path d="M200,258 L248,170 L228,170Z" fill="#000" opacity=".08"/>`;
+  // Ring des Ständers vor der Waffel
+  s += `<path d="M178,228 Q200,236 222,228" stroke="${gold}" stroke-width="6" fill="none" stroke-linecap="round"/><path d="M178,226 Q200,233 222,226" stroke="#FFD45A" stroke-width="2.5" fill="none" stroke-linecap="round"/>`;
+  // Kugel + Waffelrand
+  s += `<g class="top-scoop">` + scoop({cx: 200, by: 172, w: 116, h: 104, col: c1, t: t.filter(x => !GARN.includes(x)), R}) + crown(200, 76, 58) + `</g>`;
+  s += `<path d="M146,168 Q200,182 254,168 L252,178 Q200,192 148,178Z" fill="#D79A4E"/><path d="M146,168 Q200,182 254,168" stroke="#F0C27E" stroke-width="2" fill="none"/>`;
+  return s;
+}
+
+/* ---------- Hintergrund ---------- */
+const DECO = {berries: (x, y, r) => G.berry(x, y, r * .8), cherry: (x, y, r) => G.cherry(x, y, r * .6), lemon: (x, y, r) => G.lemon(x, y, r), mango: (x, y, r) => G.mango(x, y, r * .7), banana: (x, y, r) => G.banana(x, y, r * .8), coffee: (x, y, r) => G.coffee(x, y, r * .8), cookie: (x, y, r) => G.cookie(x, y, r * .8), flower: (x, y, r) => G.flower(x, y, r), star: (x, y, r) => G.star(x, y, r * .7), peach: (x, y, r) => G.peach(x, y, r),
+  strawberry: (x, y, r) => G.strawberry(x, y, r * .8), blueberry: (x, y, r) => G.blueberry(x, y, r * .6), kiwi: (x, y, r) => G.kiwi(x, y, r * .8), raffaello: (x, y, r) => G.ball(x, y, r * .7), pear: (x, y, r) => G.pear(x, y, r * .7),
+  pistachio: (x, y, r) => `<g transform="rotate(-25 ${x} ${y})"><path d="M${x - r},${y - r * .05} Q${x - r * .1},${y - r * .95} ${x + r * .9},${y - r * .2} Q${x - r * .05},${y - r * .45} ${x - r},${y - r * .05}Z" fill="#E8D6B2"/><path d="M${x - r},${y + r * .1} Q${x - r * .1},${y + r * .95} ${x + r * .9},${y + r * .25} Q${x - r * .05},${y + r * .5} ${x - r},${y + r * .1}Z" fill="#E8D6B2"/><ellipse cx="${x + r * .05}" cy="${y + r * .02}" rx="${r * .55}" ry="${r * .24}" fill="#7FB44A"/></g>`,
+  nuts: (x, y, r) => `<ellipse cx="${x}" cy="${y}" rx="${r * .6}" ry="${r * .45}" fill="#B07A47"/>`,
+  coconut: (x, y, r) => `<path d="M${x - r * .6},${y} q${r * .6},${-r * .4} ${r * 1.2},0" stroke="#fff" stroke-width="${r * .28}" fill="none" stroke-linecap="round"/>`};
+function quatre(x, y, r) { return [0, 1, 2, 3].map(i => { const a = i * Math.PI / 2; return `<circle cx="${x + Math.cos(a) * r * .5}" cy="${y + Math.sin(a) * r * .5}" r="${r * .42}"/>`; }).join('') + `<circle cx="${x}" cy="${y}" r="${r * .3}"/>`; }
+function diamond(x, y, r) { return `<path d="M${x},${y - r} L${x + r * .7},${y} L${x},${y + r} L${x - r * .7},${y}Z"/>`; }
+function monogram(bg, k, dark) {
+  const id = 'mono' + (++UID), tone = mix(bg, dark ? '#fff' : '#8a6420', dark ? .16 : .2);
+  return `<defs><filter id="${id}f"><feFlood flood-color="${tone}"/><feComposite in2="SourceAlpha" operator="in"/></filter>
+   <pattern id="${id}" width="64" height="64" patternUnits="userSpaceOnUse" patternTransform="rotate(0)">
+    <g filter="url(#${id}f)">${DECO[k](16, 16, 9)}<g transform="rotate(180 48 48)">${DECO[k](48, 48, 9)}</g></g>
+    <g fill="${tone}">${quatre(48, 16, 9)}${diamond(16, 48, 7)}</g></pattern></defs>
+   <rect width="400" height="300" fill="url(#${id})"/>`;
+}
+function background(bg, t, R, dark, cat, plain) {
+  const k = t.find(x => DECO[x]) || 'star';
+  let s = `<rect width="400" height="300" fill="${bg}"/>`;
+  if (cat === 'deluxe') { s += monogram(bg, k, dark); s += `<defs><radialGradient id="vig${UID}" cx=".5" cy=".5" r=".55"><stop offset=".55" stop-color="${bg}" stop-opacity=".0"/><stop offset="1" stop-color="${mix(bg, '#000', .2)}" stop-opacity=".35"/></radialGradient></defs><rect width="400" height="300" fill="url(#vig${UID})"/>`; s += `<circle cx="200" cy="150" r="104" fill="${mix(bg, '#fff', dark ? .06 : .55)}" opacity="${dark ? .5 : .85}"/>`; s += `<rect x="0" y="262" width="400" height="38" fill="${mix(bg, dark ? '#fff' : '#6b3e26', dark ? .05 : .1)}"/><ellipse cx="200" cy="263" rx="80" ry="7" fill="#000" opacity="${dark ? .35 : .14}"/>`; return s; }
+  s += `<circle cx="200" cy="148" r="118" fill="${mix(bg, '#fff', dark ? .08 : .45)}" opacity="${dark ? .5 : .8}"/>`;
+  if (!plain) [[48, 60, 16], [352, 66, 14], [62, 198, 12], [340, 202, 15]].forEach(([x, y, r], i) => s += `<g opacity="${dark ? .8 : .55}" class="fl" style="animation-delay:${-i * 1.3}s" transform="rotate(${(R() - .5) * 40} ${x} ${y})">${DECO[k](x, y, r)}</g>`);
+  if (t.includes('cosmic')) { for (let i = 0; i < 30; i++) s += `<circle cx="${R() * 400}" cy="${R() * 230}" r="${R() * 1.5 + .4}" fill="#fff" opacity="${.4 + R() * .5}"/>`; }
+  s += `<rect x="0" y="262" width="400" height="38" fill="${mix(bg, dark ? '#fff' : '#6b3e26', dark ? .05 : .08)}"/>`;
+  s += `<ellipse cx="200" cy="263" rx="92" ry="7" fill="#000" opacity="${dark ? .35 : .12}"/>`;
+  return s;
+}
+
+SN.art2 = function (r, opt = {}) {
+  const a = r.a || {}, R = rng(hash(r.id || r.name)), c1 = (a.c || ['#F7E7C6'])[0], c2 = (a.c || [])[1] || mix(c1, '#fff', .25);
+  const bg = a.bg || mix(c1, '#fff', .7), dark = lum(bg) < .35, t = a.t || [];
+  const v = r.cat === 'protein' ? pint : r.cat === 'natur' ? bowl : sundae;
+  return `<svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${String(r.name || '').replace(/[<>&"]/g, '')}"><defs><linearGradient id="gloss" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".45"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/></linearGradient></defs>` + background(bg, t, R, dark, r.cat, opt.plain) + v(c1, c2, t, R, bg, dark) + `</svg>`;
+};
+})();
+
+</script>
+<script>
 {
 const SN = window.SN;
 const $ = (s, el = document) => el.querySelector(s);
@@ -1000,7 +1254,8 @@ const $$ = (s, el = document) => [...el.querySelectorAll(s)];
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const clone = o => JSON.parse(JSON.stringify(o));
 const UNITS = ['g','ml','TL','EL','Prise','Msp','Tropfen','Stk','Fläschchen','Körnchen'];
-const TOPS = ['choc-drizzle','choc-chips','sprinkles','cosmic','nuts','pistachio','swirl','swirl-green','coconut','cocoa','vanilla','berries','cherry','lemon','zest','mango','banana','coffee','cookie','flower','star','peach','pear','raffaello','honey'];
+const TOPL = {'choc-drizzle':'Schokosauce', caramel:'Karamell', honey:'Honig', swirl:'Swirl', 'swirl-green':'Pistazien-Swirl', sprinkles:'Streusel', cosmic:'Schokolinsen', 'choc-chips':'Schokostücke', nuts:'Nüsse', pistachio:'Pistazien', coconut:'Kokos', cocoa:'Kakao', vanilla:'Vanille', zest:'Abrieb', berries:'Himbeeren', strawberry:'Erdbeere', blueberry:'Blaubeeren', kiwi:'Kiwi', cherry:'Kirsche', lemon:'Zitrone', mango:'Mango', banana:'Banane', peach:'Pfirsich', pear:'Birne', coffee:'Kaffee', cookie:'Keks', flower:'Blüte', star:'Tonka-Stern', raffaello:'Raffaello'};
+const TOPS = ['choc-drizzle','caramel','honey','swirl','swirl-green','sprinkles','cosmic','choc-chips','nuts','pistachio','coconut','cocoa','vanilla','zest','berries','strawberry','blueberry','kiwi','cherry','lemon','mango','banana','peach','pear','coffee','cookie','flower','star','raffaello'];
 
 /* ================= STATE ================= */
 const LS = 'scoopernova.v1', LSC = 'scoopernova.chat.v1';
@@ -1105,7 +1360,7 @@ async function initCaps() {
 
 
 /* ================= PWA-MODUS: SUPABASE (Konto wie FPV Cockpit) ================= */
-const VERSION = '1.6.1';
+const VERSION = '1.7.0';
 const PWA = !!window.SN_PWA;
 const AI = !PWA; /* KI-Funktionen nur in der Claude-Version – die iPhone-App bleibt kostenlos */
 const CLAUDE_URL = 'https://claude.ai/artifact/8mz7qbXNxS4notwaJyptjo';
@@ -1176,11 +1431,45 @@ function openSettings() {
    <div class="card" style="padding:14px;margin-top:12px"><b>Daten von Hand übertragen</b><p class="muted" style="margin:4px 0 10px;font-size:14px">Notlösung ohne Sync: Code kopieren, auf dem anderen Gerät einfügen. Es wird zusammengeführt – nichts wird überschrieben.</p>
     <div class="row"><button class="btn" data-act="exportcode" style="flex:1">Code kopieren</button><button class="btn" data-act="importshow" style="flex:1">Code einfügen</button></div>
     <div id="impbox" class="hide" style="margin-top:10px"><textarea class="field" id="impcode" rows="4" placeholder="Code hier einfügen"></textarea><button class="btn pri full" data-act="importdo" style="margin-top:8px">Zusammenführen</button></div></div>
-   <div class="card" style="padding:14px;margin-top:12px"><b>Neu in ${VERSION}</b><ul class="bul" style="margin-top:8px"><li>Rezepte als eigener Tab, Start aufgeräumt</li><li>v1.6.1: Sortierung vereinfacht, auf- oder absteigend, Neueste oben</li><li>v1.6: Claude-Version und iPhone-App synchronisieren sich – alles wird zusammengeführt, nichts geht verloren</li><li>v1.5.2: Scoopy hat ein Gesicht</li><li>v1.5.1: Chat mit Grafiken statt Emojis</li><li>v1.5: Gefriertruhe kennt halbe Pints (¾ · ½ · ¼ übrig)</li><li>v1.4.1: heißt jetzt Flavour-Matrix</li><li>v1.4: neue Grafiken, Bewerten mit Kugeln, Bild ändern direkt im Rezept, Matrix öffnet Rezepte</li><li>v1.3: Rezepte aufgeräumt, „Neu“ als eigene Seite, Gemacht → landet automatisch in der Truhe</li><li>iPhone-App über GitHub & Supabase</li><li>v1.2: iPhone-App ohne KI &amp; kostenlos – Scoopy bleibt in der Claude-Version</li></ul></div>`, true);
+   <div class="card" style="padding:14px;margin-top:12px"><b>Neu in ${VERSION}</b><ul class="bul" style="margin-top:8px"><li>v1.7: Neue Eis-Grafiken – Protein-Pint mit Muskeln & Stirnband, Frucht im 60s-Glas, Deluxe in der Waffel mit Krone & Monogramm-Muster</li><li>v1.7: Grafik entsteht automatisch aus den Zutaten (Farbe, Früchte, Toppings)</li><li>Rezepte als eigener Tab, Start aufgeräumt</li><li>v1.6.1: Sortierung vereinfacht, auf- oder absteigend, Neueste oben</li><li>v1.6: Claude-Version und iPhone-App synchronisieren sich – alles wird zusammengeführt, nichts geht verloren</li><li>v1.5.2: Scoopy hat ein Gesicht</li><li>v1.5.1: Chat mit Grafiken statt Emojis</li><li>v1.5: Gefriertruhe kennt halbe Pints (¾ · ½ · ¼ übrig)</li><li>v1.4.1: heißt jetzt Flavour-Matrix</li><li>v1.4: neue Grafiken, Bewerten mit Kugeln, Bild ändern direkt im Rezept, Matrix öffnet Rezepte</li><li>v1.3: Rezepte aufgeräumt, „Neu“ als eigene Seite, Gemacht → landet automatisch in der Truhe</li><li>iPhone-App über GitHub & Supabase</li><li>v1.2: iPhone-App ohne KI &amp; kostenlos – Scoopy bleibt in der Claude-Version</li></ul></div>`, true);
   SHEET = 'settings';
   const f = $('#lgf'); if (f) f.addEventListener('submit', async e => { e.preventDefault(); const fd = new FormData(f); try { await AU.login(fd.get('e'), fd.get('p')); closeSheet(); toast('Angemeldet'); await SYNC.pull(); } catch (err) { $('#lgerr').textContent = err.message; } });
 }
 
+
+
+/* ================= GRAFIK-SYSTEM v2: Farben & Toppings automatisch aus den Zutaten ================= */
+const ART_RULES = [
+  {re:/pisti|pistaz|drops_pist/, w:3, a:{c:['#A9CF7E','#BEDC96'], bg:'#E4EFD3', t:['pistachio']}, dx:['swirl-green']},
+  {re:/kakao|pud_s|zartbitter|nutella|schoko/, w:2, a:{c:['#5B3527','#7A4A33'], bg:'#F3DFD2', t:['choc-drizzle']}},
+  {re:/espresso|kaffee|mokka|instkaffee/, w:1, a:{c:['#C9A27E','#EAD7BF'], bg:'#EADCC9', t:['coffee','cocoa']}},
+  {re:/himbeer/, w:1.5, a:{c:['#E63E6D','#FF5C86'], bg:'#FFDFE8', t:['berries']}},
+  {re:/erdbeer/, w:1.5, a:{c:['#F2557A','#FF8FA8'], bg:'#FFE3E8', t:['strawberry']}},
+  {re:/blaubeer|heidelbeer/, w:1.5, a:{c:['#6A68B8','#8E8CD6'], bg:'#E9E8F8', t:['blueberry']}},
+  {re:/kiwi/, w:1.5, a:{c:['#9ACB55','#BFDD84'], bg:'#EAF4D8', t:['kiwi']}},
+  {re:/mango|maracuja|passionsfrucht/, w:1, a:{c:['#FFB52E','#FFD56E'], bg:'#FFF0C6', t:['mango']}},
+  {re:/pfirsich|aprikose|nektarine/, w:1, a:{c:['#FFB089','#FFCBA6'], bg:'#FFEADC', t:['peach']}},
+  {re:/birne/, w:1, a:{c:['#E6E59C','#F1EEB9'], bg:'#F2F5D8', t:['pear']}},
+  {re:/banane/, w:1, a:{c:['#FFF0B0','#FBE39C'], bg:'#FFF3C4', t:['banana']}},
+  {re:/kirsch/, w:1.2, a:{c:['#C8204E','#E25C7E'], bg:'#FFE5EB', t:['cherry']}},
+  {re:/zitron|zabrieb|limette/, w:8, a:{c:['#FFF0A3','#FFE27A'], bg:'#FFF5C9', t:['lemon']}},
+  {re:/kokos|raffaello/, w:2, a:{c:['#FFFFFF','#F3EEE4'], bg:'#E3F1EE', t:['coconut']}},
+  {re:/jasmin|obw|orangenbl/, w:20, a:{c:['#FFE6C2','#FFD39A'], bg:'#FCE9D2', t:['flower']}},
+  {re:/honig/, w:1, a:{c:['#FFD877','#F7C350'], bg:'#FFF1CF', t:['honey']}},
+  {re:/tonka|vanille|vanillezucker/, w:20, a:{c:['#FFF2C4','#FBE6A2'], bg:'#FFF7E2', t:['vanilla','star']}},
+];
+const ART_EXTRA = [[/zartbitter|schokodrops/, 'choc-chips'], [/schokolinsen|smarties/, 'cosmic'], [/lotus|oreo|keks/, 'cookie'], [/drops_nuss|nüsse|nuss(?!milch|nougat|-nougat)|macadamia|mandeln|mandelblätt|mandelstift/, 'nuts'], [/kokosraspeln/, 'coconut'], [/raffaello/, 'raffaello']];
+function ingKey(l) { return ((l.ing && !String(l.ing).startsWith('x-')) ? l.ing : iname(l)).toLowerCase(); }
+function deriveArt(r) {
+  const P = pantry(); let best = null, bs = 0;
+  for (const rule of ART_RULES) { let sc = 0; for (const l of r.ings || []) if (rule.re.test(ingKey(l))) sc += Math.max(.2, grams(l, P[l.ing])) * rule.w; if (sc > bs) { bs = sc; best = rule; } }
+  const base = best ? best.a : {c:['#FFF2C4','#FBE6A2'], bg:'#FFF7E2', t:['vanilla']};
+  const t = base.t.slice(); if (best && best.dx && r.cat === 'deluxe') t.push(...best.dx);
+  for (const [re, tp] of ART_EXTRA) if ((r.ings || []).some(l => re.test(ingKey(l))) && !t.includes(tp)) t.push(tp);
+  return {c:base.c.slice(), bg:base.bg, t};
+}
+function artRecipe(r) { const a = r.a || {}; if (a.auto || !a.c || !a.c.length) return Object.assign({}, r, {a:deriveArt(r)}); return r; }
+SN.art = (r, opt) => SN.art2(artRecipe(r), opt || {});
 
 /* ================= ZUSAMMENFÜHREN (keine Info geht verloren) ================= */
 const OWNER_EMAIL = 'nicolas.munk@gmail.com';
@@ -1528,16 +1817,24 @@ function edForm(r, id, page) {
    <label>Learnings (eine pro Zeile)<textarea class="field" name="notes" rows="4">${esc((r.notes || []).join('\n'))}</textarea></label>
    <label>Flavour-Matrix: fruchtig ↔ sahnig<input type="range" name="x" min="-1" max="1" step=".05" value="${r.x || 0}"></label>
    <label>Flavour-Matrix: schwer ↔ leicht<input type="range" name="y" min="-1" max="1" step=".05" value="${r.y || 0}"></label>
-   <div class="two"><label>Kugelfarbe<input type="color" class="field" name="c1" value="${esc((r.a.c || [])[0] || '#FFF2C4')}"></label><label>Hintergrund<input type="color" class="field" name="bg" value="${esc(r.a.bg || '#FFF7EE')}"></label></div>
-   <label>Gefäß<select class="field" name="v"><option value="">automatisch</option>${[['pint','Creami-Pint'],['cone','Waffel'],['bowl','Schale']].map(([k, l]) => `<option value="${k}" ${r.a.v === k ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
-   <div><div style="font-size:14px;font-weight:700;color:var(--mute);margin-bottom:6px">Toppings in der Grafik</div><div class="tpick">${TOPS.map(t => `<button type="button" class="chip" data-top="${t}" aria-pressed="${(r.a.t || []).includes(t)}">${t}</button>`).join('')}</div></div>
+   <div class="artbox"><div class="artprev" id="artprev"></div><div style="flex:1;min-width:0"><label class="chk"><input type="checkbox" name="auto" ${(!id || r.a.auto || !(r.a.c || []).length) ? 'checked' : ''}> Grafik automatisch aus Zutaten</label><div class="hint">Farbe, Toppings & Früchte erkennt die App selbst. Das Gefäß kommt aus der Kategorie: Protein = Pint mit Muskeln, Frucht = 60s-Glas, Deluxe = Waffel mit Krone.</div></div></div>
+   <div id="artman" ${(!id || r.a.auto || !(r.a.c || []).length) ? 'hidden' : ''}><div class="two"><label>Kugelfarbe<input type="color" class="field" name="c1" value="${esc((r.a.c || [])[0] || '#FFF2C4')}"></label><label>Hintergrund<input type="color" class="field" name="bg" value="${esc(r.a.bg || '#FFF7E2')}"></label></div>
+   <div><div style="font-size:14px;font-weight:700;color:var(--mute);margin:10px 0 6px">Toppings in der Grafik</div><div class="tpick">${TOPS.map(t => `<button type="button" class="chip" data-top="${t}" aria-pressed="${(r.a.t || []).includes(t)}">${TOPL[t] || t}</button>`).join('')}</div></div></div>
    <div class="livemac ${page ? 'pg' : ''}" id="livemac"></div>
    <div class="row"><button type="button" class="btn" data-act="${page ? 'edcancel' : 'close'}" style="flex:1">Abbrechen</button><button class="btn pri" style="flex:2">Speichern</button></div>
   </form>`;
 }
+function artPrev() {
+  const box = $('#artprev'); if (!box || !ED) return; const f = new FormData($('#edf'));
+  const r = Object.assign({}, ED, {cat:f.get('cat') || ED.cat});
+  r.a = f.get('auto') ? {auto:true} : {c:[f.get('c1'), SN.mix(f.get('c1'), '#ffffff', .25)], bg:f.get('bg'), t:$$('[data-top][aria-pressed=true]').map(b => b.dataset.top)};
+  box.innerHTML = SN.art(r);
+}
 function bindEditor(id) {
-  drawRows(); liveMac();
-  $('#edf').addEventListener('input', e => { if (e.target.closest('.irow')) readRows(); liveMac(); });
+  drawRows(); liveMac(); artPrev();
+  $('#edf').addEventListener('input', e => { if (e.target.closest('.irow')) readRows(); liveMac(); artPrev(); });
+  $('#edf').addEventListener('change', e => { if (e.target.name === 'auto') { const man = $('#artman'); man.hidden = e.target.checked; if (!e.target.checked) { const d = deriveArt(Object.assign({}, ED, {cat:$('#edf [name=cat]').value})); $('#edf [name=c1]').value = d.c[0]; $('#edf [name=bg]').value = d.bg; $$('[data-top]').forEach(b => b.setAttribute('aria-pressed', d.t.includes(b.dataset.top))); } } if (e.target.name === 'cat') artPrev(); artPrev(); });
+  $('#edf').addEventListener('click', e => { if (e.target.closest('[data-top]')) setTimeout(artPrev); });
   $('#edf').addEventListener('submit', e => { e.preventDefault(); submitEditor(id); });
 }
 function openEditor(id, preset) {
@@ -1578,7 +1875,7 @@ function submitEditor(id) {
   r.steps = lines('steps'); r.mix = lines('mix'); r.notes = lines('notes');
   r.flow = f.get('flowk') === 'custom' ? lines('flow') : SN.FLOWS[f.get('flowk')].slice();
   r.x = +f.get('x'); r.y = +f.get('y');
-  r.a = Object.assign({}, r.a, {c:[f.get('c1'), (r.a.c || [])[1] && (r.a.c || [])[0] === f.get('c1') ? r.a.c[1] : SN.mix(f.get('c1'), '#ffffff', .25)], bg:f.get('bg'), v:f.get('v') || undefined, t:$$('[data-top][aria-pressed=true]').map(b => b.dataset.top)});
+  r.a = f.get('auto') ? {auto:true} : {c:[f.get('c1'), (r.a.c || [])[1] && (r.a.c || [])[0] === f.get('c1') ? r.a.c[1] : SN.mix(f.get('c1'), '#ffffff', .25)], bg:f.get('bg'), t:$$('[data-top][aria-pressed=true]').map(b => b.dataset.top)};
   if (r.rank) for (const o of allRecipes()) if (o.id !== r.id && o.rank === r.rank) { const c = clone(o); delete c.rank; saveR(c, true); }
   if (!r.id) { r.id = slug(r.name); while (getR(r.id) || SEEDMAP[r.id]) r.id += '-' + Math.floor(Math.random() * 90 + 10); r.createdAt = Date.now(); }
   const before = id ? clone(getR(id)) : null;
