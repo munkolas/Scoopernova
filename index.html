@@ -455,6 +455,101 @@ button,a,input,select,textarea,label,[data-act],[data-ask]{touch-action:manipula
 @keyframes bfzOut{to{opacity:0}}
 @keyframes bfzShake{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px) rotate(-1deg)}40%{transform:translateX(6px) rotate(1deg)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
 @media (prefers-reduced-motion: reduce){.bfz,.bfz-txt{animation:none}}
+/* v1.9 – Tastatur: Menüleiste weg, Eingabe klebt über der Tastatur */
+body.kb .tabs{display:none}
+body.kb .app{padding-bottom:8px}
+body.kb .composer{bottom:calc(var(--kb,0px) + 4px)}
+body.kb .toast{bottom:calc(var(--kb,0px) + 90px)}
+/* Scoopy-Status & Modell */
+.livestat{display:flex;align-items:center;gap:8px;margin:-2px 0 4px 44px;font-size:13px;color:var(--mute);font-weight:600;flex-wrap:wrap}
+.livestat .typing{padding:0}.livestat .typing i{width:6px;height:6px}
+.livestat .st-t{transition:opacity .25s}
+.mdl{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;letter-spacing:.02em;color:var(--mute);background:var(--fill);border-radius:8px;padding:2px 7px}
+.mdl i{width:6px;height:6px;border-radius:50%;background:#4F8BFF;display:inline-block}
+.mdlrow{margin:-4px 0 6px 44px}
+.prop.old{width:min(92%,420px);padding:10px 14px;font-size:14px;color:var(--mute);display:flex;gap:10px;align-items:center;justify-content:space-between}
+.prop .kno{font:800 11px var(--title);color:var(--mute);letter-spacing:.04em}
+.warnmsg{align-self:flex-start;margin-left:44px;font-size:13px;font-weight:700;color:light-dark(#9A3412,#FDBA74);background:light-dark(#FFEDD5,#3A2112);padding:6px 10px;border-radius:12px}
+/* Merkzettel */
+.lessons{display:grid;gap:6px;margin-top:8px}
+.lessons div{display:flex;gap:8px;align-items:flex-start;background:var(--fill);border-radius:12px;padding:8px 10px;font-size:14px;line-height:1.4}
+.lessons div span{flex:1}
+.lessons button{color:var(--mute);font-size:16px;line-height:1;padding:2px 4px}
+/* Batch-Einstieg in der Truhe */
+.btgo{display:flex;align-items:center;gap:12px;width:100%;padding:10px 12px;border-radius:16px;background:var(--berrybg);color:var(--berryd);text-align:left}
+.btgo:active{transform:scale(.98)}
+.btgo .bi{width:40px;height:40px;border-radius:12px;background:var(--berry);color:#fff;display:grid;place-items:center;flex:none}
+.btgo b{display:block;font:800 16px/1.2 var(--title)}
+.btgo small{font-size:13px;font-weight:600;opacity:.85}
+.btgo .chev{margin-left:auto;font-size:22px;font-weight:700}
+/* Batch-Produktion (Vollbild, quer) */
+.bt{position:fixed;inset:0;z-index:95;background:var(--bg);display:flex;flex-direction:column;gap:10px;padding:calc(env(safe-area-inset-top) + 8px) max(env(safe-area-inset-right),14px) calc(env(safe-area-inset-bottom) + 8px) max(env(safe-area-inset-left),14px);overflow:hidden;overscroll-behavior:contain;animation:btIn .25s ease-out}
+@keyframes btIn{from{opacity:0;transform:scale(.98)}}
+.bt-top{display:flex;align-items:center;gap:10px;min-height:40px;flex:none}
+.bt-top h2{font:800 19px/1.2 var(--title);margin:0;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bt-top .muted{font-size:13px;font-weight:700;white-space:nowrap}
+.bt-prog{height:5px;border-radius:3px;background:var(--fill);overflow:hidden;flex:none}
+.bt-prog i{display:block;height:100%;background:var(--berry);border-radius:3px;transition:width .3s}
+.bt-body{flex:1;min-height:0;display:flex;flex-direction:column;gap:10px;overflow:auto;-webkit-overflow-scrolling:touch}
+.bt-cups{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,104px),1fr));gap:8px;flex:1;min-height:0}
+.bt-cups.compact,.bt-cups.grow{flex:none}
+.bt-cups.compact{grid-template-columns:repeat(auto-fit,minmax(min(100%,120px),1fr))}
+.bt-cups.compact .cup{flex-direction:row;padding:8px 10px;gap:8px;min-height:54px;justify-content:flex-start;text-align:left}
+.bt-cups.compact .cup .pi{max-width:22px}.bt-cups.compact .cup .ck{display:none}
+.bt-cups.compact .cup .no{position:static;font-size:14px}
+.bt-cups.compact .cup .nm{min-height:0;font-size:13px}
+.bt-cups.grow .cup ul{overflow:visible}
+.bt-cups.grow .cup .pi{max-width:30px}
+.cup{background:var(--card);border-radius:18px;box-shadow:var(--sh);display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:8px 6px 10px;text-align:center;gap:4px;position:relative;color:var(--ink);transition:opacity .2s,transform .15s;min-height:0}
+.cup .no{position:absolute;top:6px;left:9px;font:800 12px var(--title);color:var(--mute)}
+.cup .ck{position:absolute;top:6px;right:8px;width:20px;height:20px;border-radius:50%;border:2px solid var(--fill2);display:grid;place-items:center;font-size:12px;color:transparent}
+.cup.done .ck{background:#22C55E;border-color:#22C55E;color:#fff}
+.cup .pi{width:100%;max-width:48px;flex:none}.cup .pi svg{width:100%;height:auto;display:block}
+.cup .nm{font-size:12px;font-weight:700;line-height:1.2;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:2.4em}
+.cup .amt{font:800 clamp(22px,6.5vh,38px)/1.05 var(--title);margin-top:auto;font-variant-numeric:tabular-nums}
+.cup .amt small{font-size:.55em;font-weight:800;margin-left:2px}
+.cup .nt{font-size:11px;color:var(--mute);line-height:1.25}
+.cup.off{opacity:.32;box-shadow:none;background:var(--fill)}
+.cup.off .amt{font-size:22px}
+.cup.cur{outline:3px solid var(--berry);outline-offset:-1px}
+.cup.empty .nm{color:var(--mute)}
+.cup ul{list-style:none;margin:4px 0 0;padding:0;display:grid;gap:4px;width:100%;text-align:left;overflow:auto}
+.cup li{font-size:13px;line-height:1.3;background:var(--fill);border-radius:10px;padding:6px 8px;display:flex;gap:6px;align-items:baseline;cursor:pointer}
+.cup li b{white-space:nowrap;font-variant-numeric:tabular-nums;flex:none}
+.cup li.done{opacity:.4;text-decoration:line-through}
+.cup p{font-size:12.5px;line-height:1.35;margin:4px 0 0;text-align:left}
+.bt-bar{display:flex;align-items:center;gap:10px;flex:none}
+.bt-ing{flex:1;min-width:0}
+.bt-ing small{display:block;color:var(--mute);font-weight:800;font-size:12px;text-transform:uppercase;letter-spacing:.05em}
+.bt-ing b{display:block;font:800 clamp(22px,6vh,34px)/1.1 var(--title);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bt-ing span{font-size:13px;color:var(--mute);font-weight:600}
+.bt-nav{display:flex;gap:8px;flex:none}
+.bt-nav .btn{min-height:52px;padding:0 20px;font-size:17px}
+.bt-nav .btn[disabled]{opacity:.4;pointer-events:none}
+.bt-center{flex:1;display:grid;place-items:center;text-align:center;gap:12px;padding:10px}
+.bt-center h3{font:800 clamp(22px,5vh,30px)/1.15 var(--title);margin:0}
+.bt-center p{margin:0;color:var(--mute);max-width:460px}
+.bt-nums{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.bt-nums button{width:64px;height:64px;border-radius:20px;background:var(--card);box-shadow:var(--sh);font:800 28px var(--title)}
+.bt-nums button.sug{background:var(--berry);color:#fff}
+.bt-nums button[disabled]{opacity:.3;box-shadow:none}
+.bt-pick{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,190px),1fr));gap:6px}
+.bt-pick button{display:flex;gap:10px;align-items:center;padding:6px;border-radius:14px;background:var(--fill);text-align:left;min-height:52px}
+.bt-pick .mini{width:48px;height:38px;border-radius:9px;overflow:hidden;flex:none}
+.bt-pick .mini svg,.bt-pick .mini img{width:100%;height:100%;object-fit:cover;display:block}
+.bt-pick b{font-size:14px;line-height:1.2;display:block}
+.bt-pick small{font-size:12px;color:var(--mute)}
+.bt-pick .again{background:var(--berrybg);color:var(--berryd)}
+.bt-sub{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.bt-sub h3{font:800 18px var(--title);margin:0;flex:1}
+.bt-sub .field{max-width:240px;min-height:40px}
+.bt-rot{position:fixed;inset:0;z-index:96;background:var(--bg);display:grid;place-items:center;text-align:center;padding:30px;gap:0}
+.bt-rot .ph{width:84px;height:84px;margin:0 auto 14px;animation:btRot 2.4s ease-in-out infinite;color:var(--berry)}
+@keyframes btRot{0%,20%{transform:rotate(0)}50%,80%{transform:rotate(-90deg)}100%{transform:rotate(0)}}
+.bt-rot h3{font:800 26px var(--title);margin:0 0 6px}
+.bt-rot p{color:var(--mute);margin:0 0 18px;max-width:320px}
+@media(orientation:portrait){.bt-cups{grid-template-columns:repeat(auto-fit,minmax(min(100%,100px),1fr))}.bt-nav .btn{padding:0 14px}}
+@media(prefers-reduced-motion:reduce){.bt,.bt-rot .ph{animation:none}}
 </style>
 </head>
 <body>
@@ -1428,7 +1523,7 @@ async function initCaps() {
 
 
 /* ================= PWA-MODUS: SUPABASE (Konto wie FPV Cockpit) ================= */
-const VERSION = '1.8.6';
+const VERSION = '1.9.0';
 const PWA = !!window.SN_PWA;
 const AI = true; /* Scoopy läuft jetzt überall: in Claude über Claude, in der iPhone-App kostenlos über Gemini (Supabase-Funktion scoopy) */
 const CLAUDE_URL = 'https://claude.ai/artifact/8mz7qbXNxS4notwaJyptjo';
@@ -1464,23 +1559,37 @@ const SYNC = {
     } catch (e) { this.state = 'err'; this.busy = false; render(); }
   },
 };
-/* Scoopy im PWA-Modus: Supabase Edge Function „scoopy“ → Claude API, Tool-Loop hier im Browser */
-async function remoteChat(sys, hist, tl, image, onText, signal) {
+/* Scoopy im PWA-Modus: Supabase Edge Function „scoopy“ → Gemini, Tool-Loop hier im Browser */
+async function remoteChat(sys, hist, tl, image, onText, signal, hooks) {
+  hooks = hooks || {};
   const t = await AU.token(); if (!t) throw {code:'login'};
   const msgs = hist.map(m => ({role:m.role, content:m.content}));
   if (image) { const b64 = await new Promise(res => { const fr = new FileReader(); fr.onload = () => res(String(fr.result).split(',')[1]); fr.readAsDataURL(image); }); const last = msgs[msgs.length - 1]; last.content = [{type:'image', source:{type:'base64', media_type:'image/jpeg', data:b64}}, {type:'text', text:last.content}]; }
-  let text = '';
-  for (let i = 0; i < 8; i++) {
+  let text = '', model = '', nudged = false; const used = [];
+  for (let i = 0; i < 10; i++) {
+    hooks.onThink && hooks.onThink();
     const r = await fetch(SB.url + '/functions/v1/scoopy', {method:'POST', signal, headers:{apikey:SB.key, Authorization:'Bearer ' + (await AU.token()), 'Content-Type':'application/json'},
       body:JSON.stringify({system:sys, messages:msgs, tools:tl.map(x => ({name:x.name, description:x.description, input_schema:x.inputSchema}))})});
     const j = await r.json().catch(() => ({}));
-    if (!r.ok) throw {message:(j.error && (j.error.message || j.error)) || ('Scoopy-Server ' + r.status), code:r.status === 404 ? 'nofn' : r.status === 403 ? 'forbidden' : ''};
+    if (j.model) { model = j.model; hooks.onModel && hooks.onModel(model); }
+    if (!r.ok) throw {message:(j.error && (j.error.message || j.error)) || ('Scoopy-Server ' + r.status), code:r.status === 404 ? 'nofn' : r.status === 403 ? 'forbidden' : r.status === 429 ? 'rate_limited' : ''};
     const content = j.content || []; msgs.push({role:'assistant', content});
-    const tx = content.filter(c => c.type === 'text').map(c => c.text).join(''); if (tx) { text += (text ? '\n\n' : '') + tx; onText({text}); }
-    const uses = content.filter(c => c.type === 'tool_use'); if (!uses.length || j.stop_reason !== 'tool_use') break;
-    msgs.push({role:'user', content:uses.map(u => { const tool = tl.find(x => x.name === u.name); try { return {type:'tool_result', tool_use_id:u.id, content:JSON.stringify(tool ? tool.execute(u.input || {}) : {error:'unbekanntes Tool'})}; } catch (e) { return {type:'tool_result', tool_use_id:u.id, is_error:true, content:String(e.message || e)}; } })});
+    const tx = content.filter(c => c.type === 'text').map(c => c.text).join('').trim();
+    const uses = content.filter(c => c.type === 'tool_use');
+    if (tx && !(nudged && !uses.length && /^(ok|okay|passt)\.?$/i.test(tx))) { text += (text ? '\n\n' : '') + tx; onText({text}); }
+    if (!uses.length || j.stop_reason !== 'tool_use') {
+      /* Speicher-Check: behauptet Scoopy eine Änderung, ohne ein Werkzeug benutzt zu haben, wird einmal nachgehakt */
+      const wrote = used.some(n => WRITE_TOOLS.includes(n));
+      if (!nudged && !wrote && CLAIM_RX.test(tx) && !/\?\s*$/.test(tx)) {
+        nudged = true; hooks.onThink && hooks.onThink();
+        msgs.push({role:'user', content:'[Automatischer Check der App, nicht von Nico: Du hast gerade geschrieben, dass du etwas geändert, gespeichert oder angelegt hast – in dieser Antwort wurde aber KEIN Werkzeug aufgerufen, es ist also NICHTS passiert. Ruf jetzt das passende Werkzeug auf (update_recipe für gespeicherte Rezepte, update_card für Karten aus dem Chat, propose_recipe für neue Sorten, remember für den Merkzettel) und bestätige danach in einem Satz. Wenn du gar nichts ändern wolltest, antworte nur mit „OK“.]'});
+        continue;
+      }
+      break;
+    }
+    msgs.push({role:'user', content:uses.map(u => { used.push(u.name); const tool = tl.find(x => x.name === u.name); try { return {type:'tool_result', tool_use_id:u.id, content:JSON.stringify(tool ? tool.execute(u.input || {}) : {error:'unbekanntes Tool'})}; } catch (e) { return {type:'tool_result', tool_use_id:u.id, is_error:true, content:String(e.message || e)}; } })});
   }
-  return {text};
+  return {text, model};
 }
 function syncCard() {
   if (PWA) return '';
@@ -1490,12 +1599,18 @@ function syncCard() {
   return `<div class="card" style="padding:14px;margin-top:12px"><b>Sync mit der iPhone-App</b><p class="muted" style="margin:4px 0 10px;font-size:15px">${esc(txt)}</p>
    ${!BRIDGE.mcp ? `<ol class="muted" style="margin:0 0 10px;padding-left:20px;font-size:14px;line-height:1.5"><li>claude.ai → Einstellungen → Konnektoren → „Benutzerdefinierten Connector hinzufügen“</li><li>Name: <b>Supabase</b> · URL: <code style="user-select:all">${URL}</code></li><li>Verbinden, bei Supabase anmelden, diese Seite neu laden und „Supabase“ erlauben</li></ol><button class="btn sm" data-act="copyurl" data-u="${URL}">URL kopieren</button>` : `<button class="btn" data-act="bridgenow">↻ Jetzt synchronisieren</button>`}</div>`;
 }
+function lessonsCard() {
+  const L = Array.isArray(S.lessons) ? S.lessons : [];
+  return `<div class="card" style="padding:14px;margin-top:12px" id="lessbox"><b>Scoopys Merkzettel</b><p class="muted" style="margin:4px 0 0;font-size:14px">Was Scoopy sich dauerhaft merken soll – sag im Chat z. B. „Merk dir: …“. Gilt in jedem neuen Chat.</p>
+   ${L.length ? `<div class="lessons">${L.map((l, i) => `<div><span>${esc(l.t)}</span><button data-act="lessdel" data-i="${i}" aria-label="Löschen">✕</button></div>`).join('')}</div>` : '<p class="muted" style="margin:8px 0 0;font-size:14px"><i>Noch leer.</i></p>'}</div>`;
+}
 function openSettings() {
   openSheet(`<div style="text-align:center;padding:6px 0 4px"><div style="width:72px;height:72px;margin:0 auto">${SN.logo()}</div><h2 class="d-title" style="margin:8px 0 0">Scoopernova</h2><p class="muted" style="margin:2px 0 0">created by munkolas · Version ${VERSION}</p></div><h3 style="font:800 20px var(--title);margin:18px 0 0">Einstellungen</h3>
    <div class="card" style="padding:14px;margin-top:16px"><b>${PWA ? 'Konto' : 'Speicher'}</b><p class="muted" style="margin:4px 0 10px;font-size:15px">${esc(SYNC.label())}</p>
    ${PWA ? (AU.s ? `<div class="row"><button class="btn" data-act="syncnow" style="flex:1">↻ Jetzt synchronisieren</button><button class="btn danger" data-act="logout" style="flex:1">Abmelden</button></div>`
      : `<form class="ed" id="lgf"><p class="muted" style="margin:0;font-size:14px">Anmelden – oder mit „Neu“ ein eigenes Konto anlegen.</p><input class="field" name="n" type="text" autocomplete="given-name" placeholder="Vorname (nur bei neuem Konto)"><input class="field" name="e" type="email" autocomplete="email" placeholder="E-Mail" required><input class="field" name="p" type="password" autocomplete="current-password" placeholder="Passwort (mind. 6 Zeichen)" required minlength="6"><div class="row"><button class="btn pri" style="flex:2">Anmelden</button><button type="button" class="btn" data-act="signup" style="flex:1">Neu</button></div><p class="muted" id="lgerr" style="margin:0;font-size:14px"></p></form>`) : ''}</div>
    ${syncCard()}
+   ${lessonsCard()}
    <div class="card" style="padding:14px;margin-top:12px"><b>Daten von Hand übertragen</b><p class="muted" style="margin:4px 0 10px;font-size:14px">Notlösung ohne Sync: Code kopieren, auf dem anderen Gerät einfügen. Es wird zusammengeführt – nichts wird überschrieben.</p>
     <div class="row"><button class="btn" data-act="exportcode" style="flex:1">Code kopieren</button><button class="btn" data-act="importshow" style="flex:1">Code einfügen</button></div>
     <div id="impbox" class="hide" style="margin-top:10px"><textarea class="field" id="impcode" rows="4" placeholder="Code hier einfügen"></textarea><button class="btn pri full" data-act="importdo" style="margin-top:8px">Zusammenführen</button></div></div>
@@ -1574,10 +1689,14 @@ function mergeStates(A, B) {
   for (const e of live) { const k = tkey(e); let i = newer.truhe.findIndex(x => x && tkey(x) === k); if (i < 0) i = older.truhe.findIndex(x => x && tkey(x) === k); if (i >= 0 && !slots[i]) slots[i] = e; else rest.push(e); }
   for (const e of rest) slots[slots.indexOf(null)] = e;
   o.truhe = slots;
+  // Scoopys Merkzettel: Vereinigung, Gestrichenes bleibt weg
+  o.lessGone = Object.assign({}, a.lessGone || {}); for (const [k, t] of Object.entries(b.lessGone || {})) o.lessGone[k] = Math.max(o.lessGone[k] || 0, t);
+  const LM = new Map(); for (const l of [...(a.lessons || []), ...(b.lessons || [])]) { const k = String(l.t || '').toLowerCase(); if (k && !(o.lessGone[k] >= (l.at || 0)) && (!LM.has(k) || (l.at || 0) > (LM.get(k).at || 0))) LM.set(k, l); }
+  o.lessons = [...LM.values()].sort((x, y) => (x.at || 0) - (y.at || 0)).slice(-40);
   o.updatedAt = Math.max(a.updatedAt || 0, b.updatedAt || 0);
   return o;
 }
-function sameState(a, b) { const f = x => JSON.stringify({r:x.recipes, d:x.deleted, p:x.pantry, m:x.made, t:x.truhe, g:x.gone}); return f(a) === f(b); }
+function sameState(a, b) { const f = x => JSON.stringify({r:x.recipes, d:x.deleted, p:x.pantry, m:x.made, t:x.truhe, g:x.gone, l:x.lessons || [], lg:x.lessGone || {}}); return f(a) === f(b); }
 function adopt(merged) { S = Object.assign(S, merged); try { localStorage.setItem(LS, JSON.stringify(S)); } catch (e) {} }
 
 /* Claude-Version ↔ Supabase über den Supabase-Connector (execute_sql) */
@@ -1820,7 +1939,8 @@ function vTruhe() {
   return `<section class="sec card truhe"><div class="truhe-top"><div><b>Gefriertruhe</b> <span class="muted" style="font-size:14px;font-weight:600">${used}/6</span></div>${AI && used < 6 && used > 0 ? `<button class="btn sm" data-ask="In meiner Truhe sind: ${S.truhe.filter(Boolean).map(t => (getR(t.rid) || {}).name).filter(Boolean).join(', ')}. Was mache ich als nächste Sorte? Gib mir 3 Vorschläge, die sich davon abheben. Bestehende Sorten aus meiner Sammlung nenn exakt mit ihrem Namen, neue Ideen leg bitte direkt mit propose_recipe als Rezeptkarte an.">Was als Nächstes? ✨</button>` : ''}</div>
   <div class="slots">${S.truhe.map((t, i) => { const r = t && getR(t.rid); if (!r) return `<button class="slot empty" data-slot="${i}" aria-label="Becher ${i + 1} leer"><span class="plus">＋</span><small>frei</small></button>`;
     const left = slotReady(t), ready = left <= 0; const h = Math.ceil(left / 36e5); const f = t.fill || 1;
-    return `<button class="slot ${ready ? 'ready' : ''}" data-slot="${i}" aria-label="${esc(r.name)}">${ready ? '' : '<span class="frost"></span>'}<span class="em">${esc((r.emoji || '').split(/(?=[\uD800-\uDBFF])/)[0] || '🍨')}</span>${SN.pintIcon((r.a.c || [])[0], .82 * f, ready)}<small>${f < 1 ? FILLTXT[f] + ' · ' : ''}${ready ? 'bereit' : h + ' h'}</small></button>`; }).join('')}</div></section>`;
+    return `<button class="slot ${ready ? 'ready' : ''}" data-slot="${i}" aria-label="${esc(r.name)}">${ready ? '' : '<span class="frost"></span>'}<span class="em">${esc((r.emoji || '').split(/(?=[\uD800-\uDBFF])/)[0] || '🍨')}</span>${SN.pintIcon((r.a.c || [])[0], .82 * f, ready)}<small>${f < 1 ? FILLTXT[f] + ' · ' : ''}${ready ? 'bereit' : h + ' h'}</small></button>`; }).join('')}</div>
+  ${(() => { const fr = S.truhe.filter(t => !t || !getR(t.rid)).length, res = btStored(); return fr || res ? `<button class="btgo" data-act="batch"><span class="bi"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 8h5l-.6 11H3.1zM9.5 8h5l-.6 11h-3.8zM16.5 8h5l-.6 11h-3.8z"/><path d="M2 5.5h6M9 5.5h6M16 5.5h6"/></svg></span><span><b>${res ? 'Batch fortsetzen' : 'Batch-Produktion'}</b><small>${res ? res.cups.length + ' Becher in Arbeit' : 'Mehrere Becher auf einmal · ' + fr + ' frei'}</small></span><span class="chev">›</span></button>` : ''; })()}</section>`;
 }
 
 /* ---------- DETAIL ---------- */
@@ -2103,86 +2223,191 @@ const IC = {
 const avatar = () => `<span class="ava" aria-hidden="true">${SN.scoopy()}</span>`;
 const noEmoji = t => String(t || '').replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}]\uFE0F?/gu, '').replace(/[ \t]{2,}/g, ' ');
 let PENDING_IMG = null, BUSY = false, ABORT = null, UNDO = {};
+/* Rezeptkarten im Chat bekommen feste Nummern (K1, K2 …), damit Scoopy eine noch nicht gespeicherte Karte gezielt ändern kann */
+function chatCards() {
+  const out = []; let max = 0;
+  CHAT.forEach(m => (m.cards || []).forEach(c => { if (c.type === 'proposal' && c.k) max = Math.max(max, +String(c.k).slice(1) || 0); }));
+  CHAT.forEach((m, i) => (m.cards || []).forEach((c, j) => { if (c.type !== 'proposal') return; if (!c.k) c.k = 'K' + (++max); out.push({c, i, j}); }));
+  return out;
+}
+function nextCardKey() { let max = 0; CHAT.forEach(m => (m.cards || []).forEach(c => { if (c.type === 'proposal' && c.k) max = Math.max(max, +String(c.k).slice(1) || 0); })); return 'K' + (max + 1); }
+function findCard(k) { k = String(k || '').trim().toUpperCase(); let hit = null; for (const x of chatCards()) if (x.c.k === k && !x.c.old) hit = x; if (!hit) for (const x of chatCards()) if (x.c.k === k) hit = x; return hit; }
+function lessons() { return Array.isArray(S.lessons) ? S.lessons : []; }
 function sysPrompt() {
   const P = Object.values(pantry());
-  return `Du bist „Scoopy“, der Ninja-Creami-Coach in der App „Scoopernova“ (gebaut von Nico). Du sprichst gerade mit ${userName()}. Antworte auf Deutsch, locker. Benutze KEINE Emojis (die App zeigt eigene Grafiken). Rezepte & Antworten kurz und knackig, kein Gelaber.
+  const cards = chatCards().filter(x => !x.c.old);
+  const L = lessons();
+  return `Du bist „Scoopy“, der Ninja-Creami-Coach in der App „Scoopernova“ (gebaut von Nico). Du sprichst gerade mit ${userName()}. Antworte auf Deutsch, locker, kurz und knackig. Benutze KEINE Emojis (die App zeigt eigene Grafiken).
 
-GERÄT: Ninja Creami Basismodell (Modi: ICE CREAM, LITE ICE CREAM, SORBET, GELATO, MILKSHAKE, SMOOTHIE BOWL, MIX-IN, RE-SPIN; KEIN Frozen-Yogurt-Knopf → LITE ICE CREAM). 6 Becher. Max-Linie ≈ 460 ml – Rezepte immer nach Volumen prüfen.
+=== 1. EHRLICHKEIT & WERKZEUGE (wichtigste Regel) ===
+- Rezepte ändern, anlegen oder speichern geht NUR über Werkzeuge. Schreib NIE „geändert“, „aktualisiert“, „angepasst“, „gespeichert“, „angelegt“ oder „ist da“, wenn du in DIESER Antwort nicht das passende Werkzeug aufgerufen hast. Erst Werkzeug aufrufen, danach in 1–3 Sätzen sagen, was sich geändert hat.
+- Welches Werkzeug wofür:
+  • Gespeichertes Rezept aus der Sammlung ändern → update_recipe (id aus der Rezeptliste).
+  • Rezeptkarte aus DIESEM Chat, die noch NICHT gespeichert ist, ändern → update_card mit ihrer Karten-Nr. (K1, K2 …). Dafür NIE eine zweite Karte mit propose_recipe anlegen.
+  • Komplett neue Sorte → propose_recipe (genau eine Karte pro Sorte).
+  • Feedback/Learning zu einem bestimmten Rezept → log_feedback.
+  • Allgemeiner Fehler oder Wunsch, den du dir für ALLE künftigen Chats merken sollst → remember (landet auf deinem Merkzettel). Du hast kein anderes Gedächtnis – behaupte nichts anderes.
+- Bei update_recipe/update_card mit „ings“ immer die KOMPLETTE neue Zutatenliste schicken (unveränderte Zutaten mit übernehmen). Ändern sich Zutaten, müssen steps, mix und flow dazu passen – sonst mitschicken.
+- Namen nie eigenmächtig ändern. Nur Felder schicken, die sich wirklich ändern.
+- Zahlen (kcal, Protein, KH, Fett) NUR aus Werkzeug-Ergebnissen („macros“) übernehmen. Nie schätzen, nie im Kopf rechnen. Für Nährwerte einzelner Zutaten die Vorrats-Werte unten nehmen.
+- Erfinde keine Vergangenheit („du hast mal …“). Wenn du nicht weißt, warum etwas in einem Rezept steht, sag es ehrlich.
+- Hast du dich vertan: kurz zugeben, sofort per Werkzeug korrigieren, nicht rumeiern.
+- Schreib das Rezept nach einem Werkzeug-Aufruf NICHT als Text-Liste in den Chat – die Karte zeigt alles. Keine Platzhalter wie [Rezept: …].
+- Nennst du Sorten aus der Sammlung, schreib den Namen exakt wie in der Rezeptliste (die App verlinkt sie dann).
 
-ANTWORT-REGEL: Schreib NIE Platzhalter wie [Vorschlag: …] oder [Rezept: …] in den Text – ein neues Rezept erscheint nur, wenn du wirklich das Werkzeug propose_recipe aufrufst. Nennst du Sorten aus der Sammlung, schreib ihren Namen exakt so wie in der Rezeptliste (die App verlinkt sie dann). Schlägst du eine NEUE Sorte konkret vor, leg sie mit propose_recipe an, damit sie als Karte zum Speichern erscheint.
+=== 2. KÜCHENLOGIK – vor JEDEM Rezept und jeder Antwort im Kopf durchspielen ===
+- Nicos Werkzeug: Messbecher + Milchaufschäumer oder Stabmixer, Ninja Creami. Standard ist KALT: alles in den Messbecher, mind. 30 Sek mixen. Erythrit, Kakao, Whey, Puddingpulver und Johannisbrotkernmehl lösen sich kalt – dafür NIE erwärmen.
+- Topf/Herd nur, wenn es physikalisch nötig ist: Custard mit Eigelb (unter Rühren auf ca. 80 °C, abkühlen), Bonbons/Karamell oder Schokolade schmelzen, Gewürze/Tee in Milch ziehen lassen. Dann immer: abkühlen lassen, bevor es in die Basis kommt.
+- Harte Sachen (Bonbons wie Werther’s, Krokant, Karamellstücke, ganze Nüsse, Eiswürfel, gefrorene Fruchtstücke) kommen NIE ganz in den Becher, NIE in den Stabmixer/Milchaufschäumer und NIE ganz als Mix-In. Entweder im Gefrierbeutel mit Nudelholz/Mörser fein zerstoßen (dann nur als Mix-In) ODER mit etwas Sahne/Milch im Topf zu Sauce schmelzen, abkühlen und in die Basis rühren oder als Swirl nutzen.
+- Mix-Ins (Schoko, Kekse, Nüsse, Zerstoßenes): max. ca. 40 g, klein gehackt, erst NACH dem ersten Lauf in eine Mulde, dann MIX-IN. Nie vor dem Einfrieren in die Basis.
+- Max-Linie ≈ 460 ml: Summe aus Flüssigkeit + Feststoffen prüfen.
+- Freies Wasser (Tee, Saft, Espresso) → Kristalle. Aromen lieber in Milch, Frucht pürieren, JBKM dahin, wo freies Wasser ist. Alkohol max. ca. 60 ml, sonst friert es nicht.
+- Süße Zutaten (Nutella, Schokolade, Bonbons, Honig, Sirup, Kekse, Saft) bringen Süße mit → Süßungsmittel entsprechend senken und das auch in der Zutatenliste tun.
+- Jeder Schritt muss zu den Zutaten passen: keine Zutat in den Schritten, die nicht in der Liste steht – und umgekehrt.
 
-NICOS FESTE REGELN (immer einhalten & im Rezept erwähnen):
+=== 3. NICOS FESTE REGELN ===
 - Ohne Deckel einfrieren (sonst Hügel). 24 h frieren.
-- Vor jedem Re-Spin/Mix-In: Ränder abkratzen („scrape the edges“).
-- Es gibt nur Re-Spin oder Mix-In (Mix-In ≈ halber Re-Spin). Nie „½ Re-Spin“ sagen.
-- Johannisbrotkernmehl immer, in TL angeben (Standard ¼ TL). Gut lösen (≥30 Sek mixen).
-- Prise Salz überall – AUSSER wenn körniger Frischkäse drin ist (der ist schon salzig).
-- Abschmecken: leicht übersüß.
-- Protein-Pulver: NUR noch Better Protein Whey neutral (kein Süßstoff, kein Aroma). Gegenüber Vanille-Whey +10–15 g Erythrit; Vanilleextrakt nur wo es passt (nicht bei Himbeere, Pistazie, Jasmin).
-- Standard-Milch: 200 ml Mandelmilch + 50 ml Barista-Hafermilch (Rest mit Mandel auffüllen).
-- Makros EXAKT berechnen (Tool calc_macros), nicht schätzen. Ganze Zahlen reichen.
+- Vor jedem Re-Spin/Mix-In: Ränder abkratzen. Es gibt nur RE-SPIN oder MIX-IN (MIX-IN ≈ halber Re-Spin). Nie „½ Re-Spin“ sagen.
+- Johannisbrotkernmehl (JBKM) immer, in TL (Standard ¼ TL), ≥30 Sek mixen.
+- Prise Salz überall – AUSSER mit körnigem Frischkäse (schon salzig).
+- Abschmecken: leicht übersüß (Kälte schluckt Süße).
+- Protein-Pulver NUR Better Protein Whey neutral (kein Süßstoff, kein Aroma) → gegenüber Vanille-Whey +10–15 g Erythrit; Vanilleextrakt nur wo es passt (nicht bei Himbeere, Pistazie, Jasmin).
 - Gestrichen: Bulk Cinnamon Cereal Protein, Ironmaxx Cooking Protein. Amaretto nur Cassella (Rialto bitter).
 - Dosierungen: Tonka ⅛ TL (Protein) / ¼ TL (Custard), Pistazien-FlavDrops 6, Nuss-Nougat-Drops 6–8, Butteraroma ¼–½ Fläschchen, Zitronia Sun max ¼ TL, Orangenblütenwasser ¼–1 TL, Jasmintee max 4 Min ziehen.
-- Freies Wasser (Tee, Saft) → Kristalle. Aromen lieber in Milch extrahieren, Frucht pürieren, JBKM dahin wo freies Wasser ist.
-- Erythrit statt Zucker (gut verträglich). Lebensmittelfarbe gerne für schöne Farbe.
-- Kiba heißt bei uns „Baki“.
+- Lebensmittelfarbe gerne für schöne Farbe. Kiba heißt bei uns „Baki“.
 
-KATEGORIEN: protein = High Protein Low Cal (Nicos Alltag, Standard), natur = Frucht/Sorbet/Nicecream ohne Protein, deluxe = Gönnung ohne Limit (Vollmilch, Sahne, Zucker, Eigelb/Custard erlaubt; keine Hafermilch bei feinen Aromen).
+=== 4. KATEGORIEN – Basis & Süße hängen an der Kategorie ===
+- protein = High Protein Low Cal (Nicos Alltag, Standard). Milch: 200 ml Mandelmilch + 50 ml Barista-Hafermilch (Rest mit Mandel). Protein aus Whey, Skyr, Magerquark oder körnigem Frischkäse – Skyr nicht automatisch überall, passend zur Sorte wählen. Süße: Erythrit (nie Zucker). Programm meist LITE ICE CREAM.
+- natur = Frucht/Sorbet/Nicecream ohne Protein. Süße: Erythrit. Programm SORBET (Banane/Nicecream: ICE CREAM).
+- deluxe = Gönnung ohne Limit: Vollmilch + Sahne (keine Mandel-/Hafermilch, außer Nico will das), Zucker erlaubt (Erythrit nur wenn Nico es will), Eigelb/Custard erlaubt. Programm ICE CREAM oder GELATO.
+- Entscheide dich pro Rezept für EIN Süßungsmittel und bleib in Text und Karte konsistent.
 FAVORITEN: 1 Schoko-Nutella, 2 Tiramisu, 3 Lemon Cheesecake, 4 Banane pur, 5 Coco Vanille. Bestes Eis ever: Pistazie Gelato Deluxe. Eigenkreation: Marrakech Blossom Cream.
+GERÄT: Ninja Creami Basismodell (ICE CREAM, LITE ICE CREAM, SORBET, GELATO, MILKSHAKE, SMOOTHIE BOWL, MIX-IN, RE-SPIN; kein Frozen-Yogurt-Knopf → LITE ICE CREAM). 6 Becher.
 
-VORRAT (id | Name | Einheit | kcal/P pro 100 | da?):
+=== 5. REZEPT-FORMAT – immer gleich, damit die App alles sauber anzeigt ===
+- ings: JEDE Zutat als eigene Zeile mit Vorrats-id (ing), Menge (amount) und Einheit (unit). Mix-In-Zutaten ebenfalls hier, mit mixin: true (zählen für die Makros). Fehlt eine Zutat im Vorrat: erst add_ingredient (Nährwerte pro 100), dann deren id.
+- steps: 3–7 konkrete Schritte NUR für DIESES Rezept, je ein klarer Satz, ohne Nummerierung, in der richtigen Reihenfolge: (Vorbereitung falls nötig) → Basis mixen → abschmecken → ohne Deckel 24 h einfrieren → Creami-Programm → ggf. Ränder abkratzen + Mix-In. Bei Protein-Sorten kurz Nicos Standard: alles kalt in den Messbecher, ≥30 Sek mixen.
+- flow: nur Creami-Knöpfe & Handgriffe, z. B. ["LITE ICE CREAM","Ränder abkratzen","RE-SPIN"].
+- mix: Mix-Ins & Finish als kurze Zeilen mit Menge (z. B. „Zartbitter-Raspel 15 g“).
+- notes: NUR Learnings & Hinweise, je 1 Satz. NIE Zutatenlisten, Schritte oder das Rezept in notes.
+- sub: kurzer Untertitel. emoji: max. 3. Farben (colors/bg) passend zur Sorte.
+
+${L.length ? `=== 6. SCOOPYS MERKZETTEL (von Nico bestätigt – IMMER beachten) ===
+${L.map(l => '- ' + l.t).join('\n')}
+
+` : ''}VORRAT (id | Name | Einheit | kcal/P pro 100 | da?):
 ${P.map(p => `${p.id} | ${p.n} | ${p.u} | ${p.k}/${p.p} | ${p.have === false ? 'fehlt' : 'da'}`).join('\n')}
 
-REZEPTE in der App (id | Name | Kategorie | Status):
+REZEPTE in der Sammlung (id | Name | Kategorie | Status):
 ${allRecipes().map(r => `${r.id} | ${r.name} | ${r.cat} | ${r.status}`).join('\n')}
 
-TOOLS:
-- get_recipe für Details eines bestehenden Rezepts.
-- update_recipe NUR wenn Nico ein bestehendes Rezept ändern will – setzt die Änderung direkt (Nico kann rückgängig machen).
-- log_feedback, wenn Nico Feedback zu einem gemachten Eis gibt.
-- propose_recipe für JEDES neue Rezept, das du entwickelst (die App zeigt eine Karte mit „Speichern“). Danach im Text nur kurz erklären, nicht das ganze Rezept wiederholen.
-- Zutaten immer mit Vorrats-ids (ing). Fehlt eine Zutat in der DB: add_ingredient mit Nährwerten pro 100, dann deren id nutzen.
-- set_have, wenn Nico sagt, was er da hat oder was leer ist (z. B. nach einem Foto vom Kühlschrank).
+REZEPTKARTEN IN DIESEM CHAT:
+${cards.length ? cards.map(x => `${x.c.k} | ${x.c.recipe.name} | ${x.c.saved && getR(x.c.saved) ? 'GESPEICHERT als id ' + x.c.saved + ' → ändern nur mit update_recipe' : 'nicht gespeichert → ändern mit update_card'}`).join('\n') : '(noch keine)'}
+
 Bei Fotos: Zutaten erkennen, auflisten, dann 2–3 Eis-Ideen in der gewünschten Kategorie und für die beste direkt propose_recipe.`;
 }
-const ING_SCHEMA = {type:'object', properties:{ing:{type:'string', description:'Vorrats-id'}, name:{type:'string', description:'nur wenn keine id passt'}, amount:{type:'number'}, max:{type:'number', description:'obere Grenze bei Spannen'}, unit:{type:'string', enum:UNITS}, note:{type:'string'}, opt:{type:'boolean'}}, required:['amount','unit']};
+const ING_SCHEMA = {type:'object', properties:{ing:{type:'string', description:'Vorrats-id'}, name:{type:'string', description:'nur wenn keine id passt'}, amount:{type:'number'}, max:{type:'number', description:'obere Grenze bei Spannen'}, unit:{type:'string', enum:UNITS}, note:{type:'string', description:'kurzer Hinweis, z. B. „fein zerstoßen“'}, opt:{type:'boolean', description:'optional'}, mixin:{type:'boolean', description:'true = kommt erst als MIX-IN nach dem ersten Lauf dazu'}}, required:['ing','amount','unit']};
 const REC_SCHEMA = {type:'object', properties:{
   name:{type:'string'}, sub:{type:'string', description:'kurzer Untertitel'}, cat:{type:'string', enum:['protein','natur','deluxe']}, fam:{type:'string', enum:Object.keys(SN.FAMS)},
   emoji:{type:'string', description:'max. 3 Emojis; Protein immer mit 💪, Himbeere = 🍇, Pistazie = 🌱'}, status:{type:'string', enum:Object.keys(SN.STATUS)}, ver:{type:'string'},
-  ings:{type:'array', items:ING_SCHEMA}, steps:{type:'array', items:{type:'string'}}, flow:{type:'array', items:{type:'string'}, description:'z. B. ["LITE ICE CREAM","Ränder abkratzen","RE-SPIN"]'},
-  mix:{type:'array', items:{type:'string'}}, notes:{type:'array', items:{type:'string'}},
+  ings:{type:'array', items:ING_SCHEMA, description:'ALLE Zutaten inkl. Mix-Ins (mixin:true)'},
+  steps:{type:'array', items:{type:'string'}, description:'3–7 rezept-spezifische Zubereitungsschritte, je ein Satz, ohne Nummern'},
+  flow:{type:'array', items:{type:'string'}, description:'Creami-Programm, z. B. ["LITE ICE CREAM","Ränder abkratzen","RE-SPIN"]'},
+  mix:{type:'array', items:{type:'string'}, description:'Mix-Ins & Finish mit Menge'}, notes:{type:'array', items:{type:'string'}, description:'NUR Learnings/Hinweise, nie das Rezept'},
   x:{type:'number', description:'-1 fruchtig … 1 sahnig'}, y:{type:'number', description:'1 leicht … -1 schwer'},
-  colors:{type:'array', items:{type:'string'}, description:'1–2 Hex-Farben der Eiskugel'}, bg:{type:'string', description:'Hex Hintergrund, hell'}, toppings:{type:'array', items:{type:'string', enum:TOPS}}}, required:['name','cat','ings']};
+  colors:{type:'array', items:{type:'string'}, description:'1–2 Hex-Farben der Eiskugel'}, bg:{type:'string', description:'Hex Hintergrund, hell'}, toppings:{type:'array', items:{type:'string', enum:TOPS}}}, required:['name','cat','ings','steps']};
+/* Standard-Schritte je Kategorie – nur falls Scoopy wirklich keine liefert (nie mehr die Schritte eines anderen Rezepts) */
+function defaultSteps(r) {
+  const mixIns = (r.ings || []).filter(l => l.mixin || /mix-?in/i.test(l.note || '')).map(iname);
+  const prog = (r.flow && r.flow[0]) || (r.cat === 'natur' ? 'SORBET' : r.cat === 'deluxe' ? 'ICE CREAM' : 'LITE ICE CREAM');
+  const s = [(mixIns.length ? 'Alles außer ' + mixIns.join(', ') : 'Alle Zutaten') + ' in einen Messbecher und mit Milchaufschäumer/Stabmixer mind. 30 Sek. mixen, bis sich alles gelöst hat.',
+    'Abschmecken: Es muss leicht übersüß schmecken – Kälte schluckt Süße.',
+    'In den Becher bis max. zur Linie füllen und OHNE Deckel 24 h einfrieren.',
+    prog + ', dann Ränder abkratzen und RE-SPIN, bis es cremig ist.'];
+  if (mixIns.length) s.push('Ränder abkratzen, Mulde formen, ' + mixIns.join(', ') + ' rein, MIX-IN.');
+  return s;
+}
+const cleanLine = t => String(t || '').replace(/^\s*(?:schritt\s*\d+\s*[:.)-]\s*|\d+\s*[.)]\s*|[-•*]\s*)/i, '').trim();
 function fromAI(o, base) {
   const r = base ? clone(base) : {id:'', status:'neu', ver:'V1', steps:[], mix:[], notes:[], a:{}};
-  for (const k of ['name','sub','cat','fam','emoji','status','ver','steps','flow','mix','notes','x','y']) if (o[k] !== undefined) r[k] = o[k];
-  if (o.ings) r.ings = o.ings.map(l => { const x = {ing:l.ing || '', amount:+l.amount || 0, unit:UNITS.includes(l.unit) ? l.unit : 'g'}; if (l.max) x.max = +l.max; if (l.note) x.note = l.note; if (l.opt) x.opt = true; if (!pantry()[x.ing]) x.name = l.name || l.ing; return x; });
+  for (const k of ['name','sub','cat','fam','emoji','status','ver','x','y']) if (o[k] !== undefined && o[k] !== null && o[k] !== '') r[k] = o[k];
+  for (const k of ['steps','flow','mix','notes']) if (Array.isArray(o[k])) r[k] = o[k].map(cleanLine).filter(Boolean);
+  if (o.ings) r.ings = o.ings.map(l => { const x = {ing:l.ing || '', amount:+l.amount || 0, unit:UNITS.includes(l.unit) ? l.unit : 'g'}; if (l.max) x.max = +l.max; if (l.note) x.note = l.note; if (l.opt) x.opt = true; if (l.mixin) { x.mixin = true; if (!/mix-?in/i.test(x.note || '')) x.note = (x.note ? x.note + ', ' : '') + 'Mix-In'; } if (!pantry()[x.ing]) x.name = l.name || l.ing; return x; });
   if (o.colors || o.bg || o.toppings) r.a = Object.assign({}, r.a, o.colors ? {c:o.colors} : {}, o.bg ? {bg:o.bg} : {}, o.toppings ? {t:o.toppings} : {});
   if (!r.flow || !r.flow.length) r.flow = SN.FLOWS[r.cat === 'natur' ? 'sorbet' : r.cat === 'deluxe' ? 'ice' : 'lite'].slice();
-  if (!r.steps.length) r.steps = SN.RECIPES[0].steps.slice();
+  /* Rezept-Text, der in den Learnings gelandet ist, gehört nicht dahin */
+  r.notes = (r.notes || []).filter(n => !(n.length > 260 || /^(zutaten|zubereitung|schritte|rezept)\s*:/i.test(n)));
+  if (!r.steps || !r.steps.length) r.steps = defaultSteps(r);
   if (!r.fam) r.fam = 'vanille'; if (r.x == null) r.x = 0; if (r.y == null) r.y = 0;
   return r;
 }
 const mshort = m => ({kcal:Math.round(m.k), protein_g:Math.round(m.p), kh_g:Math.round(m.c), fett_g:Math.round(m.f), gewicht_g:Math.round(m.g), ohne_naehrwerte:m.unknown});
 let CUR = null;
+const WRITE_TOOLS = ['propose_recipe','update_recipe','update_card','log_feedback','remember','add_ingredient','set_have'];
 function tools() {
-  return [
-    {name:'get_recipe', description:'Holt ein Rezept komplett (Zutaten, Schritte, Learnings, Makros).', inputSchema:{type:'object', properties:{id:{type:'string'}}, required:['id']},
-     execute:({id}) => { const r = getR(id); if (!r) throw new Error('Rezept nicht gefunden'); return {id, name:r.name, cat:r.cat, status:r.status, ver:r.ver, ings:r.ings.map(l => ({ing:l.ing, name:iname(l), amount:l.amount, max:l.max, unit:l.unit, note:l.note, opt:l.opt})), steps:r.steps, flow:r.flow, mix:r.mix, notes:r.notes, macros:mshort(macros(r))}; }},
+  const list = [
+    {name:'get_recipe', description:'Holt ein Rezept aus der Sammlung komplett (Zutaten, Schritte, Learnings, Makros). Immer zuerst aufrufen, bevor du ein Rezept änderst.', inputSchema:{type:'object', properties:{id:{type:'string'}}, required:['id']},
+     execute:({id}) => { const r = getR(id); if (!r) throw new Error('Rezept nicht gefunden – id aus der Rezeptliste nehmen'); return {id, name:r.name, cat:r.cat, status:r.status, ver:r.ver, ings:r.ings.map(l => ({ing:l.ing, name:iname(l), amount:l.amount, max:l.max, unit:l.unit, note:l.note, opt:l.opt, mixin:l.mixin || /mix-?in/i.test(l.note || '') || undefined})), steps:r.steps, flow:r.flow, mix:r.mix, notes:r.notes, macros:mshort(macros(r))}; }},
+    {name:'get_card', description:'Holt eine Rezeptkarte aus diesem Chat (K1, K2 …) komplett.', inputSchema:{type:'object', properties:{card:{type:'string'}}, required:['card']},
+     execute:({card}) => { const x = findCard(card); if (!x) throw new Error('Karte nicht gefunden'); const r = x.c.recipe; return {card:x.c.k, gespeichert_als:x.c.saved || null, name:r.name, cat:r.cat, ings:r.ings.map(l => ({ing:l.ing, name:iname(l), amount:l.amount, max:l.max, unit:l.unit, note:l.note, opt:l.opt, mixin:l.mixin})), steps:r.steps, flow:r.flow, mix:r.mix, notes:r.notes, macros:mshort(macros(r))}; }},
     {name:'calc_macros', description:'Berechnet exakte Makros für eine Zutatenliste mit den Vorrats-Nährwerten.', inputSchema:{type:'object', properties:{ings:{type:'array', items:ING_SCHEMA}}, required:['ings']},
-     execute:({ings}) => mshort(macros({ings:fromAI({ings, cat:'protein', name:'x'}).ings}))},
-    {name:'propose_recipe', description:'Schlägt ein NEUES Rezept vor. Die App zeigt es als Karte mit Speichern-Button.', inputSchema:REC_SCHEMA,
-     execute:(o) => { const r = fromAI(o); CUR && CUR.cards.push({type:'proposal', recipe:r}); return {ok:true, macros:mshort(macros(r))}; }},
-    {name:'update_recipe', description:'Ändert ein bestehendes Rezept direkt. Nur Felder angeben, die sich ändern; ings ersetzt die komplette Zutatenliste.', inputSchema:{type:'object', properties:Object.assign({id:{type:'string'}}, REC_SCHEMA.properties), required:['id']},
-     execute:(o) => { const old = getR(o.id); if (!old) throw new Error('Rezept nicht gefunden'); const nr = fromAI(o, old); const key = 'u' + Date.now(); UNDO[key] = clone(old); saveR(nr, true); CUR && CUR.cards.push({type:'update', id:o.id, name:nr.name, undo:key}); return {ok:true, macros:mshort(macros(nr))}; }},
-    {name:'log_feedback', description:'Speichert Nicos Feedback als Learning im Rezept.', inputSchema:{type:'object', properties:{id:{type:'string'}, text:{type:'string'}}, required:['id','text']},
-     execute:({id, text}) => { const r = clone(getR(id)); if (!r) throw new Error('Rezept nicht gefunden'); r.notes.push(new Date().toLocaleDateString('de-DE') + ': ' + text); saveR(r, true); CUR && CUR.cards.push({type:'update', id, name:r.name + ' · Learning gemerkt'}); return {ok:true}; }},
+     execute:({ings}) => mshort(macros({ings:fromAI({ings, cat:'protein', name:'x', steps:['x']}).ings}))},
+    {name:'propose_recipe', description:'Legt eine NEUE Sorte als Rezeptkarte an (Nico tippt auf Speichern). Nicht für Änderungen an bestehenden Karten.', inputSchema:REC_SCHEMA,
+     execute:(o) => { const r = fromAI(o); const k = nextCardKey(); CUR && CUR.cards.push({type:'proposal', k, recipe:r}); return {ok:true, karte:k, macros:mshort(macros(r))}; }},
+    {name:'update_card', description:'Ändert eine Rezeptkarte aus diesem Chat (K1, K2 …). Ist sie schon gespeichert, wird das gespeicherte Rezept geändert. Nur geänderte Felder; ings ersetzt die komplette Zutatenliste.', inputSchema:{type:'object', properties:Object.assign({card:{type:'string', description:'Karten-Nr., z. B. K2'}}, REC_SCHEMA.properties), required:['card']},
+     execute:(o) => { const x = findCard(o.card); if (!x) throw new Error('Karte ' + o.card + ' nicht gefunden'); const p = Object.assign({}, o); delete p.card;
+       if (x.c.saved && getR(x.c.saved)) return updRecipe(Object.assign(p, {id:x.c.saved}));
+       const nr = fromAI(p, x.c.recipe); x.c.old = true; CUR && CUR.cards.push({type:'proposal', k:x.c.k, recipe:nr, rev:(x.c.rev || 1) + 1}); return {ok:true, karte:x.c.k, macros:mshort(macros(nr))}; }},
+    {name:'update_recipe', description:'Ändert ein gespeichertes Rezept aus der Sammlung direkt (Nico kann rückgängig machen). Nur geänderte Felder; ings ersetzt die komplette Zutatenliste.', inputSchema:{type:'object', properties:Object.assign({id:{type:'string'}}, REC_SCHEMA.properties), required:['id']},
+     execute:(o) => { if (/^K\d+$/i.test(String(o.id || '').trim())) { const x = findCard(o.id); if (x && !(x.c.saved && getR(x.c.saved))) { const p = Object.assign({}, o, {card:o.id}); delete p.id; return tools().find(t => t.name === 'update_card').execute(p); } if (x) o.id = x.c.saved; } return updRecipe(o); }},
+    {name:'log_feedback', description:'Speichert ein Learning (1 Satz) im Rezept. Nicht für Rezepttext.', inputSchema:{type:'object', properties:{id:{type:'string'}, text:{type:'string'}}, required:['id','text']},
+     execute:({id, text}) => { const r = clone(getR(id)); if (!r) throw new Error('Rezept nicht gefunden'); r.notes.push(new Date().toLocaleDateString('de-DE') + ': ' + String(text).slice(0, 240)); saveR(r, true); CUR && CUR.cards.push({type:'update', id, name:r.name + ' · Learning gemerkt'}); return {ok:true}; }},
+    {name:'remember', description:'Schreibt eine allgemeine Regel/Lektion dauerhaft auf Scoopys Merkzettel (gilt für alle künftigen Chats). Kurz, 1 Satz.', inputSchema:{type:'object', properties:{text:{type:'string'}}, required:['text']},
+     execute:({text}) => { const t = String(text || '').trim().slice(0, 220); if (!t) throw new Error('leer'); S.lessons = lessons().filter(l => l.t.toLowerCase() !== t.toLowerCase()).concat([{t, at:Date.now()}]).slice(-40); persist(); CUR && CUR.cards.push({type:'note', text:t}); return {ok:true, merkzettel:S.lessons.length}; }},
     {name:'add_ingredient', description:'Legt eine neue Zutat mit Nährwerten pro 100 g/ml an.', inputSchema:{type:'object', properties:{name:{type:'string'}, unit:{type:'string', enum:['g','ml']}, kcal:{type:'number'}, protein:{type:'number'}, carbs:{type:'number'}, fat:{type:'number'}, have:{type:'boolean'}}, required:['name','unit','kcal','protein','carbs','fat']},
      execute:(o) => { const id = 'x-' + slug(o.name); S.pantry[id] = {id, n:o.name, u:o.unit, k:o.kcal, p:o.protein, c:o.carbs, f:o.fat, g:'Sonstiges', have:o.have !== false, _t:Date.now()}; persist(); return {id}; }},
     {name:'set_have', description:'Markiert Vorrats-Zutaten als vorhanden oder fehlend.', inputSchema:{type:'object', properties:{ids:{type:'array', items:{type:'string'}}, have:{type:'boolean'}}, required:['ids','have']},
      execute:({ids, have}) => { const P = pantry(); let n = 0; for (const id of ids) if (P[id]) { S.pantry[id] = Object.assign({}, P[id], {have, _t:Date.now()}); n++; } persist(); return {ok:true, geaendert:n}; }},
   ];
+  /* Jede Werkzeug-Ausführung wird mitprotokolliert (für Status-Anzeige & Speicher-Check) */
+  return list.map(t => Object.assign({}, t, {execute:(o) => { o = o || {}; setStatus(toolStatus(t.name, o)); const res = t.execute(o); if (CUR) (CUR.acts = CUR.acts || []).push(t.name); return res; }}));
 }
+function updRecipe(o) {
+  const old = getR(o.id); if (!old) throw new Error('Rezept nicht gefunden – id aus der Rezeptliste oder update_card nehmen');
+  const p = Object.assign({}, o); delete p.id; const nr = fromAI(p, old);
+  const key = 'u' + Date.now() + Math.floor(Math.random() * 99); UNDO[key] = clone(old); saveR(nr, true);
+  CUR && CUR.cards.push({type:'update', id:o.id, name:nr.name, undo:key});
+  return {ok:true, id:o.id, macros:mshort(macros(nr))};
+}
+/* ---------- Status-Zeile unter der Denk-Blase ---------- */
+const recName = id => { const r = getR(id); return r ? '„' + r.name + '“' : 'das Rezept'; };
+function toolStatus(n, o) {
+  switch (n) {
+    case 'get_recipe': return 'Schlägt ' + recName(o.id) + ' nach …';
+    case 'get_card': return 'Schaut sich Karte ' + (o.card || '') + ' an …';
+    case 'calc_macros': return 'Rechnet die Makros exakt aus …';
+    case 'propose_recipe': return 'Zeichnet die Rezeptkarte' + (o.name ? ' „' + o.name + '“' : '') + ' …';
+    case 'update_card': return 'Überarbeitet Karte ' + (o.card || '') + ' …';
+    case 'update_recipe': return 'Trägt die Änderung in ' + recName(o.id) + ' ein …';
+    case 'log_feedback': return 'Notiert ein Learning …';
+    case 'remember': return 'Schreibt’s auf den Merkzettel …';
+    case 'add_ingredient': return 'Legt „' + (o.name || 'Zutat') + '“ im Vorrat an …';
+    case 'set_have': return 'Aktualisiert deinen Vorrat …';
+  }
+  return 'Arbeitet …';
+}
+let STAT = {t:'', model:'', since:0, tm:null, tool:false};
+const IDLE = [[0, 'Liest deine Nachricht …'], [2500, 'Denkt nach …'], [8000, 'Denkt gründlich nach …'], [16000, 'Spielt das im Kopf durch …'], [28000, 'Dauert heute etwas – gleich da …']];
+function prettyModel(m) { if (!m) return ''; return String(m).replace(/^models\//, '').split(/[-_]/).map(w => /^\d/.test(w) ? w : w.charAt(0).toUpperCase() + w.slice(1)).join(' ').replace(/^Claude /, 'Claude ').replace(/ Preview$/, ' (Preview)'); }
+function statusHtml() { return `<span class="st-t" id="stattxt">${esc(STAT.t || 'Denkt nach …')}</span>${STAT.model ? `<span class="mdl" id="statmdl"><i></i>${esc(prettyModel(STAT.model))}</span>` : `<span class="mdl" id="statmdl"><i></i>${PWA ? 'Gemini' : 'Claude'}</span>`}`; }
+function paintStatus() { const el = $('#livestat'); if (el) el.innerHTML = statusHtml(); }
+function setStatus(t, model) { if (t) { STAT.t = t; STAT.tool = true; STAT.since = Date.now(); } if (model) STAT.model = model; paintStatus(); }
+function thinkPhase() { STAT.tool = false; STAT.since = Date.now(); STAT.t = IDLE[0][1]; paintStatus(); }
+function startStatus() {
+  STAT = {t:IDLE[0][1], model:'', since:Date.now(), tm:null, tool:false};
+  STAT.tm = setInterval(() => { if (!BUSY) return; const dt = Date.now() - STAT.since; if (STAT.tool) { if (dt > 4000) { STAT.tool = false; STAT.since = Date.now() - 2500; } else return; } let t = IDLE[0][1]; for (const [ms, s] of IDLE) if (dt >= ms) t = s; if (t !== STAT.t) { STAT.t = t; paintStatus(); } }, 700);
+}
+function stopStatus() { clearInterval(STAT.tm); STAT.tm = null; }
 function md(t) {
   const lines = esc(t).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').replace(/(^|[^*])\*([^*\n]+)\*/g, '$1<i>$2</i>').split('\n');
   let h = '', ul = false;
@@ -2200,19 +2425,26 @@ function msgHtml(m, i) {
     const fresh = tags.filter(n => !allRecipes().some(r => r.name.toLowerCase() === n.toLowerCase()) && !(m.cards || []).some(c => c.type === 'proposal' && c.recipe.name.toLowerCase() === n.toLowerCase()));
     if (fresh.length) h += `<div class="card" style="padding:12px;margin:6px 0 10px 44px"><b style="font-size:14px">Rezeptkarten anzeigen</b><div class="row" style="flex-wrap:wrap;gap:8px;margin-top:8px">${fresh.map(n => `<button class="btn sm pri" data-ask="Leg „${esc(n)}“ bitte jetzt mit propose_recipe als Rezeptkarte an.">${esc(n)}</button>`).join('')}</div></div>`;
     const shown = new Set((m.cards || []).map(c => c.saved || c.id).filter(Boolean)), low = m.text.toLowerCase();
-    const hits = allRecipes().filter(r => r.name && r.name.length >= 4 && !shown.has(r.id) && low.includes(r.name.toLowerCase()))
+    const cardNames = new Set((m.cards || []).filter(c => c.type === 'proposal' || c.type === 'update').map(c => String(c.type === 'proposal' ? c.recipe.name : c.name).toLowerCase()));
+    const hits = allRecipes().filter(r => r.name && r.name.length >= 4 && !shown.has(r.id) && !cardNames.has(r.name.toLowerCase()) && low.includes(r.name.toLowerCase()))
       .filter((r, k, arr) => !arr.some(o => o !== r && o.name.length > r.name.length && o.name.toLowerCase().includes(r.name.toLowerCase()) && low.includes(o.name.toLowerCase())))
       .slice(0, 6);
     if (hits.length) h += `<div class="card" style="padding:12px;margin:6px 0 10px 44px"><b style="font-size:14px">Deine Sorten aus der Antwort</b><div class="list-pick" style="margin-top:8px">${hits.map(pickRow).join('')}</div></div>`;
   }
   (m.cards || []).forEach((c, j) => {
-    if (c.type === 'proposal') { const r = c.recipe, mc = macros(r); h += `<div class="card prop"><div class="im">${SN.art(r)}</div><div class="tx"><b>${esc(r.name)}</b><span class="muted" style="font-size:14px">${esc(r.sub || '')}</span><div class="mac"><span class="pill">${Math.round(mc.k)} kcal</span><span class="pill p">${Math.round(mc.p)} g P</span><span class="pill">${r.ings.length} Zutaten</span></div>
+    if (c.type === 'proposal') { const r = c.recipe;
+      if (c.old) { h += `<div class="card prop old"><span><span class="kno">${esc(c.k || '')}</span> · ${esc(r.name)} – ältere Version</span><button class="btn sm" data-peek="${i}:${j}">Ansehen</button></div>`; return; }
+      const mc = macros(r); h += `<div class="card prop"><div class="im">${SN.art(r)}</div><div class="tx"><span class="kno">${esc(c.k || '')}${c.rev ? ' · Version ' + c.rev : ''}</span><b>${esc(r.name)}</b><span class="muted" style="font-size:14px">${esc(r.sub || '')}</span><div class="mac"><span class="pill">${Math.round(mc.k)} kcal</span><span class="pill p">${Math.round(mc.p)} g P</span><span class="pill">${r.ings.length} Zutaten</span></div>
       ${c.saved ? `<button class="btn" data-open="${esc(c.saved)}">✓ Gespeichert – öffnen</button>` : `<div class="row"><button class="btn pri" data-save="${i}:${j}" style="flex:1">Speichern</button><button class="btn" data-peek="${i}:${j}">Ansehen</button></div>`}</div></div>`; }
-    if (c.type === 'update') h += `<div class="upd">✓ ${esc(c.name)} aktualisiert <button class="btn sm" data-open="${esc(c.id)}">Öffnen</button>${c.undo && UNDO[c.undo] ? `<button class="btn sm" data-undo="${esc(c.undo)}:${esc(c.id)}">Rückgängig</button>` : ''}</div>`;
+    if (c.type === 'update') h += `<div class="upd">${c.undone ? '↶ ' + esc(c.name) + ' – rückgängig gemacht' : '✓ ' + esc(c.name) + ' aktualisiert'} <button class="btn sm" data-open="${esc(c.id)}">Öffnen</button>${!c.undone && c.undo && UNDO[c.undo] ? `<button class="btn sm" data-undo="${esc(c.undo)}:${esc(c.id)}">Rückgängig</button>` : ''}</div>`;
+    if (c.type === 'note') h += `<div class="upd">✓ Auf Scoopys Merkzettel: ${esc(c.text)}</div>`;
   });
+  if (m.role === 'assistant' && m.warn) h += `<div class="warnmsg">⚠ ${esc(m.warn)}</div>`;
+  if (m.role === 'assistant' && m.model) h += `<div class="mdlrow"><span class="mdl"><i></i>${esc(prettyModel(m.model))}</span></div>`;
   return h;
 }
 const SUGG = ['Was mache ich als nächste Sorte?','Lemon Cheesecake 10 % süßer machen','Neues Eis aus Mango & Skyr','Warum wird mein Eis kristallig?','Deluxe-Eis für Gäste am Wochenende'];
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 function vChat() {
   const off = PWA ? !AU.s : !CAP.sample;
   return `<div class="view chatv"><div class="msgs" id="msgs">
@@ -2222,38 +2454,61 @@ function vChat() {
   <div class="composer">${CHAT.length ? `<button class="btn sm ghost" data-act="clearchat" style="justify-self:start">Chat leeren</button>` : ''}
    ${!CHAT.length ? `<div class="sugg">${SUGG.map(s => `<button data-ask="${esc(s)}">${esc(s)}</button>`).join('')}</div>` : ''}
    ${PENDING_IMG ? `<div class="thumb"><img src="${esc(PENDING_IMG.url)}" alt="Foto"><span class="muted" style="font-size:14px">Foto angehängt</span><button class="btn sm" data-act="rmimg">Entfernen</button></div>` : ''}
-   <div class="cbar"><button class="iconbtn" data-act="scan" aria-label="Foto">${IC.cam}</button><textarea id="cin" rows="1" placeholder="Frag Scoopy …" aria-label="Nachricht"></textarea>${CAP.dict ? `<button class="iconbtn mic" id="mic" aria-label="Diktieren">${IC.mic}</button>` : ''}<button class="iconbtn send" data-act="send" aria-label="${BUSY ? 'Stopp' : 'Senden'}">${BUSY ? IC.stop : IC.send}</button></div>
+   <div class="cbar"><button class="iconbtn" data-act="scan" aria-label="Foto">${IC.cam}</button><textarea id="cin" rows="1" placeholder="Frag Scoopy …" aria-label="Nachricht" enterkeyhint="send"></textarea><button class="iconbtn mic${MIC.on ? ' on' : ''}" id="mic" aria-label="Spracheingabe">${IC.mic}</button><button class="iconbtn send" data-act="send" aria-label="${BUSY ? 'Stopp' : 'Senden'}">${BUSY ? IC.stop : IC.send}</button></div>
   </div></div>`;
 }
+function growTa(ta) { ta.style.height = 'auto'; ta.style.height = Math.min(140, ta.scrollHeight) + 'px'; }
 function bindChat() {
   const ta = $('#cin'); if (!ta) return;
-  ta.value = DRAFT; ta.addEventListener('input', () => { DRAFT = ta.value; ta.style.height = 'auto'; ta.style.height = Math.min(140, ta.scrollHeight) + 'px'; });
+  ta.value = DRAFT; growTa(ta);
+  ta.addEventListener('input', () => { DRAFT = ta.value; growTa(ta); chatBottom(true); });
   ta.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey && !matchMedia('(pointer:coarse)').matches) { e.preventDefault(); sendChat(); } });
-  setTimeout(() => { window.scrollTo(0, document.body.scrollHeight); }, 30);
+  setTimeout(() => { window.scrollTo(0, document.documentElement.scrollHeight); }, 30);
 }
 let DRAFT = '';
+/* Erkennt, wenn Scoopy behauptet, etwas geändert/gespeichert zu haben */
+const CLAIM_RX = /\b(aktualisiert|angepasst|korrigiert|geändert|gespeichert|abgespeichert|umgestellt|umbenannt|reduziert|erhöht|eingetragen|hinterlegt|überschrieben|angelegt|ausgetauscht|ersetzt|erledigt)\b|karte ist da|rezept ist da/i;
+function histFor(msgs) {
+  const hist = [];
+  for (const m of msgs) {
+    let c = m.text || '';
+    if ((m.cards || []).length) c += '\n(Die App hat dazu angezeigt: ' + m.cards.map(x => x.type === 'proposal' ? 'Rezeptkarte ' + (x.k || '') + ' „' + x.recipe.name + '“' + (x.saved ? ' – inzwischen gespeichert als id ' + x.saved : ' – nicht gespeichert') + (x.old ? ' – durch neuere Version ersetzt' : '') : x.type === 'note' ? 'Merkzettel-Eintrag „' + x.text + '“' : 'Änderung an „' + x.name + '“' + (x.undone ? ' – von Nico RÜCKGÄNGIG gemacht' : '')).join('; ') + '.)';
+    else if (m.role === 'assistant' && m.text && CLAIM_RX.test(m.text)) c += '\n(Hinweis der App: In dieser Antwort wurde NICHTS geändert oder gespeichert.)';
+    if (!c.trim()) continue; const last = hist[hist.length - 1]; if (last && last.role === m.role) last.content += '\n' + c; else hist.push({role:m.role, content:c});
+  }
+  while (hist.length && hist[0].role !== 'user') hist.shift();
+  return hist;
+}
 async function sendChat(text) {
   if (BUSY) { ABORT && ABORT.abort(); return; }
+  if (MIC.on) micStop();
   text = (text ?? DRAFT).trim(); if (!text && !PENDING_IMG) return;
   if (PWA ? !AU.s : !CAP.sample) { if (PWA) openSettings(); else toast('Scoopy ist offline – Claude-Verbindung fehlt'); return; }
   const imgp = PENDING_IMG; PENDING_IMG = null; DRAFT = '';
+  chatCards();
   CHAT.push({role:'user', text:text || 'Was kann ich daraus machen?', img:imgp ? imgp.thumb : null});
-  CUR = {role:'assistant', text:'', cards:[]}; CHAT.push(CUR); BUSY = true; render();
-  const box = $('#msgs'); box.insertAdjacentHTML('beforeend', `<div class="arow">${avatar()}<div class="m a" id="live"><span class="typing"><i></i><i></i><i></i></span></div></div>`); window.scrollTo(0, document.body.scrollHeight);
-  const hist = []; for (const m of CHAT.slice(-17, -1)) { const c = (m.text || '') + ((m.cards || []).length ? '\n(Die App hat dazu ' + m.cards.map(x => x.type === 'proposal' ? 'die Rezeptkarte „' + x.recipe.name + '“' : 'die Änderung an „' + x.name + '“').join(' und ') + ' angezeigt.)' : ''); if (!c.trim()) continue; const last = hist[hist.length - 1]; if (last && last.role === m.role) last.content += '\n' + c; else hist.push({role:m.role, content:c}); }
-  while (hist.length && hist[0].role !== 'user') hist.shift();
+  CUR = {role:'assistant', text:'', cards:[], acts:[]}; CHAT.push(CUR); BUSY = true;
+  if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+  render(); startStatus();
+  const box = $('#msgs'); box.insertAdjacentHTML('beforeend', `<div class="arow" id="liverow">${avatar()}<div class="m a" id="live"><span class="typing"><i></i><i></i><i></i></span></div></div><div class="livestat" id="livestat" role="status" aria-live="polite">${statusHtml()}</div>`); chatBottom(true);
+  const hist = histFor(CHAT.slice(-17, -1));
   const input = [{role:'user', content:sysPrompt() + '\n\nVerstanden?'}, {role:'assistant', content:'Alles klar, ich bin Scoopy.'}].concat(hist);
   if (input[input.length - 1].role !== 'user') input.push({role:'user', content:text});
   ABORT = new AbortController();
-  const opts = {tools:tools(), signal:ABORT.signal, cache:false, modelTier:'default', onText:({text:t}) => { CUR.text = t; const l = $('#live'); if (l) l.innerHTML = md(noEmoji(t)) || '<span class="typing"><i></i><i></i><i></i></span>'; }};
+  const onText = ({text:t}) => { CUR.text = t; const l = $('#live'); if (l) l.innerHTML = md(noEmoji(t)) || '<span class="typing"><i></i><i></i><i></i></span>'; chatBottom(); };
+  const opts = {tools:tools(), signal:ABORT.signal, cache:false, modelTier:'default', onText};
   try {
-    if (PWA) { const res = await remoteChat(sysPrompt(), hist.concat(hist.length && hist[hist.length - 1].role === 'user' ? [] : [{role:'user', content:text}]), opts.tools, imgp ? await imgp.blob : null, opts.onText, ABORT.signal); CUR.text = res.text || CUR.text; } else {
+    if (PWA) { const res = await remoteChat(sysPrompt(), hist.concat(hist.length && hist[hist.length - 1].role === 'user' ? [] : [{role:'user', content:text}]), opts.tools, imgp ? await imgp.blob : null, onText, ABORT.signal, {onModel:m => { CUR.model = m; setStatus(null, m); }, onThink:thinkPhase}); CUR.text = res.text || CUR.text; if (res.model) CUR.model = res.model; } else {
     if (imgp) { let ok = true; try { ok = !!(await CAP.sample.limits()).images; } catch (e) {} if (ok) opts.images = [await imgp.blob]; else toast('Bilder gehen gerade nicht – ich antworte ohne Foto'); }
-    const res = await CAP.sample(input, opts); CUR.text = res.text || CUR.text; }
+    const res = await CAP.sample(input, opts); CUR.text = res.text || CUR.text; CUR.model = (res && res.model) || 'Claude'; }
+    /* Speicher-Check: Behauptung ohne Werkzeug → sichtbar machen */
+    const wrote = (CUR.acts || []).some(n => WRITE_TOOLS.includes(n));
+    if (!wrote && CLAIM_RX.test(CUR.text || '') && !/\?\s*$/.test((CUR.text || '').trim())) CUR.warn = 'Achtung: Scoopy hat hier nichts gespeichert oder geändert. Sag „Bitte jetzt wirklich ändern“.';
   } catch (e) {
-    CUR.text = (e && e.text) || CUR.text || (e && e.code === 'not_granted' ? 'Ohne deine Erlaubnis kann ich nicht antworten – tipp nochmal auf Senden und erlaube „Claude fragen“.' : e && e.code === 'nofn' ? 'Der Scoopy-Server (Supabase-Funktion „scoopy“) ist noch nicht eingerichtet – siehe Einrichtung.' : e && e.code === 'forbidden' ? 'Dein Konto ist für Scoopy nicht freigeschaltet (ALLOWED_EMAILS).' : e && e.code === 'login' ? 'Bitte neu anmelden.' : e && e.code === 'rate_limited' ? 'Kurze Eispause – zu viele Anfragen. Gleich nochmal versuchen.' : (e && e.name === 'AbortError') ? CUR.text || 'Gestoppt.' : 'Da ist was schiefgelaufen. Nochmal?');
+    CUR.text = (e && e.text) || CUR.text || (e && e.code === 'not_granted' ? 'Ohne deine Erlaubnis kann ich nicht antworten – tipp nochmal auf Senden und erlaube „Claude fragen“.' : e && e.code === 'nofn' ? 'Der Scoopy-Server (Supabase-Funktion „scoopy“) ist noch nicht eingerichtet – siehe Einrichtung.' : e && e.code === 'forbidden' ? 'Dein Konto ist für Scoopy nicht freigeschaltet (ALLOWED_EMAILS).' : e && e.code === 'login' ? 'Bitte neu anmelden.' : e && e.code === 'rate_limited' ? 'Kurze Eispause – zu viele Anfragen. Gleich nochmal versuchen.' : (e && e.name === 'AbortError') ? CUR.text || 'Gestoppt.' : (e && e.message) ? 'Da ist was schiefgelaufen: ' + e.message : 'Da ist was schiefgelaufen. Nochmal?');
   }
-  BUSY = false; ABORT = null; persistChat(); if (VIEW === 'chat') render(); else toast('Scoopy hat geantwortet', 'Ansehen', () => { location.hash = 'chat'; });
+  stopStatus(); delete CUR.acts;
+  BUSY = false; ABORT = null; persistChat(); if (VIEW === 'chat') { render(); chatBottom(true); } else toast('Scoopy hat geantwortet', 'Ansehen', () => { location.hash = 'chat'; });
   CUR = null;
 }
 function ask(text, prefill) {
@@ -2269,12 +2524,184 @@ $('#fileImg').addEventListener('change', async e => {
   } catch (err) { toast('Foto konnte nicht geladen werden'); }
 });
 let MKPEND = null, MKCAT = 'protein';
+/* ---------- Spracheingabe: in Claude über „dictation“, auf dem iPhone über die Spracherkennung von Safari ---------- */
+const MIC = {on:false, rec:null, base:''};
+function micPaint() { const b = $('#mic'); if (b) b.classList.toggle('on', MIC.on); }
+function micStop() { MIC.on = false; try { MIC.rec && MIC.rec.stop(); } catch (e) {} try { CAP.dict && CAP.dict.stop().catch(() => {}); } catch (e) {} micPaint(); }
+function micStart() {
+  if (CAP.dict) { CAP.dict.start().catch(err => { if (err && err.code === 'not_granted') toast('Mikrofon nicht erlaubt'); }); return; }
+  if (!SR) { const t = $('#cin'); if (t) t.focus(); toast('Tipp aufs Mikro unten in deiner Tastatur – damit kannst du direkt reinsprechen.'); return; }
+  const rec = new SR(); MIC.rec = rec; rec.lang = 'de-DE'; rec.interimResults = true; rec.continuous = true; rec.maxAlternatives = 1;
+  MIC.base = DRAFT ? DRAFT.replace(/\s*$/, ' ') : '';
+  rec.onresult = ev => { let fin = '', tmp = ''; for (let i = 0; i < ev.results.length; i++) { const r = ev.results[i]; if (r.isFinal) fin += r[0].transcript; else tmp += r[0].transcript; } DRAFT = (MIC.base + fin + tmp).replace(/\s+/g, ' ').replace(/^\s/, ''); const t = $('#cin'); if (t) { t.value = DRAFT; growTa(t); } chatBottom(true); };
+  rec.onerror = ev => { if (ev.error === 'not-allowed' || ev.error === 'service-not-allowed') toast('Mikrofon/Spracherkennung nicht erlaubt – in den iPhone-Einstellungen freigeben oder das Tastatur-Mikro nutzen.'); else if (ev.error !== 'aborted' && ev.error !== 'no-speech') toast('Spracheingabe: ' + ev.error); };
+  rec.onend = () => { MIC.on = false; MIC.rec = null; micPaint(); };
+  try { rec.start(); MIC.on = true; micPaint(); try { navigator.vibrate && navigator.vibrate(12); } catch (e) {} } catch (e) { MIC.on = false; toast('Spracheingabe startet nicht – nutz das Mikro der Tastatur.'); }
+}
 function setupDict() {
   const d = CAP.dict; let base = '';
-  d.onPartial(({text}) => { const t = $('#cin'); if (t) t.value = base + text; });
-  d.onFinal(({text}) => { base = (base + ' ' + text).trim() + ' '; DRAFT = base; const t = $('#cin'); if (t) t.value = base; });
-  d.onState(({state}) => { const b = $('#mic'); if (b) b.classList.toggle('on', state === 'listening'); if (state === 'listening') base = DRAFT ? DRAFT.trim() + ' ' : ''; });
+  d.onPartial(({text}) => { const t = $('#cin'); if (t) { t.value = base + text; growTa(t); } });
+  d.onFinal(({text}) => { base = (base + ' ' + text).trim() + ' '; DRAFT = base; const t = $('#cin'); if (t) { t.value = base; growTa(t); } });
+  d.onState(({state}) => { MIC.on = state === 'listening'; micPaint(); if (state === 'listening') base = DRAFT ? DRAFT.trim() + ' ' : ''; });
 }
+
+/* ================= BATCH-PRODUKTION ================= */
+/* Mehrere Becher gleichzeitig: Becher nebeneinander, Zutat für Zutat durch alle Becher, am Ende in derselben Reihenfolge in die Truhe */
+const LSB = 'scoopernova.batch.v1';
+let BT = null, BTWL = null;
+const BT_PREP = /(erwärm|erhitz|\bTopf|aufkoch|kochen|einweich|aufbrüh|brühen|Espresso|abkühl|zur Rose|schmelz|rösten|\bHerd|ziehen lassen|aufgieß|zerstoß|mörser|vorbereit|auftau)/i;
+function freeSlots() { return S.truhe.map((t, i) => (!t || !getR(t.rid)) ? i : -1).filter(i => i >= 0); }
+function btStored() { try { const b = JSON.parse(localStorage.getItem(LSB) || 'null'); return b && b.cups && Date.now() - (b.at || 0) < 18 * 36e5 ? b : null; } catch (e) { return null; } }
+function btSave() { try { if (BT && BT.phase !== 'count') { BT.at = Date.now(); localStorage.setItem(LSB, JSON.stringify(BT)); } else if (!BT) localStorage.removeItem(LSB); } catch (e) {} }
+const btMix = l => !!l.mixin || /mix-?in|topping|zum servieren|finish/i.test(l.note || '');
+const btLand = () => matchMedia('(orientation: landscape)').matches || innerWidth > innerHeight;
+function btPlan() {
+  const cups = BT.cups.map(id => getR(id)).filter(Boolean); if (cups.length !== BT.cups.length) return null;
+  const P = pantry(), map = new Map();
+  cups.forEach((r, ci) => { const base = (r.ings || []).filter(l => !btMix(l)); base.forEach((l, li) => {
+    const key = l.ing && P[l.ing] ? l.ing : 'n:' + iname(l).toLowerCase();
+    let e = map.get(key); if (!e) { e = {key, name:iname(l), per:Array(cups.length).fill(null), pos:[]}; map.set(key, e); }
+    const g = grams(l, P[l.ing]);
+    if (e.per[ci]) { const p = e.per[ci]; if (p.unit === l.unit) { p.amount += +l.amount || 0; if (l.max) p.max = (p.max || p.amount) + (+l.max - (+l.amount || 0)); } else p.extra = (p.extra ? p.extra + ' + ' : '') + famt(l); p.g += g; }
+    else e.per[ci] = {amount:+l.amount || 0, max:l.max, unit:l.unit, note:l.note || '', opt:!!l.opt, g};
+    e.pos.push(base.length > 1 ? li / (base.length - 1) : 0); }); });
+  const all = [...map.values()].map(e => Object.assign(e, {n:e.per.filter(Boolean).length, avg:e.pos.reduce((a, b) => a + b, 0) / e.pos.length}));
+  const one = cups.length === 1;
+  const shared = all.filter(e => one || e.n >= 2).sort((a, b) => b.n - a.n || a.avg - b.avg);
+  const solo = one ? [] : all.filter(e => e.n < 2).sort((a, b) => a.avg - b.avg);
+  const total = cups.map((r, ci) => all.reduce((s, e) => s + (e.per[ci] ? e.per[ci].g : 0), 0) || 1);
+  const prep = cups.map(r => (r.steps || []).filter(s => BT_PREP.test(s) && !/einfrier|Deckel|RE-SPIN|MIX-IN|abschmeck/i.test(s))
+    .concat((r.ings || []).filter(l => l.note && BT_PREP.test(l.note) && !btMix(l)).map(l => iname(l) + ' (' + famt(l).trim() + '): ' + l.note)));
+  const mix = cups.map(r => (r.mix && r.mix.length) ? r.mix.slice() : (r.ings || []).filter(btMix).map(l => famt(l).trim() + ' ' + iname(l)));
+  const steps = [];
+  if (prep.some(x => x.length)) steps.push({t:'prep'});
+  shared.forEach(e => steps.push({t:'ing', e}));
+  if (solo.length) steps.push({t:'solo'});
+  steps.push({t:'finish'});
+  return {cups, shared, solo, total, prep, mix, steps};
+}
+const btAmt = p => p ? `${fnum(p.amount)}${p.max ? '–' + fnum(p.max) : ''}<small>${p.unit === 'Stk' ? 'Stk' : esc(p.unit)}</small>${p.extra ? `<small> + ${esc(p.extra)}</small>` : ''}` : '–';
+function btFill(plan, ci, upto) { let g = 0; for (let k = 0; k < upto; k++) { const s = plan.steps[k]; if (s.t === 'ing' && s.e.per[ci]) g += s.e.per[ci].g; if (s.t === 'solo' || s.t === 'finish') return 1; } return Math.min(1, g / plan.total[ci]); }
+function btCup(r, i, inner, cls) { return `<button class="cup ${cls || ''}" data-bc="${i}"><span class="no">${i + 1}</span><span class="ck">✓</span><span class="pi">${SN.pintIcon(r ? (r.a.c || [])[0] : '', r ? .08 : 0, false)}</span><span class="nm">${r ? esc(r.name) : 'Becher ' + (i + 1)}</span>${inner || ''}</button>`; }
+function btPickHtml() {
+  const cur = BT.cur, prev = cur > 0 ? getR(BT.cups[cur - 1]) : null, q = (BT.q || '').toLowerCase().trim();
+  const list = sorted(allRecipes()).filter(r => !q || r.name.toLowerCase().includes(q));
+  return (prev && !q ? `<button class="again" data-br="${esc(prev.id)}"><span class="mini">${img(prev, {plain:true})}</span><span><b>Nochmal ${esc(prev.name)}</b><small>wie Becher ${cur}</small></span></button>` : '') + list.map(r => { const m = macros(r); return `<button data-br="${esc(r.id)}"><span class="mini">${img(r, {plain:true})}</span><span><b>${esc(r.name)}</b><small>${esc((SN.CATS[r.cat] || {}).label || '')} · ${Math.round(m.k)} kcal</small></span></button>`; }).join('') + (list.length ? '' : '<p class="muted">Keine Sorte gefunden.</p>');
+}
+function btShell(title, sub, prog, body, bar) {
+  return `<div class="bt-top"><button class="iconbtn" data-b="close" aria-label="Schließen">✕</button><h2>${title}</h2>${sub ? `<span class="muted">${sub}</span>` : ''}${BT.resumed && BT.phase !== 'count' ? '<button class="btn sm" data-b="restart">Neu starten</button>' : ''}</div>${prog != null ? `<div class="bt-prog"><i style="width:${Math.round(prog * 100)}%"></i></div>` : ''}<div class="bt-body">${body}</div>${bar ? `<div class="bt-bar">${bar}</div>` : ''}`;
+}
+function btRender() {
+  let el = $('#bt'); if (!BT) { if (el) el.remove(); return; }
+  if (!el) { el = document.createElement('div'); el.id = 'bt'; el.className = 'bt'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true'); document.body.appendChild(el); }
+  const free = freeSlots().length;
+  let html = '';
+  if (BT.phase === 'count') {
+    const sug = Math.max(1, Math.min(6, free));
+    html = btShell('Batch-Produktion', `Truhe: ${free} frei`, null, `<div class="bt-center"><div><h3>Wie viele Becher machst du?</h3><p>Stell sie nebeneinander – ich führe dich Zutat für Zutat durch alle gleichzeitig.</p></div>
+      <div class="bt-nums">${[1,2,3,4,5,6].map(n => `<button data-bn="${n}" class="${n === sug ? 'sug' : ''}" ${n > free ? 'disabled' : ''} aria-label="${n} Becher">${n}</button>`).join('')}</div>
+      ${free < 6 ? `<p style="font-size:13px">Mehr als ${free} geht nicht – die Truhe hat nur ${free} freie Plätze.</p>` : ''}</div>`);
+  } else if (BT.phase === 'assign') {
+    const cur = BT.cur;
+    const all = BT.cups.every(Boolean);
+    html = btShell('Sorten zuweisen', `${BT.cups.filter(Boolean).length}/${BT.cups.length}`, null,
+      `<div class="bt-cups compact">${BT.cups.map((id, i) => { const r = id && getR(id); return btCup(r, i, '', (i === cur ? 'cur ' : '') + (r ? '' : 'empty')); }).join('')}</div>
+       <div class="bt-sub"><h3>Becher ${cur + 1}: Was kommt rein?</h3><input class="field" id="btq" type="search" placeholder="Sorte suchen" value="${esc(BT.q || '')}" autocomplete="off"></div>
+       <div class="bt-pick" id="btpick">${btPickHtml()}</div>`,
+      `<div class="bt-ing"><span>${all ? 'Alles zugewiesen – Becher antippen zum Ändern.' : 'Sorte antippen – dann geht’s zum nächsten Becher.'}</span></div><div class="bt-nav"><button class="btn" data-b="back">‹ Zurück</button><button class="btn pri" data-b="go" ${all ? '' : 'disabled'}>Los geht’s ›</button></div>`);
+  } else if (BT.phase === 'run') {
+    const plan = btPlan(); if (!plan) { BT.phase = 'assign'; return btRender(); }
+    const k = Math.min(BT.i, plan.steps.length - 1), st = plan.steps[k], n = plan.steps.length;
+    const ckey = 's' + k + (st.e ? ':' + st.e.key : ''); BT.ck = BT.ck || {}; const ck = BT.ck[ckey] || {};
+    const nIng = plan.shared.length, ingNo = plan.steps.slice(0, k + 1).filter(s => s.t === 'ing').length;
+    let body = '', label = '', title = 'Batch-Produktion';
+    const cupsWith = fn => `<div class="bt-cups ${st.t === 'ing' ? '' : 'grow'}">${plan.cups.map((r, ci) => fn(r, ci)).join('')}</div>`;
+    const pint = (r, ci, f) => `<span class="pi">${SN.pintIcon((r.a.c || [])[0], .82 * f, false)}</span>`;
+    if (st.t === 'prep') {
+      title = 'Erst vorbereiten';
+      body = cupsWith((r, ci) => `<div class="cup ${plan.prep[ci].length ? '' : 'off'}"><span class="no">${ci + 1}</span>${pint(r, ci, 0)}<span class="nm">${esc(r.name)}</span>${plan.prep[ci].length ? `<ul>${plan.prep[ci].map((s, j) => `<li data-bl="${ci}:${j}" class="${ck[ci + ':' + j] ? 'done' : ''}">${esc(s)}</li>`).join('')}</ul>` : '<p class="muted">nichts vorzubereiten</p>'}</div>`);
+      label = `<small>Vorbereitung</small><b>Was vorher passieren muss</b><span>Antippen zum Abhaken</span>`;
+    } else if (st.t === 'ing') {
+      const e = st.e, sum = e.per.filter(Boolean), sameUnit = sum.every(p => p.unit === sum[0].unit && !p.extra && !p.max);
+      title = 'Zutat ' + ingNo + ' von ' + nIng;
+      body = cupsWith((r, ci) => { const p = e.per[ci]; return `<button class="cup ${p ? '' : 'off'} ${p && ck[ci] ? 'done' : ''}" ${p ? `data-bc="${ci}"` : ''}><span class="no">${ci + 1}</span><span class="ck">✓</span>${pint(r, ci, btFill(plan, ci, k + (p && ck[ci] ? 1 : 0)))}<span class="nm">${esc(r.name)}</span><span class="amt">${btAmt(p)}</span>${p && p.note ? `<span class="nt">${esc(p.note)}</span>` : ''}</button>`; });
+      label = `<small>${e.n === plan.cups.length ? 'In alle Becher' : 'In ' + e.n + ' von ' + plan.cups.length + ' Bechern'}</small><b>${esc(e.name)}</b>${sameUnit && sum.length > 1 ? `<span>zusammen ${fnum(Math.round(sum.reduce((a, p) => a + p.amount, 0) * 100) / 100)} ${esc(sum[0].unit)}</span>` : ''}`;
+    } else if (st.t === 'solo') {
+      title = 'Die Extras';
+      body = cupsWith((r, ci) => { const mine = plan.solo.filter(e => e.per[ci]); return `<div class="cup ${mine.length ? '' : 'off'}"><span class="no">${ci + 1}</span>${pint(r, ci, btFill(plan, ci, k))}<span class="nm">${esc(r.name)}</span>${mine.length ? `<ul>${mine.map(e => `<li data-bl="${ci}:${esc(e.key)}" class="${ck[ci + ':' + e.key] ? 'done' : ''}"><b>${btAmt(e.per[ci]).replace(/<\/?small>/g, ' ')}</b><span>${esc(e.name)}${e.per[ci].note ? ' · ' + esc(e.per[ci].note) : ''}</span></li>`).join('')}</ul>` : '<p class="muted">keine Extras</p>'}</div>`; });
+      label = `<small>Nur in einzelnen Bechern</small><b>Becher für Becher</b><span>Antippen zum Abhaken</span>`;
+    } else {
+      title = 'Mixen & ab in die Truhe';
+      body = cupsWith((r, ci) => `<div class="cup"><span class="no">${ci + 1}</span>${pint(r, ci, 1)}<span class="nm">${esc(r.name)}</span>${plan.mix[ci].length ? `<p><b>Später als Mix-In:</b> ${plan.mix[ci].map(esc).join(', ')}</p>` : '<p class="muted">kein Mix-In</p>'}<p class="muted">Programm: ${esc((r.flow || [])[0] || '')}</p></div>`);
+      label = `<small>Jeden Becher</small><b>≥30 Sek mixen · abschmecken</b><span>bis max. zur Linie · OHNE Deckel · 24 h</span>`;
+    }
+    const last = st.t === 'finish';
+    html = btShell(title, `Schritt ${k + 1}/${n}`, (k + 1) / n, body,
+      `<div class="bt-ing">${label}</div><div class="bt-nav"><button class="btn" data-b="prev">‹</button>${last ? `<button class="btn pri" data-b="freeze">❄ Einfrieren</button>` : `<button class="btn pri" data-b="next">Weiter ›</button>`}</div>`);
+  }
+  el.innerHTML = html;
+  /* Querformat-Hinweis */
+  let rot = $('#btrot');
+  if (!btLand() && !BT.portraitOk) {
+    if (!rot) { rot = document.createElement('div'); rot.id = 'btrot'; rot.className = 'bt-rot'; document.body.appendChild(rot); }
+    rot.innerHTML = `<div><svg class="ph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M11 18.5h2"/></svg><h3>Bitte Handy drehen</h3><p>Die Batch-Produktion läuft im Querformat – dann passen alle Becher nebeneinander.<br><small>Falls sich nichts dreht: Ausrichtungssperre im Kontrollzentrum aus.</small></p><div class="row" style="justify-content:center;gap:8px"><button class="btn" data-b="close">Abbrechen</button><button class="btn ghost" data-b="portrait">Hochkant weiter</button></div></div>`;
+  } else if (rot) rot.remove();
+}
+async function btWake(on) {
+  try { if (on && 'wakeLock' in navigator && !BTWL && document.visibilityState === 'visible') { BTWL = await navigator.wakeLock.request('screen'); BTWL.addEventListener('release', () => { BTWL = null; }); } else if (!on && BTWL) { await BTWL.release(); BTWL = null; } } catch (e) { BTWL = null; }
+}
+function btOpen() {
+  if (SHEET) closeSheet();
+  const saved = btStored();
+  if (saved && saved.cups.every(id => getR(id))) { BT = saved; delete BT.portraitOk; BT.resumed = true; }
+  else { if (!freeSlots().length) { toast('Truhe ist voll (6/6) – erst einen Becher leer essen'); return; } BT = {phase:'count'}; }
+  try { screen.orientation && screen.orientation.lock && screen.orientation.lock('landscape').catch(() => {}); } catch (e) {}
+  document.documentElement.style.overflow = 'hidden';
+  btWake(true); btRender();
+}
+function btClose(clear) {
+  if (clear) { BT = null; btSave(); }
+  else btSave();
+  BT = null; const el = $('#bt'); if (el) el.remove(); const r = $('#btrot'); if (r) r.remove();
+  document.documentElement.style.overflow = '';
+  try { screen.orientation && screen.orientation.unlock && screen.orientation.unlock(); } catch (e) {}
+  btWake(false); if (VIEW === 'start') render();
+}
+function btFreeze() {
+  const plan = btPlan(); if (!plan) return;
+  const slots = freeSlots(); let n = 0; const now = Date.now();
+  plan.cups.forEach((r, ci) => { const i = slots[ci]; if (i == null) return; S.truhe[i] = {rid:r.id, at:now, uid:r.id + '@' + now + '-' + ci + Math.random().toString(36).slice(2, 5), mod:now}; const m = S.made[r.id] || {count:0}; m.count++; m.last = now; S.made[r.id] = m; n++; });
+  persist(); btClose(true); if (location.hash !== '#start') location.hash = 'start'; else render(); confetti();
+  toast(n === plan.cups.length ? `${n} Becher in der Truhe – in 24 h bereit` : `${n} von ${plan.cups.length} Bechern eingetragen – Truhe war voll`, null, null, 4200);
+}
+document.addEventListener('click', e => {
+  const host = e.target.closest && e.target.closest('#bt,#btrot'); if (!host || !BT) return;
+  const b = e.target.closest('button,li'); if (!b) return; const d = b.dataset;
+  if (d.b === 'close') { btClose(BT.phase === 'count'); return; }
+  if (d.b === 'restart') { if (!freeSlots().length) { btClose(true); toast('Truhe ist voll (6/6)'); return; } BT = {phase:'count'}; btSave(); btRender(); return; }
+  if (d.b === 'portrait') { BT.portraitOk = true; btRender(); return; }
+  if (d.bn) { const n = +d.bn; BT = {phase:'assign', cups:Array(n).fill(null), cur:0, i:0, ck:{}}; btSave(); btRender(); return; }
+  if (BT.phase === 'assign') {
+    if (d.bc !== undefined) { BT.cur = +d.bc; btRender(); return; }
+    if (d.br) { BT.cups[BT.cur] = d.br; BT.q = ''; const nx = BT.cups.findIndex(x => !x); if (nx >= 0) BT.cur = nx; btSave(); btRender(); const bd = $('#bt .bt-body'); if (bd) bd.scrollTop = 0; return; }
+    if (d.b === 'back') { BT = {phase:'count'}; btSave(); btRender(); return; }
+    if (d.b === 'go' && BT.cups.every(Boolean)) { BT.phase = 'run'; BT.i = 0; BT.ck = {}; btSave(); btRender(); try { navigator.vibrate && navigator.vibrate(15); } catch (er) {} return; }
+  }
+  if (BT.phase === 'run') {
+    const plan = btPlan(); if (!plan) return; const k = Math.min(BT.i, plan.steps.length - 1), st = plan.steps[k];
+    const ckey = 's' + k + (st.e ? ':' + st.e.key : ''); BT.ck[ckey] = BT.ck[ckey] || {};
+    if (d.bc !== undefined && st.t === 'ing') { const ci = +d.bc; BT.ck[ckey][ci] = !BT.ck[ckey][ci]; btSave(); btRender();
+      const need = st.e.per.map((p, i) => p ? i : -1).filter(i => i >= 0); if (need.every(i => BT.ck[ckey][i])) setTimeout(() => { if (BT && BT.i === k) { BT.i++; btSave(); btRender(); } }, 450); return; }
+    if (d.bl) { BT.ck[ckey][d.bl] = !BT.ck[ckey][d.bl]; btSave(); btRender(); return; }
+    if (d.b === 'next') { BT.i = Math.min(plan.steps.length - 1, k + 1); btSave(); btRender(); return; }
+    if (d.b === 'prev') { if (k === 0) { BT.phase = 'assign'; BT.cur = 0; } else BT.i = k - 1; btSave(); btRender(); return; }
+    if (d.b === 'freeze') { btFreeze(); return; }
+  }
+});
+document.addEventListener('input', e => { if (e.target.id === 'btq' && BT) { BT.q = e.target.value; const pk = $('#btpick'); if (pk) pk.innerHTML = btPickHtml(); } });
+document.addEventListener('keydown', e => { if (!BT || BT.phase !== 'run' || (e.target && e.target.tagName === 'INPUT')) return; if (e.key === 'ArrowRight') { const b = $('#bt [data-b=next]'); b && b.click(); } if (e.key === 'ArrowLeft') { const b = $('#bt [data-b=prev]'); b && b.click(); } if (e.key === 'Escape') btClose(false); });
+matchMedia('(orientation: landscape)').addEventListener('change', () => { if (BT) setTimeout(btRender, 60); });
+document.addEventListener('visibilitychange', () => { if (BT && document.visibilityState === 'visible') btWake(true); });
 
 /* ================= EVENTS ================= */
 document.addEventListener('click', e => {
@@ -2303,9 +2730,9 @@ document.addEventListener('click', e => {
   if (d.pm) { PMISS = d.pm === '1'; render(); return; }
   if (d.mk) { MKCAT = d.mk; $$('[data-mk]').forEach(b => b.setAttribute('aria-pressed', b.dataset.mk === d.mk)); toast(SN.CATS[d.mk].long); return; }
   if (d.top) { t.setAttribute('aria-pressed', t.getAttribute('aria-pressed') !== 'true'); return; }
-  if (d.save) { const [i, j] = d.save.split(':').map(Number); const c = CHAT[i].cards[j]; const r = clone(c.recipe); r.id = slug(r.name); while (getR(r.id)) r.id += '-' + Math.floor(Math.random() * 90 + 10); r.createdAt = Date.now(); saveR(r, true); c.saved = r.id; persistChat(); render(); confetti(); toast(r.name + ' gespeichert', 'Öffnen', () => openDetail(r.id)); return; }
+  if (d.save) { const [i, j] = d.save.split(':').map(Number); const c = CHAT[i].cards[j]; const r = clone(c.recipe); const prev = c.k && CHAT.flatMap(m => m.cards || []).find(x => x !== c && x.type === 'proposal' && x.k === c.k && x.saved && getR(x.saved)); if (prev) { const o = getR(prev.saved); r.id = prev.saved; for (const f of ['fav','rank','champ','rating','photo','createdAt']) if (o[f] !== undefined) r[f] = o[f]; } else { r.id = slug(r.name); while (getR(r.id)) r.id += '-' + Math.floor(Math.random() * 90 + 10); r.createdAt = Date.now(); } saveR(r, true); c.saved = r.id; persistChat(); render(); confetti(); toast(r.name + ' gespeichert', 'Öffnen', () => openDetail(r.id)); return; }
   if (d.peek) { const [i, j] = d.peek.split(':').map(Number); openEditor(null, CHAT[i].cards[j].recipe); return; }
-  if (d.undo) { const [k, id] = d.undo.split(':'); if (UNDO[k]) { saveR(UNDO[k], true); delete UNDO[k]; render(); toast('Rückgängig gemacht'); } return; }
+  if (d.undo) { const [k, id] = d.undo.split(':'); if (UNDO[k]) { saveR(UNDO[k], true); delete UNDO[k]; CHAT.forEach(m => (m.cards || []).forEach(c => { if (c.undo === k) c.undone = true; })); persistChat(); render(); toast('Rückgängig gemacht'); } return; }
   const a = d.act; if (!a) return;
   if (a === 'close') closeSheet();
   else if (a === 'new') openEditor(null);
@@ -2315,6 +2742,8 @@ document.addEventListener('click', e => {
   else if (a === 'exportcode') copy(exportCode(), 'Code kopiert – auf dem anderen Gerät einfügen');
   else if (a === 'importshow') $('#impbox').classList.toggle('hide');
   else if (a === 'importdo') { try { const n = importCode($('#impcode').value); closeSheet(); toast('Zusammengeführt – ' + n + ' Sorten'); } catch (err) { toast(err.message); } }
+  else if (a === 'lessdel') { const L = (S.lessons || []).slice(); const gone = L.splice(+d.i, 1)[0]; S.lessons = L; if (gone) { S.lessGone = S.lessGone || {}; S.lessGone[gone.t.toLowerCase()] = Date.now(); } persist(); const b = $('#lessbox'); if (b) b.outerHTML = lessonsCard(); if (gone) toast('Vom Merkzettel gestrichen', 'Rückgängig', () => { S.lessons = (S.lessons || []).concat([{t:gone.t, at:Date.now()}]); persist(); const b2 = $('#lessbox'); if (b2) b2.outerHTML = lessonsCard(); }); }
+  else if (a === 'batch') btOpen();
   else if (a === 'logout') { AU.logout(); closeSheet(); render(); toast('Abgemeldet'); }
   else if (a === 'syncnow') { SYNC.pull().then(() => toast('Synchronisiert ✓')); closeSheet(); }
   else if (a === 'signup') { const f = $('#lgf'), fd = new FormData(f); AU.signup(fd.get('e'), fd.get('p'), fd.get('n')).then(() => { closeSheet(); toast('Konto angelegt'); SYNC.pull(); }, err => { $('#lgerr').textContent = err.message; }); }
@@ -2349,7 +2778,7 @@ document.addEventListener('click', e => {
   else if (a === 'scan' && AI) { if (VIEW === 'start') { const z = ($('#mkin') || {}).value || ''; MKPEND = `Hier ist ein Foto meiner Zutaten${z ? ' (dazu habe ich: ' + z + ')' : ''}. Erkenne alles und entwickle mir daraus ein ${SN.CATS[MKCAT].long}-Eis.`; } $('#fileImg').click(); }
   else if (a === 'mkgo' && AI) { const z = $('#mkin').value.trim(); if (!z) { $('#mkin').focus(); toast('Erst Zutaten eingeben 🙂'); return; } ask(`Entwickle mir ein ${SN.CATS[MKCAT].long}-Eis (Kategorie ${MKCAT}) aus: ${z}. Nutze sonst meinen Vorrat und meine Regeln.`); }
 });
-document.addEventListener('click', e => { if (e.target.id === 'mic') { const d = CAP.dict; if (!d) return; const b = e.target; if (b.classList.contains('on')) d.stop().catch(() => {}); else d.start().catch(err => { if (err && err.code === 'not_granted') { b.remove(); } }); } });
+document.addEventListener('click', e => { if (e.target.closest && e.target.closest('#mic')) { if (MIC.on) micStop(); else micStart(); } });
 document.addEventListener('input', e => {
   if (e.target.id === 'q') { S.prefs.q = e.target.value; clearTimeout(window._qt); window._qt = setTimeout(() => { const pos = e.target.selectionStart; persist(); render(); const q = $('#q'); if (q) { q.focus(); q.setSelectionRange(pos, pos); } }, 250); }
   if (e.target.id === 'pq') { PQ = e.target.value; clearTimeout(window._pt); window._pt = setTimeout(() => { render(); const q = $('#pq'); if (q) { q.focus(); q.setSelectionRange(PQ.length, PQ.length); } }, 250); }
@@ -2361,6 +2790,22 @@ $('#logo').addEventListener('click', () => { logoTaps++; clearTimeout(window._lt
 window.addEventListener('scroll', () => $('#hdr').classList.toggle('scrolled', scrollY > 4), {passive:true});
 new ResizeObserver(() => { if (VIEW === 'rezepte' && S.prefs.view === 'matrix') layoutMatrix(); }).observe(document.body);
 setInterval(() => { if (VIEW === 'start' && !SHEET) { const tr = $('.truhe'); if (tr) tr.outerHTML = vTruhe(); } }, 60000);
+
+/* ---------- Tastatur: Menüleiste ausblenden, Eingabe über der Tastatur halten, Chat mitscrollen ---------- */
+const isTextField = el => el && (el.tagName === 'TEXTAREA' || (el.tagName === 'INPUT' && /^(text|search|email|password|number|tel|url)$/i.test(el.type || 'text')));
+function kbMeasure() {
+  const vv = window.visualViewport; let h = 0;
+  if (vv && document.body.classList.contains('kb')) h = Math.max(0, Math.round(window.innerHeight - vv.height - vv.offsetTop));
+  document.documentElement.style.setProperty('--kb', (h > 60 ? h : 0) + 'px');
+}
+function chatBottom(force) {
+  if (VIEW !== 'chat') return;
+  const gap = document.documentElement.scrollHeight - (scrollY + innerHeight);
+  if (force || gap < 260) window.scrollTo(0, document.documentElement.scrollHeight);
+}
+document.addEventListener('focusin', e => { if (!isTextField(e.target) || e.target.closest('.sheet,.bt')) return; document.body.classList.add('kb'); kbMeasure(); if (e.target.id === 'cin') { setTimeout(() => chatBottom(true), 60); setTimeout(() => { kbMeasure(); chatBottom(true); }, 350); } });
+document.addEventListener('focusout', e => { if (!isTextField(e.target)) return; setTimeout(() => { if (isTextField(document.activeElement) && !document.activeElement.closest('.sheet,.bt')) return; document.body.classList.remove('kb'); kbMeasure(); }, 140); });
+if (window.visualViewport) { const vvh = () => { kbMeasure(); if (document.activeElement && document.activeElement.id === 'cin') chatBottom(true); }; visualViewport.addEventListener('resize', vvh); visualViewport.addEventListener('scroll', kbMeasure); }
 
 $('#subttl').textContent = 'created by munkolas · v' + VERSION;
 if (PWA && 'serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
